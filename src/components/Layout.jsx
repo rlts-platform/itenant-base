@@ -2,13 +2,12 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Building2, Home, Users, FileText, Wrench,
   CreditCard, BarChart3, FolderOpen, MessageSquare, Package,
-  Users2, Zap, Settings, ChevronLeft, ChevronRight, LogOut,
-  Bell, Menu, X, DollarSign, ShieldCheck
+  Users2, Zap, Settings, LogOut, Bell, Menu, X, DollarSign, ShieldCheck
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const clientNav = [
@@ -18,10 +17,10 @@ const clientNav = [
   { label: "Tenants", icon: Users, to: "/tenants" },
   { label: "Leases", icon: FileText, to: "/leases" },
   { label: "Maintenance", icon: Wrench, to: "/maintenance" },
+  { label: "Messages", icon: MessageSquare, to: "/messages" },
   { label: "Payments", icon: CreditCard, to: "/payments" },
   { label: "Financials", icon: BarChart3, to: "/financials" },
   { label: "Documents", icon: FolderOpen, to: "/documents" },
-  { label: "Messages", icon: MessageSquare, to: "/messages" },
   { label: "Vendors", icon: Package, to: "/vendors" },
   { label: "Automations", icon: Zap, to: "/automations" },
   { label: "Settings", icon: Settings, to: "/settings" },
@@ -33,7 +32,6 @@ const tenantNav = [
   { label: "Maintenance", icon: Wrench, to: "/tenant/maintenance" },
   { label: "Documents", icon: FolderOpen, to: "/tenant/documents" },
   { label: "Messages", icon: MessageSquare, to: "/tenant/messages" },
-  { label: "Profile", icon: Users, to: "/tenant/profile" },
 ];
 
 const ownerNav = [
@@ -42,7 +40,6 @@ const ownerNav = [
 ];
 
 export default function Layout() {
-  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useAuth();
   const location = useLocation();
@@ -57,90 +54,117 @@ export default function Layout() {
         to={item.to}
         onClick={() => setMobileOpen(false)}
         className={cn(
-          "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 group",
-          active
-            ? "bg-sidebar-accent text-white"
-            : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-white"
+          "relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
+          active ? "text-primary" : "text-sidebar-foreground hover:text-foreground hover:bg-secondary/60"
         )}
       >
-        <item.icon className={cn("shrink-0", collapsed ? "w-5 h-5" : "w-4 h-4")} />
-        {!collapsed && <span className="text-sm font-medium truncate">{item.label}</span>}
+        {active && (
+          <motion.div
+            layoutId="nav-active"
+            className="absolute inset-0 bg-accent rounded-xl"
+            transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+          />
+        )}
+        <item.icon className={cn("relative w-4 h-4 shrink-0 transition-transform duration-200", active ? "text-primary" : "group-hover:scale-110")} />
+        <span className="relative text-sm font-medium">{item.label}</span>
       </Link>
     );
   };
 
-  const Sidebar = ({ mobile = false }) => (
-    <div className={cn(
-      "flex flex-col h-full bg-sidebar",
-      mobile ? "w-64" : collapsed ? "w-16" : "w-60"
-    )}>
-      <div className={cn("flex items-center p-4", collapsed ? "justify-center" : "gap-3")}>
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-          <ShieldCheck className="w-4 h-4 text-white" />
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full bg-white border-r border-border">
+      <div className="flex items-center gap-3 px-5 py-5">
+        <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center shrink-0 shadow-md">
+          <ShieldCheck className="w-5 h-5 text-white" />
         </div>
-        {!collapsed && <span className="font-outfit font-700 text-white text-lg tracking-tight">iTenant</span>}
+        <span className="font-outfit font-800 text-foreground text-xl tracking-tight">iTenant</span>
       </div>
 
-      <nav className="flex-1 px-2 py-2 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
         {nav.map(item => <NavLink key={item.to} item={item} />)}
       </nav>
 
-      <div className="p-2 border-t border-sidebar-border">
+      <div className="p-3 border-t border-border">
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1">
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold shrink-0">
+            {user?.full_name?.[0] || "U"}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold truncate">{user?.full_name}</p>
+            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+          </div>
+        </div>
         <button
           onClick={() => base44.auth.logout()}
-          className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-lg w-full text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-white transition-all",
-            collapsed && "justify-center"
-          )}
+          className="flex items-center gap-3 px-3 py-2 rounded-xl w-full text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
         >
           <LogOut className="w-4 h-4 shrink-0" />
-          {!collapsed && <span className="text-sm font-medium">Logout</span>}
+          <span className="text-sm font-medium">Logout</span>
         </button>
       </div>
     </div>
   );
 
+  const pageKey = location.pathname;
+
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       {/* Desktop Sidebar */}
-      <div className="hidden md:flex shrink-0 relative transition-all duration-200" style={{ width: collapsed ? 64 : 240 }}>
-        <Sidebar />
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-6 w-6 h-6 bg-card border border-border rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow z-10"
-        >
-          {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
-        </button>
+      <div className="hidden md:flex shrink-0 w-60">
+        <SidebarContent />
       </div>
 
       {/* Mobile Sidebar */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <div className="absolute left-0 top-0 h-full">
-            <Sidebar mobile />
+      <AnimatePresence>
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: "spring", bounce: 0, duration: 0.35 }}
+              className="absolute left-0 top-0 h-full w-64"
+            >
+              <SidebarContent />
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-border bg-card px-4 flex items-center justify-between shrink-0">
-          <button className="md:hidden" onClick={() => setMobileOpen(true)}>
+        <header className="h-14 border-b border-border bg-white px-4 flex items-center justify-between shrink-0">
+          <button className="md:hidden p-2 rounded-lg hover:bg-secondary transition-colors" onClick={() => setMobileOpen(true)}>
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex-1" />
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="relative">
+          <div className="flex items-center gap-2">
+            <button className="relative p-2 rounded-xl hover:bg-secondary transition-colors">
               <Bell className="w-4 h-4" />
-            </Button>
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-semibold">
-              {user?.full_name?.[0] || "U"}
-            </div>
+            </button>
           </div>
         </header>
+
         <main className="flex-1 overflow-y-auto">
-          <Outlet />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pageKey}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="h-full"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>

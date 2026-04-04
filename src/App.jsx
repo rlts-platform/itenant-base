@@ -5,7 +5,22 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-// Add page imports here
+import Layout from './components/Layout';
+import ClientDashboard from './pages/ClientDashboard';
+import Properties from './pages/Properties';
+import Units from './pages/Units';
+import Tenants from './pages/Tenants';
+import Leases from './pages/Leases';
+import Maintenance from './pages/Maintenance';
+import Payments from './pages/Payments';
+import Financials from './pages/Financials';
+import Documents from './pages/Documents';
+import Messages from './pages/Messages';
+import Vendors from './pages/Vendors';
+import Automations from './pages/Automations';
+import Settings from './pages/Settings';
+import OwnerDashboard from './pages/OwnerDashboard';
+import TenantDashboard from './pages/TenantDashboard';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -33,8 +48,24 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
-      <Route path="*" element={<PageNotFound />} />
+      <Route element={<Layout />}>
+        <Route path="/" element={<ClientDashboard />} />
+        <Route path="/properties" element={<Properties />} />
+        <Route path="/units" element={<Units />} />
+        <Route path="/tenants" element={<Tenants />} />
+        <Route path="/leases" element={<Leases />} />
+        <Route path="/maintenance" element={<Maintenance />} />
+        <Route path="/payments" element={<Payments />} />
+        <Route path="/financials" element={<Financials />} />
+        <Route path="/documents" element={<Documents />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/vendors" element={<Vendors />} />
+        <Route path="/automations" element={<Automations />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/owner" element={<OwnerDashboard />} />
+        <Route path="/tenant" element={<TenantDashboard />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Route>
     </Routes>
   );
 };
