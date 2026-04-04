@@ -32,11 +32,14 @@ const tenantNav = [
   { label: "Maintenance", icon: Wrench, to: "/tenant/maintenance" },
   { label: "Documents", icon: FolderOpen, to: "/tenant/documents" },
   { label: "Messages", icon: MessageSquare, to: "/tenant/messages" },
+  { label: "Profile", icon: Settings, to: "/tenant/profile" },
 ];
 
 const ownerNav = [
-  { label: "Dashboard", icon: LayoutDashboard, to: "/owner" },
+  { label: "Owner Dashboard", icon: LayoutDashboard, to: "/owner" },
   { label: "Clients", icon: Users2, to: "/owner/clients" },
+  { label: "Revenue", icon: BarChart3, to: "/owner/revenue" },
+  { label: "Settings", icon: Settings, to: "/owner/settings" },
 ];
 
 export default function Layout() {

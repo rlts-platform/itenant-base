@@ -1,7 +1,8 @@
+import { useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -23,9 +24,22 @@ import OwnerDashboard from './pages/OwnerDashboard';
 import TenantDashboard from './pages/TenantDashboard';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
+  const navigate = useNavigate();
 
-  // Show loading spinner while checking app public settings or auth
+  // Role-based redirect after login
+  useEffect(() => {
+    if (!isLoadingAuth && !isLoadingPublicSettings && user && !authError) {
+      const role = user.role;
+      const path = window.location.pathname;
+      if (role === 'platform_owner' && path === '/') {
+        navigate('/owner', { replace: true });
+      } else if (role === 'tenant' && path === '/') {
+        navigate('/tenant', { replace: true });
+      }
+    }
+  }, [isLoadingAuth, isLoadingPublicSettings, user, authError]);
+
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
