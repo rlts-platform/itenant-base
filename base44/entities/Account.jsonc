@@ -1,0 +1,36 @@
+{
+  "name": "Account",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string"
+    },
+    "plan_tier": {
+      "type": "string",
+      "enum": [
+        "starter",
+        "growth",
+        "pro",
+        "enterprise"
+      ]
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "trialing",
+        "past_due",
+        "canceled"
+      ]
+    },
+    "mrr": {
+      "type": "number"
+    },
+    "owner_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company_name"
+  ]
+}

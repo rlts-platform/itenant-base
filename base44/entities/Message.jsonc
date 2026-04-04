@@ -1,0 +1,27 @@
+{
+  "name": "Message",
+  "type": "object",
+  "properties": {
+    "body": {
+      "type": "string"
+    },
+    "from_user": {
+      "type": "string"
+    },
+    "to_user": {
+      "type": "string"
+    },
+    "read": {
+      "type": "boolean"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "body",
+    "from_user",
+    "to_user",
+    "account_id"
+  ]
+}

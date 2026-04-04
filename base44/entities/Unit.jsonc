@@ -1,0 +1,47 @@
+{
+  "name": "Unit",
+  "type": "object",
+  "properties": {
+    "unit_number": {
+      "type": "string"
+    },
+    "bedrooms": {
+      "type": "number"
+    },
+    "bathrooms": {
+      "type": "number"
+    },
+    "sqft": {
+      "type": "number"
+    },
+    "rent_amount": {
+      "type": "number"
+    },
+    "deposit_amount": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "vacant",
+        "occupied"
+      ]
+    },
+    "amenities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pet_friendly": {
+      "type": "boolean"
+    },
+    "property_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "unit_number",
+    "property_id"
+  ]
+}

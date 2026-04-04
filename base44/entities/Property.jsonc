@@ -1,0 +1,29 @@
+{
+  "name": "Property",
+  "type": "object",
+  "properties": {
+    "address": {
+      "type": "string"
+    },
+    "nickname": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "single_family",
+        "multi_family",
+        "condo",
+        "apartment",
+        "commercial"
+      ]
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "address",
+    "account_id"
+  ]
+}

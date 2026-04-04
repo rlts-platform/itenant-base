@@ -1,0 +1,49 @@
+{
+  "name": "Payment",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "check",
+        "money_order",
+        "cash",
+        "zelle"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed",
+        "failed"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "proof_image_url": {
+      "type": "string"
+    },
+    "check_number": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "amount",
+    "method",
+    "date",
+    "account_id"
+  ]
+}

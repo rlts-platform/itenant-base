@@ -1,0 +1,36 @@
+{
+  "name": "Document",
+  "type": "object",
+  "properties": {
+    "file_url": {
+      "type": "string"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "lease",
+        "receipt",
+        "notice",
+        "inspection",
+        "other"
+      ]
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "file_url",
+    "file_name",
+    "account_id"
+  ]
+}

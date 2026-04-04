@@ -1,0 +1,54 @@
+{
+  "name": "Lease",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string"
+    },
+    "unit_id": {
+      "type": "string"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "rent_amount": {
+      "type": "number"
+    },
+    "deposit_amount": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "expired",
+        "terminated"
+      ]
+    },
+    "signed_by_tenant": {
+      "type": "boolean"
+    },
+    "signed_by_client": {
+      "type": "boolean"
+    },
+    "document_url": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "unit_id",
+    "start_date",
+    "end_date",
+    "account_id"
+  ]
+}

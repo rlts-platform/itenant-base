@@ -1,0 +1,97 @@
+import { useEffect, useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { Plus, Package, Pencil, Trash2, Star, Phone, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const CATEGORIES = ["plumbing","electrical","hvac","cleaning","landscaping","general","other"];
+
+export default function Vendors() {
+  const [vendors, setVendors] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({ name: "", category: "general", phone: "", email: "", rating: 5 });
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => { const v = await base44.entities.Vendor.list(); setVendors(v); setLoading(false); };
+  useEffect(() => { load(); }, []);
+
+  const openAdd = () => { setEditing(null); setForm({ name: "", category: "general", phone: "", email: "", rating: 5 }); setOpen(true); };
+  const openEdit = (v) => { setEditing(v); setForm({ name: v.name, category: v.category, phone: v.phone || "", email: v.email || "", rating: v.rating || 5 }); setOpen(true); };
+
+  const save = async () => {
+    const data = { ...form, rating: Number(form.rating) };
+    if (editing) await base44.entities.Vendor.update(editing.id, data);
+    else await base44.entities.Vendor.create(data);
+    setOpen(false); load();
+  };
+  const remove = async (id) => { await base44.entities.Vendor.delete(id); load(); };
+
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div><h1 className="text-2xl font-outfit font-700">Vendors</h1><p className="text-sm text-muted-foreground mt-1">{vendors.length} vendors</p></div>
+        <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Add Vendor</Button>
+      </div>
+
+      {vendors.length === 0 ? (
+        <div className="bg-card border border-border rounded-xl p-16 text-center">
+          <Package className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <p className="font-semibold">No vendors yet</p>
+          <Button onClick={openAdd} className="mt-4 gap-2"><Plus className="w-4 h-4" />Add Vendor</Button>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {vendors.map(v => (
+            <div key={v.id} className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between mb-3">
+                <span className="text-xs bg-secondary px-2 py-0.5 rounded-full capitalize">{v.category}</span>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(v)}><Pencil className="w-3 h-3" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(v.id)}><Trash2 className="w-3 h-3" /></Button>
+                </div>
+              </div>
+              <h3 className="font-semibold">{v.name}</h3>
+              <div className="flex items-center gap-1 mt-1 mb-3">
+                {[1,2,3,4,5].map(s => <Star key={s} className={`w-3 h-3 ${s <= v.rating ? "text-yellow-400 fill-yellow-400" : "text-muted"}`} />)}
+              </div>
+              <div className="space-y-1">
+                {v.phone && <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{v.phone}</div>}
+                {v.email && <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Mail className="w-3 h-3" />{v.email}</div>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{editing ? "Edit Vendor" : "Add Vendor"}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Name</Label><Input className="mt-1" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
+            <div><Label>Category</Label>
+              <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>{CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Phone</Label><Input className="mt-1" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
+              <div><Label>Email</Label><Input className="mt-1" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
+            </div>
+            <div><Label>Rating (1–5)</Label><Input type="number" min="1" max="5" className="mt-1" value={form.rating} onChange={e => setForm(f => ({ ...f, rating: e.target.value }))} /></div>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={save}>Save</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

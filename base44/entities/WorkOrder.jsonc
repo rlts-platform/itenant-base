@@ -1,0 +1,64 @@
+{
+  "name": "WorkOrder",
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "plumbing",
+        "electrical",
+        "hvac",
+        "appliance",
+        "pest",
+        "structural",
+        "other"
+      ]
+    },
+    "urgency": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "urgent",
+        "emergency"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "in_progress",
+        "closed"
+      ]
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "unit_id": {
+      "type": "string"
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "cost": {
+      "type": "number"
+    },
+    "receipt_url": {
+      "type": "string"
+    },
+    "permission_to_enter": {
+      "type": "boolean"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "summary",
+    "category",
+    "urgency",
+    "account_id"
+  ]
+}

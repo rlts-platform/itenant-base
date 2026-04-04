@@ -1,0 +1,46 @@
+{
+  "name": "AutomationRule",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "trigger_event": {
+      "type": "string",
+      "enum": [
+        "rent_due",
+        "lease_expiring",
+        "work_order_created",
+        "payment_received",
+        "tenant_invited"
+      ]
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "email",
+          "sms"
+        ]
+      }
+    },
+    "subject": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "is_enabled": {
+      "type": "boolean"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "trigger_event",
+    "account_id"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Vendor",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "plumbing",
+        "electrical",
+        "hvac",
+        "cleaning",
+        "landscaping",
+        "general",
+        "other"
+      ]
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "number"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "account_id"
+  ]
+}
