@@ -33,6 +33,7 @@ import Team from './pages/Team';
 import Assistant from './pages/Assistant';
 import Reports from './pages/Reports';
 import OwnerRevenue from './pages/OwnerRevenue';
+import OwnerClients from './pages/OwnerClients';
 import ApplyPage from './pages/ApplyPage';
 import Applications from './pages/Applications';
 import ApplicationDetail from './pages/ApplicationDetail';
@@ -108,6 +109,7 @@ const AuthenticatedApp = () => {
         <Route path="/assistant" element={<Assistant />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/owner/revenue" element={<OwnerRevenue />} />
+        <Route path="/owner/clients" element={<OwnerClients />} />
         <Route path="/applications" element={<Applications />} />
         <Route path="/apply/:propertyId" element={<ApplyPage />} />
         <Route path="*" element={<PageNotFound />} />

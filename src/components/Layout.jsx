@@ -44,7 +44,6 @@ const ownerNav = [
   { label: "Owner Dashboard", icon: LayoutDashboard, to: "/owner" },
   { label: "Clients", icon: Users2, to: "/owner/clients" },
   { label: "Revenue", icon: BarChart3, to: "/owner/revenue" },
-  { label: "Settings", icon: Settings, to: "/owner/settings" },
 ];
 
 export default function Layout() {
