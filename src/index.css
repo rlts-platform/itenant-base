@@ -6,8 +6,15 @@
 
 @layer base {
   :root {
-    --background: 245 60% 98%;
-    --foreground: 240 43% 14%;
+    --foreground: #1A1A2E;
+    --text-primary: #1A1A2E;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
+    --background: #F4F3FF;
+    --card-background: #FFFFFF;
+    --accent: #7C6FCD;
+    --background-hsl: 245 60% 98%;
+    --foreground-hsl: 240 43% 14%;
     --text-primary: 240 43% 14%;
     --text-body: 217 13% 33%;
     --text-secondary: 217 14% 43%;
@@ -85,6 +92,8 @@
   body {
     @apply bg-background text-foreground font-inter;
     background-color: #F4F3FF;
+    color: #1A1A2E;
+    -webkit-text-fill-color: #1A1A2E;
     overscroll-behavior: none;
     padding-bottom: env(safe-area-inset-bottom);
   }

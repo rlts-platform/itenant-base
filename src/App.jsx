@@ -175,10 +175,12 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
+        <div style={{ color: '#1A1A2E', WebkitTextFillColor: '#1A1A2E' }}>
+          <Router>
+            <AuthenticatedApp />
+          </Router>
+          <Toaster />
+        </div>
       </QueryClientProvider>
     </AuthProvider>
   )
