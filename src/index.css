@@ -170,92 +170,15 @@
   }
 }
 
-/* Button and interactive element hover state fixes */
-@layer components {
-  /* Primary buttons (purple filled) */
-  button[class*="default"],
-  .bg-primary {
-    @apply hover:bg-[#8B7FD4] active:bg-[#6357B8];
-    color: #FFFFFF !important;
-  }
-  button[class*="default"] svg,
-  .bg-primary svg {
-    color: #FFFFFF !important;
-  }
-
-  /* Secondary buttons (outlined) */
-  button[class*="outline"],
-  button[class*="secondary"],
-  .border-input {
-    @apply hover:bg-[rgba(124,111,205,0.08)] active:bg-[rgba(124,111,205,0.15)];
-  }
-  button[class*="outline"]:hover,
-  button[class*="secondary"]:hover {
-    border-color: #7C6FCD !important;
-  }
-
-  /* Ghost and icon-only buttons */
-  button[class*="ghost"],
-  button[class*="icon"] {
-    @apply hover:bg-[rgba(124,111,205,0.08)];
-  }
-  button[class*="ghost"]:hover svg,
-  button[class*="icon"]:hover svg {
-    color: #7C6FCD !important;
-  }
-
-  /* Sidebar nav items */
-  [class*="nav"] a,
-  [class*="sidebar"] a {
-    @apply hover:bg-[rgba(124,111,205,0.08)];
-  }
-  [class*="nav"] a:hover,
-  [class*="sidebar"] a:hover {
-    color: #1A1A2E !important;
-  }
-  [class*="nav"] a:hover svg,
-  [class*="sidebar"] a:hover svg {
-    color: #7C6FCD !important;
-  }
-
-  /* Quick action cards */
-  [class*="group"]:hover {
-    background-color: #F4F3FF !important;
-  }
-  [class*="group"]:hover [class*="text"] {
-    color: #1A1A2E !important;
-  }
-  [class*="group"]:hover svg {
-    color: #7C6FCD !important;
-  }
-
-  /* Table rows */
-  tr:hover {
-    background-color: rgba(124, 111, 205, 0.05) !important;
-  }
-
-  /* Links */
-  a:not([class*="button"]):not([class*="nav"]):not([class*="link"]) {
-    @apply hover:text-[#7C6FCD];
-  }
+/* Hero section text colors — scoped to prevent affecting other pages */
+.hero-section {
+  color: #fff !important;
 }
 
-/* Global interactive element rules */
-@layer utilities {
-  /* Ensure hover states are always lighter */
-  .hover\:bg-\[rgba\(.*\)\]:hover {
-    background-color: inherit !important;
-  }
-
-  /* Text must never change on hover for colored buttons */
-  button:has(> svg) svg {
-    will-change: color;
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .dark {
-    color-scheme: dark;
-  }
+.hero-section h1,
+.hero-section h2,
+.hero-section p,
+.hero-section span,
+.hero-section div {
+  color: inherit !important;
 }
