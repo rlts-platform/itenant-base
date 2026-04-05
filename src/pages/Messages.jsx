@@ -151,7 +151,7 @@ export default function Messages() {
         </div>
       </div>
       <PropertySelector open={propSelectorOpen} onClose={() => setPropSelectorOpen(false)} onSelect={(prop, unit) => { setSelectedProp(prop); setSelectedUnit(unit); }} />
-      </>
+      )}
 
       {activeTab === "broadcasts" && (
         <div className="bg-card border border-border rounded-xl p-6">
