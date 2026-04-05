@@ -32,10 +32,12 @@ const AuthenticatedApp = () => {
     if (!isLoadingAuth && !isLoadingPublicSettings && user && !authError) {
       const role = user.role;
       const path = window.location.pathname;
-      if (role === 'platform_owner' && path === '/') {
+      if (role === 'platform_owner' && !path.startsWith('/owner')) {
         navigate('/owner', { replace: true });
-      } else if (role === 'tenant' && path === '/') {
+      } else if (role === 'tenant' && !path.startsWith('/tenant')) {
         navigate('/tenant', { replace: true });
+      } else if (role !== 'platform_owner' && role !== 'tenant' && (path.startsWith('/owner') || path.startsWith('/tenant'))) {
+        navigate('/', { replace: true });
       }
     }
   }, [isLoadingAuth, isLoadingPublicSettings, user, authError]);
