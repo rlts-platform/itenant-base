@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, Building2, MapPin, Pencil, Trash2, ChevronRight, Link2 } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import PropertyProfile from "./PropertyProfile";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -18,6 +19,7 @@ export default function Properties() {
   const [form, setForm] = useState({ address: "", nickname: "", type: "single_family" });
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
+  const location = useLocation();
 
   if (selectedId) return <PropertyProfile propertyId={selectedId} onBack={() => setSelectedId(null)} />;
 
@@ -27,6 +29,7 @@ export default function Properties() {
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
+  useEffect(() => { if (location.state?.openAdd) { openAdd(); window.history.replaceState({}, ""); } }, [location.state]);
 
   const openAdd = () => { setEditing(null); setForm({ address: "", nickname: "", type: "single_family" }); setOpen(true); };
   const openEdit = (p) => { setEditing(p); setForm({ address: p.address, nickname: p.nickname || "", type: p.type || "single_family" }); setOpen(true); };

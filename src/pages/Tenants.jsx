@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, Users, Pencil, Trash2, Mail, Phone, Send, Clock } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import TenantDetail from "./TenantDetail";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -20,6 +21,7 @@ export default function Tenants() {
 
   const [invites, setInvites] = useState([]);
   const [sendingInvite, setSendingInvite] = useState(null);
+  const location = useLocation();
 
   if (selectedId) return <TenantDetail tenantId={selectedId} onBack={() => setSelectedId(null)} />;
 
@@ -32,6 +34,7 @@ export default function Tenants() {
     setTenants(t); setUnits(u); setInvites(inv); setLoading(false);
   };
   useEffect(() => { load(); }, []);
+  useEffect(() => { if (location.state?.openAdd) { openAdd(); window.history.replaceState({}, ""); } }, [location.state]);
 
   const openAdd = () => { setEditing(null); setForm({ first_name: "", last_name: "", email: "", phone: "", status: "active", unit_id: "" }); setOpen(true); };
   const openEdit = (t) => { setEditing(t); setForm({ first_name: t.first_name, last_name: t.last_name, email: t.email, phone: t.phone || "", status: t.status, unit_id: t.unit_id || "" }); setOpen(true); };

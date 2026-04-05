@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Building2, Home, Users, Wrench, DollarSign, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Building2, Home, Users, Wrench, DollarSign, AlertTriangle, CheckCircle, Plus, CreditCard } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const container = {
   hidden: {},
@@ -24,28 +30,69 @@ const STAT_CARDS = [
 
 export default function ClientDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ properties: 0, units: 0, tenants: 0, openOrders: 0, revenue: 0 });
   const [recentPayments, setRecentPayments] = useState([]);
   const [openOrders, setOpenOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [overdueCount, setOverdueCount] = useState(0);
+  const [overdueAmount, setOverdueAmount] = useState(0);
+  const [allTenants, setAllTenants] = useState([]);
+
+  // Quick action dialogs
+  const [woOpen, setWoOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
+  const [woForm, setWoForm] = useState({ summary: "", category: "plumbing", urgency: "normal" });
+  const [payForm, setPayForm] = useState({ tenant_id: "", amount: "", method: "check", date: new Date().toISOString().split("T")[0] });
+  const [savingWo, setSavingWo] = useState(false);
+  const [savingPay, setSavingPay] = useState(false);
 
   useEffect(() => {
     async function load() {
-      const [props, units, tenants, payments, orders] = await Promise.all([
+      const [props, units, tenants, payments, orders, leases] = await Promise.all([
         base44.entities.Property.list(),
         base44.entities.Unit.list(),
         base44.entities.Tenant.filter({ status: "active" }),
         base44.entities.Payment.list("-date", 20),
         base44.entities.WorkOrder.filter({ status: "new" }),
+        base44.entities.Lease.filter({ status: "active" }),
       ]);
       const revenue = payments.filter(p => p.status === "confirmed").reduce((s, p) => s + (p.amount || 0), 0);
       setStats({ properties: props.length, units: units.length, tenants: tenants.length, openOrders: orders.length, revenue });
       setRecentPayments(payments.slice(0, 5));
       setOpenOrders(orders.slice(0, 5));
+      setAllTenants(tenants);
+
+      // Overdue: active leases whose tenant has no confirmed payment this calendar month
+      const now = new Date();
+      const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      const paidThisMonth = new Set(
+        payments.filter(p => p.status === "confirmed" && p.date?.startsWith(monthStr)).map(p => p.tenant_id)
+      );
+      const overdueLeases = leases.filter(l => !paidThisMonth.has(l.tenant_id));
+      setOverdueCount(overdueLeases.length);
+      setOverdueAmount(overdueLeases.reduce((s, l) => s + (l.rent_amount || 0), 0));
+
       setLoading(false);
     }
     load();
   }, []);
+
+  const submitWorkOrder = async () => {
+    setSavingWo(true);
+    await base44.entities.WorkOrder.create({ ...woForm, status: "new" });
+    setSavingWo(false);
+    setWoOpen(false);
+    setWoForm({ summary: "", category: "plumbing", urgency: "normal" });
+  };
+
+  const submitPayment = async () => {
+    setSavingPay(true);
+    await base44.entities.Payment.create({ ...payForm, amount: Number(payForm.amount), status: "confirmed" });
+    setSavingPay(false);
+    setPayOpen(false);
+    setPayForm({ tenant_id: "", amount: "", method: "check", date: new Date().toISOString().split("T")[0] });
+  };
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -82,7 +129,120 @@ export default function ClientDashboard() {
             </motion.div>
           );
         })}
+        {/* Overdue Rent card */}
+        <motion.div variants={item}>
+          <Link to="/payments" className="flex items-center justify-between bg-white rounded-2xl border border-border p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Overdue Rent</p>
+              <p className="text-3xl font-outfit font-800 text-foreground">{overdueCount}</p>
+              {overdueAmount > 0 && <p className="text-xs text-red-500 font-medium mt-0.5">${overdueAmount.toLocaleString()} outstanding</p>}
+            </div>
+            <div className="w-14 h-14 rounded-2xl bg-red-500 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-200">
+              <AlertTriangle className="w-7 h-7 text-white" />
+            </div>
+          </Link>
+        </motion.div>
       </motion.div>
+
+      {/* Quick Actions */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.3 }}>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Quick Actions</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <button
+            onClick={() => navigate("/properties", { state: { openAdd: true } })}
+            className="flex flex-col items-center gap-2 bg-white border border-border rounded-2xl p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+              <Building2 className="w-6 h-6 text-blue-600" />
+            </div>
+            <span className="text-sm font-semibold">Add Property</span>
+          </button>
+          <button
+            onClick={() => navigate("/tenants", { state: { openAdd: true } })}
+            className="flex flex-col items-center gap-2 bg-white border border-border rounded-2xl p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center group-hover:bg-violet-200 transition-colors">
+              <Users className="w-6 h-6 text-violet-600" />
+            </div>
+            <span className="text-sm font-semibold">Invite Tenant</span>
+          </button>
+          <button
+            onClick={() => setWoOpen(true)}
+            className="flex flex-col items-center gap-2 bg-white border border-border rounded-2xl p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+              <Wrench className="w-6 h-6 text-orange-600" />
+            </div>
+            <span className="text-sm font-semibold">Create Work Order</span>
+          </button>
+          <button
+            onClick={() => setPayOpen(true)}
+            className="flex flex-col items-center gap-2 bg-white border border-border rounded-2xl p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
+              <CreditCard className="w-6 h-6 text-emerald-600" />
+            </div>
+            <span className="text-sm font-semibold">Record Payment</span>
+          </button>
+        </div>
+      </motion.div>
+
+      {/* Work Order Dialog */}
+      <Dialog open={woOpen} onOpenChange={setWoOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Create Work Order</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Summary</Label><Input className="mt-1" value={woForm.summary} onChange={e => setWoForm(f => ({ ...f, summary: e.target.value }))} placeholder="e.g. Leaking faucet in unit 3" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Category</Label>
+                <Select value={woForm.category} onValueChange={v => setWoForm(f => ({ ...f, category: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>{["plumbing","electrical","hvac","appliance","pest","structural","other"].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div><Label>Urgency</Label>
+                <Select value={woForm.urgency} onValueChange={v => setWoForm(f => ({ ...f, urgency: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>{["normal","urgent","emergency"].map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setWoOpen(false)}>Cancel</Button>
+            <Button onClick={submitWorkOrder} disabled={savingWo || !woForm.summary}>{savingWo ? "Saving…" : "Create"}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Dialog */}
+      <Dialog open={payOpen} onOpenChange={setPayOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Record Payment</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Tenant</Label>
+              <Select value={payForm.tenant_id} onValueChange={v => setPayForm(f => ({ ...f, tenant_id: v }))}>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Select tenant" /></SelectTrigger>
+                <SelectContent>{allTenants.map(t => <SelectItem key={t.id} value={t.id}>{t.first_name} {t.last_name}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Amount ($)</Label><Input type="number" className="mt-1" value={payForm.amount} onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))} /></div>
+              <div><Label>Date</Label><Input type="date" className="mt-1" value={payForm.date} onChange={e => setPayForm(f => ({ ...f, date: e.target.value }))} /></div>
+            </div>
+            <div><Label>Method</Label>
+              <Select value={payForm.method} onValueChange={v => setPayForm(f => ({ ...f, method: v }))}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>{["check","money_order","cash","zelle"].map(m => <SelectItem key={m} value={m}>{m.replace("_"," ")}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setPayOpen(false)}>Cancel</Button>
+            <Button onClick={submitPayment} disabled={savingPay || !payForm.tenant_id || !payForm.amount}>{savingPay ? "Saving…" : "Record"}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid lg:grid-cols-2 gap-6">
         <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.35 }} className="bg-white rounded-2xl border border-border p-5">
