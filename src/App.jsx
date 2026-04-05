@@ -22,6 +22,7 @@ import Automations from './pages/Automations';
 import Settings from './pages/Settings';
 import OwnerDashboard from './pages/OwnerDashboard';
 import TenantDashboard from './pages/TenantDashboard';
+import TenantPay from './pages/TenantPay';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -80,6 +81,7 @@ const AuthenticatedApp = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/owner" element={<OwnerDashboard />} />
         <Route path="/tenant" element={<TenantDashboard />} />
+        <Route path="/tenant/pay" element={<TenantPay />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>
