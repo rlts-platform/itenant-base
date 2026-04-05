@@ -5,8 +5,8 @@ import { useLocation } from "react-router-dom";
 import ExportButton from "../components/ExportButton";
 import { formatDate, formatCurrency } from "@/lib/csvExport";
 import TenantDetail from "./TenantDetail";
+import ModalWrapper from "@/components/ModalWrapper";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -218,9 +218,7 @@ export default function Tenants() {
       }
 
       {/* Add/Edit Tenant Dialog */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>{editing ? "Edit Tenant" : "Add Tenant"}</DialogTitle></DialogHeader>
+      <ModalWrapper open={open} onOpenChange={setOpen} title={editing ? "Edit Tenant" : "Add Tenant"}>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div><Label>First Name</Label><Input className="mt-1" value={form.first_name} onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} /></div>
@@ -239,8 +237,7 @@ export default function Tenants() {
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={save} disabled={!form.first_name || !form.email}>Save & Send Invite</Button>
           </div>
-        </DialogContent>
-      </Dialog>
+          </ModalWrapper>
     </div>);
 
 }

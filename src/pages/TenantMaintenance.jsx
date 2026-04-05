@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import ModalWrapper from "@/components/ModalWrapper";
 import { Wrench, Plus, AlertTriangle, Clock, CheckCircle, X, Upload, Loader2, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -184,9 +185,7 @@ Normal: cosmetic, minor repairs, slow drains.`,
       )}
 
       {/* Submit Dialog */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Submit Maintenance Request</DialogTitle></DialogHeader>
+      <ModalWrapper open={open} onOpenChange={setOpen} title="Submit Maintenance Request">
           <div className="space-y-4">
             <div><Label>Issue Title</Label><Input className="mt-1" value={form.summary} onChange={e => setForm(f => ({ ...f, summary: e.target.value }))} placeholder="e.g. Kitchen faucet is leaking" /></div>
             <div><Label>Category</Label>
@@ -226,13 +225,10 @@ Normal: cosmetic, minor repairs, slow drains.`,
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={submit} disabled={submitting || !form.summary}>{submitting ? "Submitting..." : "Submit Request"}</Button>
           </div>
-        </DialogContent>
-      </Dialog>
+      </ModalWrapper>
 
       {/* Detail Dialog */}
-      <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Request Details</DialogTitle></DialogHeader>
+      <ModalWrapper open={!!selected} onOpenChange={() => setSelected(null)} title="Request Details">
           {selected && (
             <div className="space-y-3">
               {selected.ai_emergency && (
@@ -269,10 +265,9 @@ Normal: cosmetic, minor repairs, slow drains.`,
                 </div>
               )}
               <div><p className="text-xs text-muted-foreground">Submitted</p><p className="text-sm">{new Date(selected.created_date).toLocaleString()}</p></div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+              </div>
+              )}
+              </ModalWrapper>
     </div>
   );
 }

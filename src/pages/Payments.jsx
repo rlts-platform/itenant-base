@@ -5,8 +5,8 @@ import { Plus, CreditCard, Pencil, Trash2, Upload, SplitSquareHorizontal, Calend
 import ExportButton from "../components/ExportButton";
 import { formatDate, formatCurrency } from "@/lib/csvExport";
 import ActivityLogHistory from "../components/ActivityLogHistory";
+import ModalWrapper from "@/components/ModalWrapper";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -225,9 +225,7 @@ export default function Payments() {
       </div>
 
       {/* Log Payment Dialog */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>{editing ? "Edit Payment" : "Log Payment"}</DialogTitle></DialogHeader>
+      <ModalWrapper open={open} onOpenChange={setOpen} title={editing ? "Edit Payment" : "Log Payment"}>
           <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
             <div>
               <Label>Tenant</Label>
@@ -320,9 +318,8 @@ export default function Payments() {
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={save} disabled={uploading1 || uploading2}>Save</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+            </div>
+            </ModalWrapper>
     </div>
   );
 }

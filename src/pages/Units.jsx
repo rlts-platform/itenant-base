@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, Home, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import ModalWrapper from "@/components/ModalWrapper";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -83,9 +83,7 @@ export default function Units() {
         </div>
       )}
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>{editing ? "Edit Unit" : "Add Unit"}</DialogTitle></DialogHeader>
+      <ModalWrapper open={open} onOpenChange={setOpen} title={editing ? "Edit Unit" : "Add Unit"}>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2"><Label>Property</Label>
               <Select value={form.property_id} onValueChange={v => setForm(f => ({ ...f, property_id: v }))}>
@@ -114,8 +112,7 @@ export default function Units() {
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={save}>Save</Button>
           </div>
-        </DialogContent>
-      </Dialog>
+          </ModalWrapper>
     </div>
   );
 }
