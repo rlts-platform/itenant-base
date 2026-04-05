@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Plus, FileText, Pencil, Trash2, CheckCircle, Circle, Sparkles, RefreshCw, History } from "lucide-react";
+import ExportButton from "../components/ExportButton";
+import { formatDate, formatCurrency } from "@/lib/csvExport";
 import ActivityLogHistory from "../components/ActivityLogHistory";
 import LeaseGenerator from "../components/LeaseGenerator";
 import { Button } from "@/components/ui/button";
@@ -19,6 +22,7 @@ export default function Leases() {
   const [leases, setLeases] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [units, setUnits] = useState([]);
+  const [properties, setProperties] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ tenant_id: "", unit_id: "", start_date: "", end_date: "", rent_amount: "", deposit_amount: "", status: "draft", signed_by_tenant: false, signed_by_client: false });
@@ -27,8 +31,8 @@ export default function Leases() {
   const [renewData, setRenewData] = useState(null);
 
   const load = async () => {
-    const [l, t, u] = await Promise.all([base44.entities.Lease.list("-created_date"), base44.entities.Tenant.list(), base44.entities.Unit.list()]);
-    setLeases(l); setTenants(t); setUnits(u); setLoading(false);
+    const [l, t, u, p] = await Promise.all([base44.entities.Lease.list("-created_date"), base44.entities.Tenant.list(), base44.entities.Unit.list(), base44.entities.Property.list()]);
+    setLeases(l); setTenants(t); setUnits(u); setProperties(p); setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
@@ -64,6 +68,28 @@ export default function Leases() {
   const tenantName = (id) => { const t = tenants.find(t => t.id === id); return t ? `${t.first_name} ${t.last_name}` : "—"; };
   const unitNum = (id) => units.find(u => u.id === id)?.unit_number || "—";
 
+  const exportLeases = async (exportAll) => {
+    const rows = leases.map(l => {
+      const tenant = tenants.find(t => t.id === l.tenant_id);
+      const unit = units.find(u => u.id === l.unit_id);
+      const prop = properties.find(p => p.id === unit?.property_id);
+      return {
+        "Tenant Name": tenant ? `${tenant.first_name} ${tenant.last_name}` : "",
+        "Property Address": prop?.address || "",
+        "Unit Number": unit?.unit_number || "",
+        "Lease Start Date": formatDate(l.start_date),
+        "Lease End Date": formatDate(l.end_date),
+        "Monthly Rent": formatCurrency(l.rent_amount),
+        "Security Deposit": formatCurrency(l.deposit_amount),
+        "Lease Status": l.status
+      };
+    });
+    return {
+      headers: ["Tenant Name", "Property Address", "Unit Number", "Lease Start Date", "Lease End Date", "Monthly Rent", "Security Deposit", "Lease Status"],
+      rows
+    };
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
@@ -71,6 +97,7 @@ export default function Leases() {
       <div className="flex items-center justify-between">
         <div><h1 className="text-2xl font-outfit font-700">Leases</h1><p className="text-sm text-muted-foreground mt-1">{leases.length} leases</p></div>
         <div className="flex gap-2">
+          <ExportButton pageName="Leases" onExport={exportLeases} />
           <Button variant="outline" onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />New Lease</Button>
           <Button onClick={() => { setRenewData(null); setGenOpen(true); }} className="gap-2"><Sparkles className="w-4 h-4" />Generate Lease</Button>
         </div>

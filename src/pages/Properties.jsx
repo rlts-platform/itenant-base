@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, Building2, MapPin, Pencil, Trash2, ChevronRight, Link2 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import ExportButton from "../components/ExportButton";
+import { formatCurrency } from "@/lib/csvExport";
 import PropertyProfile from "./PropertyProfile";
 import AddPropertyWizard from "../components/property/AddPropertyWizard";
 import { Button } from "@/components/ui/button";
@@ -9,6 +12,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function Properties() {
   const [properties, setProperties] = useState([]);
+  const [units, setUnits] = useState([]);
+  const [workOrders, setWorkOrders] = useState([]);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
@@ -18,8 +23,10 @@ export default function Properties() {
   if (selectedId) return <PropertyProfile propertyId={selectedId} onBack={() => setSelectedId(null)} />;
 
   const load = async () => {
-    const data = await base44.entities.Property.list("-created_date");
+    const [data, u, wo] = await Promise.all([base44.entities.Property.list("-created_date"), base44.entities.Unit.list(), base44.entities.WorkOrder.list()]);
     setProperties(data);
+    setUnits(u);
+    setWorkOrders(wo);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -27,6 +34,35 @@ export default function Properties() {
 
   const remove = async (id) => { await base44.entities.Property.delete(id); load(); };
   const handleSaved = (propertyId) => { load(); setSelectedId(propertyId); };
+
+  const exportProperties = async (exportAll) => {
+    const rows = properties.map(p => {
+      const propUnits = units.filter(u => u.property_id === p.id);
+      const occupied = propUnits.filter(u => u.status === "occupied").length;
+      const vacant = propUnits.filter(u => u.status === "vacant").length;
+      const totalRent = propUnits.reduce((sum, u) => sum + (u.rent_amount || 0), 0);
+      const openOrders = workOrders.filter(wo => wo.property_id === p.id && wo.status !== "closed").length;
+      return {
+        "Property Nickname": p.nickname || "",
+        "Full Address": p.address,
+        "Property Type": p.type || "",
+        "Year Built": p.year_built || "",
+        "Total Units": propUnits.length,
+        "Occupied Units": occupied,
+        "Vacant Units": vacant,
+        "Total Monthly Rent": formatCurrency(totalRent),
+        "Open Work Orders": openOrders,
+        "Insurance Provider": p.insurance_provider || "",
+        "Insurance Premium": formatCurrency(p.insurance_premium),
+        "HOA Name": p.hoa_name || "",
+        "HOA Monthly Fee": formatCurrency(p.hoa_monthly_fee)
+      };
+    });
+    return {
+      headers: ["Property Nickname", "Full Address", "Property Type", "Year Built", "Total Units", "Occupied Units", "Vacant Units", "Total Monthly Rent", "Open Work Orders", "Insurance Provider", "Insurance Premium", "HOA Name", "HOA Monthly Fee"],
+      rows
+    };
+  };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
@@ -37,9 +73,12 @@ export default function Properties() {
           <h1 className="text-3xl font-outfit font-800 text-foreground">Properties</h1>
           <p className="text-muted-foreground text-sm mt-1">Manage your rental properties</p>
         </div>
-        <Button onClick={() => setWizardOpen(true)} className="gap-2 rounded-xl shadow-sm">
-          <Plus className="w-4 h-4" />Add Property
-        </Button>
+        <div className="flex gap-2">
+          {properties.length > 0 && <ExportButton pageName="Properties" onExport={exportProperties} />}
+          <Button onClick={() => setWizardOpen(true)} className="gap-2 rounded-xl shadow-sm">
+            <Plus className="w-4 h-4" />Add Property
+          </Button>
+        </div>
       </motion.div>
 
       {properties.length === 0 ? (

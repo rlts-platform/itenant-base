@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Plus, CreditCard, Pencil, Trash2, Upload, SplitSquareHorizontal, Calendar, Clock, History } from "lucide-react";
+import ExportButton from "../components/ExportButton";
+import { formatDate, formatCurrency } from "@/lib/csvExport";
 import ActivityLogHistory from "../components/ActivityLogHistory";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -18,6 +21,8 @@ const METHODS = ["check", "money_order", "cash", "zelle"];
 export default function Payments() {
   const { user } = useAuth();
   const [payments, setPayments] = useState([]);
+  const [properties, setProperties] = useState([]);
+  const [units, setUnits] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -31,8 +36,8 @@ export default function Payments() {
   const [uploading2, setUploading2] = useState(false);
 
   const load = async () => {
-    const [p, t] = await Promise.all([base44.entities.Payment.list("-date"), base44.entities.Tenant.list()]);
-    setPayments(p); setTenants(t); setLoading(false);
+    const [p, t, pr, u] = await Promise.all([base44.entities.Payment.list("-date"), base44.entities.Tenant.list(), base44.entities.Property.list(), base44.entities.Unit.list()]);
+    setPayments(p); setTenants(t); setProperties(pr); setUnits(u); setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
@@ -105,6 +110,30 @@ export default function Payments() {
   const remove = async (id) => { await base44.entities.Payment.delete(id); load(); };
   const tenantName = (id) => { const t = tenants.find(t => t.id === id); return t ? `${t.first_name} ${t.last_name}` : "—"; };
 
+  const exportPayments = async (exportAll) => {
+    const rows = payments.map(p => {
+      const tenant = tenants.find(t => t.id === p.tenant_id);
+      const unit = units.find(u => u.id === tenant?.unit_id);
+      const prop = properties.find(pr => pr.id === unit?.property_id);
+      return {
+        "Tenant Name": tenant ? `${tenant.first_name} ${tenant.last_name}` : "",
+        "Property Address": prop?.address || "",
+        "Unit Number": unit?.unit_number || "",
+        "Payment Date": formatDate(p.date),
+        "Amount Paid": formatCurrency(p.amount),
+        "Payment Method": p.method?.replace("_", " ") || "",
+        "Proof Uploaded": p.proof_image_url ? "Yes" : "No",
+        "Upload Timestamp": p.proof_upload_date ? new Date(p.proof_upload_date).toLocaleString() : "",
+        "Status": p.status || "",
+        "Notes": ""
+      };
+    });
+    return {
+      headers: ["Tenant Name", "Property Address", "Unit Number", "Payment Date", "Amount Paid", "Payment Method", "Proof Uploaded", "Upload Timestamp", "Status", "Notes"],
+      rows
+    };
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
   const selectedTenant = tenants.find(t => t.id === selectedTenantId);
@@ -113,7 +142,10 @@ export default function Payments() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div><h1 className="text-2xl font-outfit font-700">Payments</h1><p className="text-sm text-muted-foreground mt-1">{payments.length} payments</p></div>
-        <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Log Payment</Button>
+        <div className="flex gap-2">
+          <ExportButton pageName="Payments" onExport={exportPayments} />
+          <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Log Payment</Button>
+        </div>
       </div>
 
       {payments.length === 0 ? (

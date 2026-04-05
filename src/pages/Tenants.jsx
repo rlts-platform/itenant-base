@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, Users, FileText, Clock, ClipboardList } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import ExportButton from "../components/ExportButton";
+import { formatDate, formatCurrency } from "@/lib/csvExport";
 import TenantDetail from "./TenantDetail";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -12,6 +15,7 @@ import AllTenantsTab from "../components/tenants/AllTenantsTab";
 import ApplicationsTab from "../components/tenants/ApplicationsTab";
 import InvitesTab from "../components/tenants/InvitesTab";
 import MoveOutsTab from "../components/tenants/MoveOutsTab";
+import { useEffect, useState } from "react";
 
 const TABS = [
 { id: "tenants", label: "All Tenants", icon: Users },
@@ -19,8 +23,9 @@ const TABS = [
 { id: "invites", label: "Invites", icon: Clock },
 { id: "moveouts", label: "Move Outs", icon: FileText }];
 
-
 export default function Tenants() {
+
+
   const [tenants, setTenants] = useState([]);
   const [units, setUnits] = useState([]);
   const [properties, setProperties] = useState([]);
@@ -88,6 +93,43 @@ export default function Tenants() {
     load();
   };
 
+  const exportTenants = async (exportAll) => {
+    let data = tenants;
+    if (!exportAll && (search || filterProperty !== "all")) {
+      data = tenants.filter(t => {
+        const matchSearch = search === "" || `${t.first_name} ${t.last_name}`.toLowerCase().includes(search.toLowerCase()) || t.email.includes(search);
+        const matchFilter = filterProperty === "all" || tenants.some(t2 => t2.id === t.id && units.find(u => u.id === t2.unit_id)?.property_id === filterProperty);
+        return matchSearch && matchFilter;
+      });
+    }
+    const rows = data.map(t => {
+      const lease = leases.find(l => l.tenant_id === t.id && l.status === "active");
+      const unit = units.find(u => u.id === t.unit_id);
+      const prop = properties.find(p => p.id === unit?.property_id);
+      const thisMonthPayments = payments.filter(p => p.tenant_id === t.id && p.date?.startsWith(new Date().toISOString().slice(0, 7)));
+      const invite = invites.find(i => i.tenant_id === t.id);
+      return {
+        "Full Name": `${t.first_name} ${t.last_name}`,
+        "Email": t.email,
+        "Phone": t.phone || "",
+        "Property Address": prop?.address || "",
+        "Unit Number": unit?.unit_number || "",
+        "Lease Start Date": formatDate(lease?.start_date),
+        "Lease End Date": formatDate(lease?.end_date),
+        "Monthly Rent": formatCurrency(lease?.rent_amount),
+        "Security Deposit": formatCurrency(lease?.deposit_amount),
+        "Payment Status This Month": thisMonthPayments.length > 0 ? "Paid" : "Pending",
+        "Invite Status": invite?.status || "active",
+        "Emergency Contact Name": t.emergency_contact_name || "",
+        "Emergency Contact Phone": t.emergency_contact_phone || ""
+      };
+    });
+    return {
+      headers: ["Full Name", "Email", "Phone", "Property Address", "Unit Number", "Lease Start Date", "Lease End Date", "Monthly Rent", "Security Deposit", "Payment Status This Month", "Invite Status", "Emergency Contact Name", "Emergency Contact Phone"],
+      rows
+    };
+  };
+
   // Stats
   const activeLeases = leases.filter((l) => l.status === "active").length;
   const pendingInvites = invites.filter((i) => i.status === "pending").length;
@@ -110,11 +152,14 @@ export default function Tenants() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-outfit font-bold">Tenant CRM</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage all tenants, applications, and move-outs</p>
-        </div>
-        <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Add Tenant</Button>
+       <div>
+         <h1 className="text-2xl font-outfit font-bold">Tenant CRM</h1>
+         <p className="text-sm text-muted-foreground mt-0.5">Manage all tenants, applications, and move-outs</p>
+       </div>
+       <div className="flex gap-2">
+         {tab === "tenants" && <ExportButton pageName="Tenants" hasFilters={search || filterProperty !== "all"} onExport={exportTenants} />}
+         <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Add Tenant</Button>
+       </div>
       </div>
 
       {/* Stats */}
