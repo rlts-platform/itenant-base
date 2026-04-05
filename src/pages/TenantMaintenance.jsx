@@ -13,8 +13,9 @@ const CATEGORIES = ["plumbing","electrical","hvac","appliance","pest","structura
 const URGENCIES = ["normal","urgent","emergency"];
 
 const statusConfig = {
-  new: { label: "Open", color: "bg-blue-100 text-blue-700", icon: Clock },
+  new: { label: "Awaiting Scheduling", color: "bg-blue-100 text-blue-700", icon: Clock },
   in_progress: { label: "In Progress", color: "bg-yellow-100 text-yellow-700", icon: AlertTriangle },
+  scheduled: { label: "Scheduled", color: "bg-purple-100 text-purple-700", icon: CheckCircle },
   closed: { label: "Completed", color: "bg-emerald-100 text-emerald-700", icon: CheckCircle },
 };
 
@@ -138,10 +139,12 @@ Normal: cosmetic, minor repairs, slow drains.`,
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm">{o.summary}</p>
                     <p className="text-xs text-muted-foreground mt-0.5 capitalize">{o.category} · Submitted {new Date(o.created_date).toLocaleDateString()}</p>
+                    {o.scheduled_date && <p className="text-xs text-primary font-medium mt-1">📅 Scheduled: {new Date(o.scheduled_date).toLocaleDateString()} ({o.time_window?.replace('_', ' ')})</p>}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${urgencyColor[o.urgency]}`}>{o.urgency}</span>
                     <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${s.color}`}><Icon className="w-3 h-3" />{s.label}</span>
+                    {o.vendor_confirmed && <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-100 text-green-700">✓ Vendor Confirmed</span>}
                   </div>
                 </div>
               </div>
@@ -214,6 +217,15 @@ Normal: cosmetic, minor repairs, slow drains.`,
                 <div><p className="text-xs text-muted-foreground">Urgency</p><p className="text-sm capitalize">{selected.urgency}</p></div>
                 <div><p className="text-xs text-muted-foreground">Status</p><p className="text-sm capitalize">{selected.status?.replace("_", " ")}</p></div>
               </div>
+              {selected.scheduled_date && (
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 space-y-1.5">
+                  <p className="text-xs font-semibold text-purple-700">Scheduled Information</p>
+                  <p className="text-sm text-purple-700">📅 Date: {new Date(selected.scheduled_date).toLocaleDateString()}</p>
+                  <p className="text-sm text-purple-700">⏰ Time: {selected.time_window?.replace('_', ' ') || 'Not specified'}</p>
+                  {selected.entry_instructions && <p className="text-sm text-purple-700">📋 Entry Instructions: {selected.entry_instructions}</p>}
+                  {selected.vendor_confirmed && <p className="text-sm text-green-700 font-medium">✓ Vendor has confirmed this appointment</p>}
+                </div>
+              )}
               {selected.photo_urls?.length > 0 && (
                 <div>
                   <p className="text-xs text-muted-foreground mb-1.5">Photos</p>

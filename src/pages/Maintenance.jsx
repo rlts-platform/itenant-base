@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Plus, Wrench, AlertTriangle, Pencil, Trash2, ShoppingCart, Loader2, Flame, History } from "lucide-react";
+import { Plus, Wrench, AlertTriangle, Pencil, Trash2, ShoppingCart, Loader2, Flame, History, Calendar, List } from "lucide-react";
 import ActivityLogHistory from "../components/ActivityLogHistory";
 import FindSuppliesPanel from "../components/vendors/FindSuppliesPanel";
+import CalendarView from "../components/maintenance/CalendarView";
+import ScheduleRepairSection from "../components/maintenance/ScheduleRepairSection";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -19,13 +21,17 @@ const STATUS_COLOR = { new: "default", in_progress: "outline", closed: "secondar
 
 export default function Maintenance() {
   const [orders, setOrders] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [units, setUnits] = useState([]);
   const [properties, setProperties] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [filter, setFilter] = useState("all");
-  const [form, setForm] = useState({ summary: "", category: "plumbing", urgency: "normal", status: "new", tenant_id: "", unit_id: "", property_id: "", permission_to_enter: false, cost: "" });
+  const [viewMode, setViewMode] = useState("list"); // 'list' or 'calendar'
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [conflictWarning, setConflictWarning] = useState(false);
+  const [form, setForm] = useState({ summary: "", category: "plumbing", urgency: "normal", status: "new", tenant_id: "", unit_id: "", property_id: "", permission_to_enter: false, cost: "", scheduled_date: "", time_window: "morning", assigned_vendor_id: "", entry_instructions: "", notify_tenant: true });
   const [loading, setLoading] = useState(true);
   const [suppliesOpen, setSuppliesOpen] = useState(false);
   const [suppliesPrefill, setSuppliesPrefill] = useState("");
@@ -57,13 +63,33 @@ Normal: cosmetic, minor repairs.`,
   const openSupplies = (summary = "") => { setSuppliesPrefill(summary); setSuppliesOpen(true); };
 
   const load = async () => {
-    const [o, t, u, p] = await Promise.all([base44.entities.WorkOrder.list("-created_date"), base44.entities.Tenant.list(), base44.entities.Unit.list(), base44.entities.Property.list()]);
-    setOrders(o); setTenants(t); setUnits(u); setProperties(p); setLoading(false);
+    const [o, t, u, p, v] = await Promise.all([base44.entities.WorkOrder.list("-created_date"), base44.entities.Tenant.list(), base44.entities.Unit.list(), base44.entities.Property.list(), base44.entities.Vendor.list()]);
+    setOrders(o); setTenants(t); setUnits(u); setProperties(p); setVendors(v); setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
-  const openAdd = () => { setEditing(null); setForm({ summary: "", category: "plumbing", urgency: "normal", status: "new", tenant_id: "", unit_id: "", property_id: "", permission_to_enter: false, cost: "" }); setOpen(true); };
-  const openEdit = (o) => { setEditing(o); setForm({ summary: o.summary, category: o.category, urgency: o.urgency, status: o.status, tenant_id: o.tenant_id || "", unit_id: o.unit_id || "", property_id: o.property_id || "", permission_to_enter: !!o.permission_to_enter, cost: o.cost || "" }); setOpen(true); };
+  const openAdd = () => { setEditing(null); setForm({ summary: "", category: "plumbing", urgency: "normal", status: "new", tenant_id: "", unit_id: "", property_id: "", permission_to_enter: false, cost: "", scheduled_date: "", time_window: "morning", assigned_vendor_id: "", entry_instructions: "", notify_tenant: true }); setOpen(true); };
+  const openEdit = (o) => { setEditing(o); setForm({ summary: o.summary, category: o.category, urgency: o.urgency, status: o.status, tenant_id: o.tenant_id || "", unit_id: o.unit_id || "", property_id: o.property_id || "", permission_to_enter: !!o.permission_to_enter, cost: o.cost || "", scheduled_date: o.scheduled_date || "", time_window: o.time_window || "morning", assigned_vendor_id: o.assigned_vendor_id || "", entry_instructions: o.entry_instructions || "", notify_tenant: o.notify_tenant ?? true }); setOpen(true); };
+
+  const checkConflict = (propId, date, timeWindow) => {
+    if (!propId || !date || !timeWindow) return false;
+    return orders.some(o => 
+      o.id !== editing?.id &&
+      o.property_id === propId &&
+      o.scheduled_date === date &&
+      o.time_window === timeWindow &&
+      o.status !== "closed"
+    );
+  };
+
+  const handleScheduleUpdate = (scheduleData) => {
+    const hasConflict = checkConflict(form.property_id, scheduleData.scheduled_date, scheduleData.time_window);
+    if (hasConflict) {
+      setConflictWarning(true);
+    } else {
+      setConflictWarning(false);
+    }
+  };
 
   const save = async () => {
     const data = { ...form, cost: form.cost ? Number(form.cost) : undefined };
@@ -95,32 +121,43 @@ Normal: cosmetic, minor repairs.`,
         notes: "Created",
       });
     }
-    setOpen(false); load();
+    setOpen(false); setConflictWarning(false); load();
   };
   const remove = async (id) => { await base44.entities.WorkOrder.delete(id); load(); };
 
   const tenantName = (id) => { const t = tenants.find(t => t.id === id); return t ? `${t.first_name} ${t.last_name}` : "—"; };
-  const filtered = filter === "all" ? orders : orders.filter(o => o.status === filter);
+  const propName = (id) => properties.find(p => p.id === id)?.nickname || properties.find(p => p.id === id)?.address || "Unknown";
+  let filtered = filter === "all" ? orders : orders.filter(o => o.status === filter);
+  if (selectedDate && viewMode === "list") {
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    filtered = filtered.filter(o => o.scheduled_date?.startsWith(dateStr));
+  }
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-outfit font-700">Maintenance</h1><p className="text-sm text-muted-foreground mt-1">{orders.length} work orders</p></div>
+        <div><h1 className="text-2xl font-outfit font-700">Maintenance</h1><p className="text-sm text-muted-foreground mt-1">{orders.length} work orders {selectedDate && viewMode === "list" && `— ${selectedDate.toLocaleDateString()}`}</p></div>
         <div className="flex gap-2">
+          <div className="flex gap-1 bg-secondary/50 rounded-lg p-1">
+            <button onClick={() => { setViewMode("list"); setSelectedDate(null); }} className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === "list" ? "bg-white shadow" : "hover:bg-white/50"}` }><List className="w-4 h-4" />List</button>
+            <button onClick={() => setViewMode("calendar")} className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === "calendar" ? "bg-white shadow" : "hover:bg-white/50"}` }><Calendar className="w-4 h-4" />Calendar</button>
+          </div>
           <Button variant="outline" onClick={() => openSupplies()} className="gap-2"><ShoppingCart className="w-4 h-4" />Find Supplies</Button>
           <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />New Work Order</Button>
         </div>
       </div>
 
-      <div className="flex gap-2">
-        {["all","new","in_progress","closed"].map(s => (
-          <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === s ? "bg-primary text-white" : "bg-card border border-border hover:bg-secondary"}`}>
-            {s === "all" ? "All" : s.replace("_", " ")}
-          </button>
-        ))}
-      </div>
+      {viewMode === "list" && (
+        <div className="flex gap-2">
+          {["all","new","in_progress","scheduled","closed"].map(s => (
+            <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === s ? "bg-primary text-white" : "bg-card border border-border hover:bg-secondary"}`}>
+              {s === "all" ? "All" : s.replace("_", " ")}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Emergency banner */}
       {filtered.some(o => o.ai_emergency && o.status !== "closed") && (
@@ -135,7 +172,9 @@ Normal: cosmetic, minor repairs.`,
         </div>
       )}
 
-      {filtered.length === 0 ? (
+      {viewMode === "calendar" ? (
+        <CalendarView orders={orders} onSelectOrder={openEdit} onDateSelect={d => { setViewMode("list"); setSelectedDate(d); }} />
+      ) : filtered.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-16 text-center">
           <Wrench className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="font-semibold">No work orders</p>
@@ -154,12 +193,14 @@ Normal: cosmetic, minor repairs.`,
                   <h3 className="font-semibold text-sm">{o.summary}</h3>
                   <Badge variant={URGENCY_COLOR[o.urgency]}>{o.urgency}</Badge>
                   <Badge variant={STATUS_COLOR[o.status]}>{o.status?.replace("_"," ")}</Badge>
+                  {o.vendor_confirmed && <Badge variant="default" className="bg-green-500">✓ Confirmed</Badge>}
                   <span className="text-xs bg-secondary px-2 py-0.5 rounded-full">{o.category}</span>
                 </div>
                 <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
                    <span>Tenant: {tenantName(o.tenant_id)}</span>
                    {o.cost && <span>Cost: ${o.cost}</span>}
                    {o.permission_to_enter && <span>✓ Entry permitted</span>}
+                   {o.scheduled_date && <span>📅 {new Date(o.scheduled_date).toLocaleDateString()} ({o.time_window})</span>}
                 </div>
                 {o.photo_urls?.length > 0 && (
                   <div className="flex gap-1.5 mt-2 flex-wrap">
@@ -186,7 +227,7 @@ Normal: cosmetic, minor repairs.`,
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editing ? "Edit Work Order" : "New Work Order"}</DialogTitle></DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto">
             {triaging && <div className="flex items-center gap-2 text-sm text-primary"><Loader2 className="w-4 h-4 animate-spin" />AI is triaging this request…</div>}
             <div><Label>Summary</Label><Textarea className="mt-1" value={form.summary} onChange={e => setForm(f => ({ ...f, summary: e.target.value }))} /></div>
             <div className="grid grid-cols-2 gap-3">
@@ -217,8 +258,12 @@ Normal: cosmetic, minor repairs.`,
               </Select>
             </div>
             <div className="flex items-center gap-2"><Switch checked={form.permission_to_enter} onCheckedChange={v => setForm(f => ({ ...f, permission_to_enter: v }))} /><Label>Permission to Enter</Label></div>
-          </div>
-          {editing && (
+
+            <div className="border-t border-border pt-4">
+              <ScheduleRepairSection workOrder={editing} vendors={vendors} properties={properties} onUpdate={handleScheduleUpdate} conflictWarning={conflictWarning} onConflictContinue={() => setConflictWarning(false)} onConflictChangeDate={() => setForm(f => ({ ...f, scheduled_date: "" }))} />
+            </div>
+            </div>
+            {editing && (
             <div className="mt-2 pt-4 border-t border-border">
               <div className="flex items-center gap-2 mb-2">
                 <History className="w-3.5 h-3.5 text-muted-foreground" />
