@@ -6,23 +6,12 @@
       "type": "string"
     },
     "trigger_event": {
-      "type": "string",
-      "enum": [
-        "rent_due",
-        "lease_expiring",
-        "work_order_created",
-        "payment_received",
-        "tenant_invited"
-      ]
+      "type": "string"
     },
     "channels": {
       "type": "array",
       "items": {
-        "type": "string",
-        "enum": [
-          "email",
-          "sms"
-        ]
+        "type": "string"
       }
     },
     "subject": {
@@ -34,13 +23,53 @@
     "is_enabled": {
       "type": "boolean"
     },
+    "is_preset": {
+      "type": "boolean"
+    },
+    "preset_id": {
+      "type": "string"
+    },
+    "recipient_mode": {
+      "type": "string",
+      "enum": [
+        "all",
+        "property",
+        "specific"
+      ]
+    },
+    "recipient_property_id": {
+      "type": "string"
+    },
+    "recipient_tenant_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "last_run": {
+      "type": "string"
+    },
+    "trigger_type": {
+      "type": "string"
+    },
+    "condition_field": {
+      "type": "string"
+    },
+    "condition_op": {
+      "type": "string"
+    },
+    "condition_value": {
+      "type": "string"
+    },
+    "action_type": {
+      "type": "string"
+    },
     "account_id": {
       "type": "string"
     }
   },
   "required": [
     "name",
-    "trigger_event",
     "account_id"
   ]
 }
