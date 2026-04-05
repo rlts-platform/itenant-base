@@ -1,0 +1,33 @@
+{
+  "name": "AppUser",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "client",
+        "tenant",
+        "platform_owner"
+      ]
+    },
+    "onboarding_complete": {
+      "type": "boolean",
+      "default": false
+    },
+    "business_name": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_email"
+  ]
+}
