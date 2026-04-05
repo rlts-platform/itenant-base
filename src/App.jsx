@@ -43,12 +43,7 @@ const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
   const navigate = useNavigate();
 
-  // Public routes — skip auth enforcement
-  if (window.location.pathname.startsWith('/apply/')) return <ApplyPage />;
-  if (window.location.pathname === '/' && (isLoadingPublicSettings || isLoadingAuth)) {
-    return <div style={{ backgroundColor: '#0D0F14', minHeight: '100vh' }} />;
-  }
-  if (window.location.pathname === '/' && authError?.type === 'auth_required') return <LandingPage />;
+  // Public routes — skip auth enforcement (checked after hooks)
 
   // Role-based redirect after login
   useEffect(() => {
@@ -65,10 +60,13 @@ const AuthenticatedApp = () => {
     }
   }, [isLoadingAuth, isLoadingPublicSettings, user, authError]);
 
+  // Public routes checked after hooks
+  if (window.location.pathname.startsWith('/apply/')) return <ApplyPage />;
+
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      <div className="fixed inset-0 flex items-center justify-center" style={{ backgroundColor: '#0D0F14' }}>
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -78,6 +76,9 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
+      if (window.location.pathname === '/' || window.location.pathname === '/landing') {
+        return <LandingPage />;
+      }
       navigateToLogin();
       return null;
     }
