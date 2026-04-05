@@ -1,7 +1,7 @@
 import { base44 } from "@/api/base44Client";
 import { ShieldCheck, Zap, Wrench, BarChart3, Bot, CheckCircle2, Building2, Users, CreditCard, FolderOpen, MessageSquare, Bell } from "lucide-react";
 
-const HERO_IMAGE = "https://media.base44.com/images/public/69d176412565789962328166/ea0f27858_Screenshot2026-04-05at22803AM.png";
+const HERO_IMAGE = "https://media.base44.com/images/public/69d176412565789962328166/74bcfb124_Screenshot2026-04-05at22803AM.png";
 
 const FEATURES = [
   { icon: Building2, title: "Property Management", desc: "Track every property, unit, and tenant in one place with full history and audit trails." },
@@ -67,7 +67,7 @@ export default function LandingPage() {
       <section style={{ position: "relative", minHeight: 620, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
         {/* Hero bg image */}
         <div style={{ position: "absolute", inset: 0, backgroundImage: `url(${HERO_IMAGE})`, backgroundSize: "cover", backgroundPosition: "center", zIndex: 0 }} />
-        <div style={{ position: "absolute", inset: 0, background: "rgba(13,15,20,0.85)", zIndex: 1 }} />
+        <div style={{ position: "absolute", inset: 0, background: "rgba(13,15,20,0.45)", zIndex: 1 }} />
 
         <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "80px 24px 60px", maxWidth: 720 }}>
           {/* Badge */}
