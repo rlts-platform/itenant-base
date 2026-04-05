@@ -53,7 +53,8 @@ export default function Layout() {
   const location = useLocation();
 
   const handleLogout = async () => {
-    await base44.auth.logout('/');
+    await base44.auth.logout();
+    window.location.replace('/landing');
   };
 
   useEffect(() => {

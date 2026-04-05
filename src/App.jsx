@@ -77,11 +77,8 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      if (window.location.pathname === '/' || window.location.pathname === '/landing') {
-        return <LandingPage />;
-      }
-      navigateToLogin();
-      return null;
+      // Always show landing page for unauthenticated users
+      return <LandingPage />;
     }
   }
 
