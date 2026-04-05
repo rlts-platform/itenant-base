@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, FileText, Pencil, Trash2, CheckCircle, Circle, Sparkles, RefreshCw } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { Plus, FileText, Pencil, Trash2, CheckCircle, Circle, Sparkles, RefreshCw, History } from "lucide-react";
+import ActivityLogHistory from "../components/ActivityLogHistory";
 import LeaseGenerator from "../components/LeaseGenerator";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -13,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 const statusColor = { draft: "secondary", active: "default", expired: "outline", terminated: "destructive" };
 
 export default function Leases() {
+  const { user } = useAuth();
   const [leases, setLeases] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [units, setUnits] = useState([]);
@@ -34,8 +37,26 @@ export default function Leases() {
 
   const save = async () => {
     const data = { ...form, rent_amount: Number(form.rent_amount), deposit_amount: Number(form.deposit_amount) };
-    if (editing) await base44.entities.Lease.update(editing.id, data);
-    else await base44.entities.Lease.create(data);
+    if (editing) {
+      if (editing.status !== form.status) {
+        await base44.entities.ActivityLog.create({
+          record_type: "lease", record_id: editing.id,
+          old_status: editing.status, new_status: form.status,
+          changed_by: user?.full_name || user?.email || "Unknown",
+          changed_at: new Date().toISOString(),
+        });
+      }
+      await base44.entities.Lease.update(editing.id, data);
+    } else {
+      const created = await base44.entities.Lease.create(data);
+      await base44.entities.ActivityLog.create({
+        record_type: "lease", record_id: created.id,
+        new_status: data.status,
+        changed_by: user?.full_name || user?.email || "Unknown",
+        changed_at: new Date().toISOString(),
+        notes: "Created",
+      });
+    }
     setOpen(false); load();
   };
   const remove = async (id) => { await base44.entities.Lease.delete(id); load(); };
@@ -138,6 +159,15 @@ export default function Leases() {
               <div className="flex items-center gap-2"><Switch checked={form.signed_by_client} onCheckedChange={v => setForm(f => ({ ...f, signed_by_client: v }))} /><Label>Signed by Client</Label></div>
             </div>
           </div>
+          {editing && (
+            <div className="mt-2 pt-4 border-t border-border">
+              <div className="flex items-center gap-2 mb-2">
+                <History className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">History</span>
+              </div>
+              <ActivityLogHistory recordId={editing.id} />
+            </div>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={save}>Save</Button>

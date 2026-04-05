@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Wrench, AlertTriangle, Pencil, Trash2, ShoppingCart, Loader2, Flame } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { Plus, Wrench, AlertTriangle, Pencil, Trash2, ShoppingCart, Loader2, Flame, History } from "lucide-react";
+import ActivityLogHistory from "../components/ActivityLogHistory";
 import FindSuppliesPanel from "../components/vendors/FindSuppliesPanel";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -28,6 +30,7 @@ export default function Maintenance() {
   const [suppliesOpen, setSuppliesOpen] = useState(false);
   const [suppliesPrefill, setSuppliesPrefill] = useState("");
   const [triaging, setTriaging] = useState(false);
+  const { user } = useAuth();
 
   const runAITriage = async (summary, description) => {
     const text = `${summary} ${description || ""}`.trim();
@@ -65,6 +68,14 @@ Normal: cosmetic, minor repairs.`,
   const save = async () => {
     const data = { ...form, cost: form.cost ? Number(form.cost) : undefined };
     if (editing) {
+      if (editing.status !== form.status) {
+        await base44.entities.ActivityLog.create({
+          record_type: "work_order", record_id: editing.id,
+          old_status: editing.status, new_status: form.status,
+          changed_by: user?.full_name || user?.email || "Unknown",
+          changed_at: new Date().toISOString(),
+        });
+      }
       await base44.entities.WorkOrder.update(editing.id, data);
     } else {
       setTriaging(true);
@@ -75,7 +86,14 @@ Normal: cosmetic, minor repairs.`,
         data.category = triage.category || data.category;
         data.ai_emergency = triage.is_emergency || false;
       }
-      await base44.entities.WorkOrder.create(data);
+      const created = await base44.entities.WorkOrder.create(data);
+      await base44.entities.ActivityLog.create({
+        record_type: "work_order", record_id: created.id,
+        new_status: data.status || "new",
+        changed_by: user?.full_name || user?.email || "Unknown",
+        changed_at: new Date().toISOString(),
+        notes: "Created",
+      });
     }
     setOpen(false); load();
   };
@@ -200,6 +218,15 @@ Normal: cosmetic, minor repairs.`,
             </div>
             <div className="flex items-center gap-2"><Switch checked={form.permission_to_enter} onCheckedChange={v => setForm(f => ({ ...f, permission_to_enter: v }))} /><Label>Permission to Enter</Label></div>
           </div>
+          {editing && (
+            <div className="mt-2 pt-4 border-t border-border">
+              <div className="flex items-center gap-2 mb-2">
+                <History className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">History</span>
+              </div>
+              <ActivityLogHistory recordId={editing.id} />
+            </div>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={save}>Save</Button>

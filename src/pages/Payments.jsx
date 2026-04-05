@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, CreditCard, Pencil, Trash2, Upload, SplitSquareHorizontal, Calendar, Clock } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { Plus, CreditCard, Pencil, Trash2, Upload, SplitSquareHorizontal, Calendar, Clock, History } from "lucide-react";
+import ActivityLogHistory from "../components/ActivityLogHistory";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -14,6 +16,7 @@ const statusColor = { pending: "outline", confirmed: "default", failed: "destruc
 const METHODS = ["check", "money_order", "cash", "zelle"];
 
 export default function Payments() {
+  const { user } = useAuth();
   const [payments, setPayments] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [open, setOpen] = useState(false);
@@ -76,8 +79,26 @@ export default function Payments() {
       amount: Number(form.amount),
       split_amount_2: form.is_split ? Number(form.split_amount_2) : null,
     };
-    if (editing) await base44.entities.Payment.update(editing.id, data);
-    else await base44.entities.Payment.create(data);
+    if (editing) {
+      if (editing.status !== form.status) {
+        await base44.entities.ActivityLog.create({
+          record_type: "payment", record_id: editing.id,
+          old_status: editing.status, new_status: form.status,
+          changed_by: user?.full_name || user?.email || "Unknown",
+          changed_at: new Date().toISOString(),
+        });
+      }
+      await base44.entities.Payment.update(editing.id, data);
+    } else {
+      const created = await base44.entities.Payment.create(data);
+      await base44.entities.ActivityLog.create({
+        record_type: "payment", record_id: created.id,
+        new_status: data.status,
+        changed_by: user?.full_name || user?.email || "Unknown",
+        changed_at: new Date().toISOString(),
+        notes: "Created",
+      });
+    }
     setOpen(false); load();
   };
 
@@ -256,6 +277,15 @@ export default function Payments() {
               </div>
             )}
           </div>
+          {editing && (
+            <div className="mt-2 pt-4 border-t border-border">
+              <div className="flex items-center gap-2 mb-2">
+                <History className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">History</span>
+              </div>
+              <ActivityLogHistory recordId={editing.id} />
+            </div>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button onClick={save} disabled={uploading1 || uploading2}>Save</Button>
