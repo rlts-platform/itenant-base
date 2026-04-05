@@ -1,6 +1,8 @@
 import { base44 } from "@/api/base44Client";
 import { useState } from "react";
-import { ShieldCheck, Zap, Wrench, BarChart3, Bot, CheckCircle2, Building2, Users, CreditCard, FolderOpen, MessageSquare, Bell, X } from "lucide-react";
+import { Zap, Wrench, BarChart3, Bot, CheckCircle2, Building2, Users, CreditCard, FolderOpen, MessageSquare, X } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import Logo from "../components/Logo";
 
 const HERO_IMAGE = "https://media.base44.com/images/public/69d176412565789962328166/74bcfb124_Screenshot2026-04-05at22803AM.png";
 
@@ -52,11 +54,8 @@ export default function LandingPage() {
 
       {/* Header */}
       <header style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(124,111,205,0.12)", padding: "0 40px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 34, height: 34, borderRadius: 10, background: "#7C6FCD", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <ShieldCheck size={18} color="#fff" />
-          </div>
-          <span style={{ fontWeight: 800, fontSize: 20, letterSpacing: "-0.5px", color: "#1A1A2E" }}>iTenant</span>
+        <div>
+          <Logo variant="horizontal" size="lg" />
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={handleLogin} style={{ padding: "8px 20px", borderRadius: 999, background: "#fff", border: "1px solid rgba(124,111,205,0.4)", color: "#7C6FCD", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
@@ -277,11 +276,8 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer style={{ background: "#F4F3FF", borderTop: "1px solid rgba(124,111,205,0.15)", padding: "32px 40px", textAlign: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: "#7C6FCD", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <ShieldCheck size={14} color="#fff" />
-          </div>
-          <span style={{ fontWeight: 800, fontSize: 16, color: "#1A1A2E" }}>iTenant</span>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>
+          <Logo variant="horizontal" size="sm" />
         </div>
         <p style={{ fontSize: 13, color: "#6B7280" }}>© {new Date().getFullYear()} iTenant. All rights reserved.</p>
       </footer>

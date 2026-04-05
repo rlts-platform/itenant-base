@@ -8,6 +8,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { base44 } from '@/api/base44Client';
+import Logo from './components/Logo';
 import Layout from './components/Layout';
 import ClientDashboard from './pages/ClientDashboard';
 import Properties from './pages/Properties';
@@ -98,8 +99,20 @@ const AuthenticatedApp = () => {
   // Show loading during app user check
   if (checkingUser && user && !authError && !isLoadingAuth && !isLoadingPublicSettings) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ backgroundColor: '#F4F3FF' }}>
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <div className="fixed inset-0 flex flex-col items-center justify-center" style={{ backgroundColor: '#F4F3FF' }}>
+        <div className="mb-6">
+          <Logo variant="icon" size="lg" />
+        </div>
+        <style>{`
+          @keyframes pulse-scale {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+          }
+          .logo-pulse svg { animation: pulse-scale 2s ease-in-out infinite; }
+        `}</style>
+        <div className="logo-pulse">
+          <Logo variant="icon" size="lg" />
+        </div>
       </div>
     );
   }
@@ -109,8 +122,17 @@ const AuthenticatedApp = () => {
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ backgroundColor: '#F4F3FF' }}>
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <div className="fixed inset-0 flex flex-col items-center justify-center" style={{ backgroundColor: '#F4F3FF' }}>
+        <style>{`
+          @keyframes pulse-scale {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+          }
+          .logo-pulse svg { animation: pulse-scale 2s ease-in-out infinite; }
+        `}</style>
+        <div className="logo-pulse">
+          <Logo variant="icon" size="lg" />
+        </div>
       </div>
     );
   }

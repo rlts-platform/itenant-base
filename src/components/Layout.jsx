@@ -3,11 +3,12 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
+import Logo from "./Logo";
 import MobileBottomBar from "./MobileBottomBar";
 import {
   LayoutDashboard, Building2, Home, Users, FileText, Wrench,
   CreditCard, BarChart3, FolderOpen, MessageSquare, Package,
-  Users2, Zap, Settings, LogOut, Bell, Menu, DollarSign, ShieldCheck, UserCircle, Bot, ClipboardList, FilePlus, TrendingUp
+  Users2, Zap, Settings, LogOut, Bell, Menu, DollarSign, UserCircle, Bot, ClipboardList, FilePlus, TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -106,11 +107,12 @@ export default function Layout() {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full border-r" style={{ backgroundColor: '#FFFFFF', borderColor: 'rgba(124,111,205,0.15)' }}>
-      <div className="flex items-center gap-3 px-5 py-5">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-md" style={{ backgroundColor: '#7C6FCD' }}>
-          <ShieldCheck className="w-5 h-5 text-white" />
-        </div>
-        <span className="font-outfit font-800 text-xl tracking-tight" style={{ color: '#1A1A2E' }}>iTenant</span>
+      <div className="px-5 py-5">
+        <Logo variant="horizontal" size="md" onClick={() => {
+          if (user?.role === 'platform_owner') window.location.href = '/owner';
+          else if (user?.role === 'tenant') window.location.href = '/tenant';
+          else window.location.href = '/';
+        }} />
       </div>
 
       <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
