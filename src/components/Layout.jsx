@@ -46,6 +46,10 @@ const ownerNav = [
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useAuth();
+
+  const handleLogout = async () => {
+    await base44.auth.logout();
+  };
   const location = useLocation();
 
   const role = user?.role || "user";
@@ -99,7 +103,7 @@ export default function Layout() {
           </div>
         </div>
         <button
-          onClick={() => base44.auth.logout()}
+          onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2 rounded-xl w-full text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
         >
           <LogOut className="w-4 h-4 shrink-0" />
