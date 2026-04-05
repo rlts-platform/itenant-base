@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Plug, Bell, CreditCard, User } from "lucide-react";
+import { Save, Plug, Bell, CreditCard, User, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import IntegrationsTab from "../components/settings/IntegrationsTab";
 import NotificationsTab from "../components/settings/NotificationsTab";
 import BillingTab from "../components/settings/BillingTab";
@@ -24,6 +25,8 @@ export default function Settings() {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("account");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
     const accounts = await base44.entities.Account.filter({ owner_email: user?.email });
@@ -42,6 +45,22 @@ export default function Settings() {
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
     load();
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      // Delete associated AppUser record
+      const appUsers = await base44.entities.AppUser.filter({ user_email: user?.email });
+      if (appUsers[0]) await base44.entities.AppUser.delete(appUsers[0].id);
+      // Delete account
+      if (account) await base44.entities.Account.delete(account.id);
+      // Logout
+      await base44.auth.logout();
+    } catch (error) {
+      alert("Error deleting account. Please try again.");
+      setDeleting(false);
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
@@ -85,13 +104,21 @@ export default function Settings() {
           </div>
 
           <div className="bg-card border border-border rounded-xl p-6 space-y-2">
-            <h2 className="font-semibold">Your Profile</h2>
-            <p className="text-sm text-muted-foreground">Name: {user?.full_name}</p>
-            <p className="text-sm text-muted-foreground">Email: {user?.email}</p>
-            <p className="text-sm text-muted-foreground">Role: {user?.role}</p>
+           <h2 className="font-semibold">Your Profile</h2>
+           <p className="text-sm text-muted-foreground">Name: {user?.full_name}</p>
+           <p className="text-sm text-muted-foreground">Email: {user?.email}</p>
+           <p className="text-sm text-muted-foreground">Role: {user?.role}</p>
           </div>
-        </div>
-      )}
+
+          <div className="bg-red-50 border border-red-200 rounded-xl p-6 space-y-4">
+           <h2 className="font-semibold text-red-900">Danger Zone</h2>
+           <p className="text-sm text-red-800">Permanently delete your account and all associated data. This action cannot be undone.</p>
+           <Button onClick={() => setDeleteDialogOpen(true)} variant="destructive" className="gap-2">
+             <Trash2 className="w-4 h-4" /> Delete Account
+           </Button>
+          </div>
+          </div>
+          )}
 
       {tab === "integrations" && account && (
         <IntegrationsTab account={account} onSaved={load} />
@@ -110,6 +137,22 @@ export default function Settings() {
       {tab === "billing" && (
         <BillingTab account={account} />
       )}
+
+      {/* Delete Account Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Account</DialogTitle>
+            <DialogDescription>Are you sure? This will permanently delete your account and all data. This cannot be undone.</DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleting}>
+              {deleting ? "Deleting..." : "Delete Account"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

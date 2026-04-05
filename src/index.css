@@ -76,9 +76,23 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    padding-top: env(safe-area-inset-top);
+  }
   body {
     @apply bg-background text-foreground font-inter;
     background-color: #F4F3FF;
+    overscroll-behavior: none;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  button, [role="button"], nav {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  @media (max-width: 767px) {
+    body {
+      padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
+    }
   }
   input, textarea, select {
     color-scheme: light;
@@ -93,5 +107,12 @@
     border-color: #7C6FCD !important;
     outline: none;
     box-shadow: 0 0 0 2px rgba(124,111,205,0.15) !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .dark {
+    color-scheme: dark;
   }
 }
