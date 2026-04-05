@@ -5,6 +5,7 @@ import { DollarSign, CreditCard, CheckCircle, XCircle, Loader2 } from "lucide-re
 import BillReminders from "../components/payments/BillReminders";
 import UtilityBillsTracker from "../components/tenant/UtilityBillsTracker";
 import SavedPaymentMethods from "../components/tenant/SavedPaymentMethods";
+import PaymentReceipts from "../components/tenant/PaymentReceipts";
 import { Button } from "@/components/ui/button";
 
 const isInIframe = () => {
@@ -18,6 +19,7 @@ export default function TenantPay() {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
+  const [refresh, setRefresh] = useState(0);
 
   const urlParams = new URLSearchParams(window.location.search);
   const success = urlParams.get("success");
@@ -39,7 +41,7 @@ export default function TenantPay() {
       setLoading(false);
     }
     load();
-  }, [user]);
+  }, [user, refresh]);
 
   const handlePay = async () => {
     if (isInIframe()) {
@@ -55,11 +57,17 @@ export default function TenantPay() {
       tenant_name: user?.full_name,
     });
     if (res.data?.url) {
+      // Redirect to Stripe checkout
+      setPaying(false);
       window.location.href = res.data.url;
     } else {
       alert("Could not initiate payment. Please try again.");
       setPaying(false);
     }
+  };
+
+  const handlePaymentSuccess = () => {
+    setRefresh(r => r + 1);
   };
 
   if (loading) return (
@@ -81,6 +89,7 @@ export default function TenantPay() {
           <div>
             <p className="font-semibold">Payment successful!</p>
             <p className="text-sm">Your payment has been confirmed and a receipt has been sent to your email.</p>
+            <Button onClick={() => window.history.replaceState({}, "", "/tenant/pay")} variant="link" className="mt-1 h-auto p-0 text-emerald-700">Dismiss</Button>
           </div>
         </div>
       )}
@@ -120,10 +129,12 @@ export default function TenantPay() {
         </div>
       )}
 
+      {tenant && <PaymentReceipts tenantId={tenant.id} />}
+
       {payments.length > 0 && (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
-            <h2 className="font-semibold text-sm">Recent Payments</h2>
+            <h2 className="font-semibold text-sm">Payment History</h2>
           </div>
           <div className="divide-y divide-border">
             {payments.map(p => (
