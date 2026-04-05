@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import ChatPanel from "../components/assistant/ChatPanel";
 import ResourceLibrary from "../components/assistant/ResourceLibrary";
+import PropertyInsights from "../components/assistant/PropertyInsights";
 
 export default function Assistant() {
   const { user } = useAuth();
@@ -24,23 +25,44 @@ export default function Assistant() {
     });
   }, [user]);
 
+  const [tab, setTab] = useState("chat");
+
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden">
-      {/* Left — Chat */}
-      <div className="flex-1 flex flex-col border-r border-border min-w-0">
-        <div className="px-5 py-3 border-b border-border shrink-0">
-          <h1 className="font-outfit font-bold text-lg">AI Assistant</h1>
-          <p className="text-xs text-muted-foreground">Your property management advisor</p>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <ChatPanel context={context} />
-        </div>
+    <div className="flex flex-col h-[calc(100vh-3.5rem)] overflow-hidden">
+      {/* Tab bar */}
+      <div className="flex border-b border-border shrink-0" style={{ backgroundColor: '#fff' }}>
+        {[{ id: "chat", label: "AI Chat" }, { id: "insights", label: "Portfolio Intelligence ✨" }].map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            style={{
+              padding: "12px 22px", fontSize: 13, fontWeight: 700, border: "none", cursor: "pointer",
+              background: "none", borderBottom: tab === t.id ? "2px solid #7C6FCD" : "2px solid transparent",
+              color: tab === t.id ? "#7C6FCD" : "#6B7280",
+              transition: "all 0.15s",
+            }}
+          >{t.label}</button>
+        ))}
       </div>
 
-      {/* Right — Resource Library */}
-      <div className="w-96 shrink-0 flex flex-col overflow-hidden hidden lg:flex">
-        <ResourceLibrary />
-      </div>
+      {tab === "chat" ? (
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left — Chat */}
+          <div className="flex-1 flex flex-col border-r border-border min-w-0">
+            <div className="flex-1 overflow-hidden">
+              <ChatPanel context={context} />
+            </div>
+          </div>
+          {/* Right — Resource Library */}
+          <div className="w-96 shrink-0 flex flex-col overflow-hidden hidden lg:flex">
+            <ResourceLibrary />
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-hidden">
+          <PropertyInsights />
+        </div>
+      )}
     </div>
   );
 }
