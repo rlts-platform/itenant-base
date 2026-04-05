@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Building2, MapPin, Pencil, Trash2 } from "lucide-react";
+import { Plus, Building2, MapPin, Pencil, Trash2, ChevronRight } from "lucide-react";
+import PropertyProfile from "./PropertyProfile";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,9 @@ export default function Properties() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ address: "", nickname: "", type: "single_family" });
   const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState(null);
+
+  if (selectedId) return <PropertyProfile propertyId={selectedId} onBack={() => setSelectedId(null)} />;
 
   const load = async () => {
     const data = await base44.entities.Property.list("-created_date");
@@ -75,7 +79,10 @@ export default function Properties() {
                       <span className="text-sm">{p.address}</span>
                     </div>
                     {p.type && <span className="mt-2 inline-block text-xs bg-secondary text-secondary-foreground px-2.5 py-0.5 rounded-full capitalize">{p.type.replace(/_/g, " ")}</span>}
-                    <div className="flex gap-2 mt-3">
+      <div className="flex gap-2 mt-3">
+                      <button onClick={() => setSelectedId(p.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors">
+                        View Profile <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
                       <button onClick={() => openEdit(p)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-sm font-medium hover:bg-secondary transition-colors">
                         <Pencil className="w-3.5 h-3.5" /> Edit
                       </button>

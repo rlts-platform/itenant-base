@@ -20,6 +20,68 @@
     },
     "account_id": {
       "type": "string"
+    },
+    "year_built": {
+      "type": "string"
+    },
+    "purchase_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "purchase_price": {
+      "type": "number"
+    },
+    "market_value": {
+      "type": "number"
+    },
+    "state": {
+      "type": "string"
+    },
+    "mortgage_lender": {
+      "type": "string"
+    },
+    "mortgage_balance": {
+      "type": "number"
+    },
+    "mortgage_rate": {
+      "type": "number"
+    },
+    "mortgage_payment": {
+      "type": "number"
+    },
+    "insurance_provider": {
+      "type": "string"
+    },
+    "insurance_premium": {
+      "type": "number"
+    },
+    "insurance_expiry": {
+      "type": "string",
+      "format": "date"
+    },
+    "hoa_name": {
+      "type": "string"
+    },
+    "hoa_monthly_fee": {
+      "type": "number"
+    },
+    "hoa_contact": {
+      "type": "string"
+    },
+    "property_tax_annual": {
+      "type": "number"
+    },
+    "property_tax_due_date": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "photo_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [
