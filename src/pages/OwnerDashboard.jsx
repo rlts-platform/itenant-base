@@ -169,6 +169,36 @@ export default function OwnerDashboard() {
         </div>
       </div>
 
+      {/* Platform Analytics */}
+      <div className="space-y-4">
+        <h2 className="font-semibold">Platform Analytics</h2>
+        {(() => {
+          // Calculate platform-wide metrics
+          const allPayments = accounts.flatMap(a => []);
+          return (
+            <div className="grid lg:grid-cols-2 gap-4">
+              <div className="bg-card border border-border rounded-xl p-5">
+                <h3 className="font-semibold text-sm mb-4">Platform Revenue Trend</h3>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={mrrTrend}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
+                    <Tooltip formatter={v => [fmt(v), "MRR"]} contentStyle={{ borderRadius: 8, fontSize: 12 }} />
+                    <Line type="monotone" dataKey="mrr" stroke="#6366f1" strokeWidth={2.5} dot={{ r: 3 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="bg-card border border-border rounded-xl p-5">
+                <h3 className="font-semibold text-sm mb-4">Total Work Orders ({accounts.length} clients)</h3>
+                <div className="text-3xl font-bold text-primary">{stats.units}</div>
+                <p className="text-xs text-muted-foreground mt-1">Across all client accounts</p>
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
       {/* Clients Table */}
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">

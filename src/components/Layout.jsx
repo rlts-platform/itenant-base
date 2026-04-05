@@ -7,7 +7,7 @@ import MobileBottomBar from "./MobileBottomBar";
 import {
   LayoutDashboard, Building2, Home, Users, FileText, Wrench,
   CreditCard, BarChart3, FolderOpen, MessageSquare, Package,
-  Users2, Zap, Settings, LogOut, Bell, Menu, DollarSign, ShieldCheck, UserCircle, Bot, ClipboardList, FilePlus
+  Users2, Zap, Settings, LogOut, Bell, Menu, DollarSign, ShieldCheck, UserCircle, Bot, ClipboardList, FilePlus, TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +26,7 @@ const clientNav = [
   { label: "Vendors", icon: Package, to: "/vendors", permission: "manage_vendors" },
   { label: "Automations", icon: Zap, to: "/automations", permission: "manage_automations" },
   { label: "Reports", icon: ClipboardList, to: "/reports", permission: "view_financials" },
+  { label: "Analytics", icon: TrendingUp, to: "/analytics", permission: "view_financials" },
   { label: "Assistant", icon: Bot, to: "/assistant", permission: null },
   { label: "Team", icon: Users2, to: "/team", permission: null },
   { label: "Settings", icon: Settings, to: "/settings", permission: null },

@@ -42,6 +42,7 @@ import Applications from './pages/Applications';
 import ApplicationDetail from './pages/ApplicationDetail';
 import LandingPage from './pages/LandingPage';
 import SignaturePage from './pages/SignaturePage';
+import Analytics from './pages/Analytics';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -157,6 +158,7 @@ const AuthenticatedApp = () => {
         <Route path="/team" element={<Team />} />
         <Route path="/assistant" element={<Assistant />} />
         <Route path="/reports" element={<Reports />} />
+        <Route path="/analytics" element={<Analytics />} />
         <Route path="/owner/revenue" element={<OwnerRevenue />} />
         <Route path="/owner/clients" element={<OwnerClients />} />
         <Route path="/applications" element={<Applications />} />

@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Building2, Home, Users, Wrench, DollarSign, AlertTriangle, CheckCircle, Plus, CreditCard } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import AnalyticsPreview from "../components/analytics/AnalyticsPreview";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -243,6 +244,8 @@ export default function ClientDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AnalyticsPreview />
 
       <div className="grid lg:grid-cols-2 gap-6">
         <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.35 }} className="bg-white rounded-2xl border border-border p-5">
