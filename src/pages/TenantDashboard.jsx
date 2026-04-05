@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useFirstName } from "@/hooks/useFirstName";
