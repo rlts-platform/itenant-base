@@ -1,0 +1,32 @@
+{
+  "name": "SavedPaymentMethod",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string"
+    },
+    "nickname": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Bank Transfer",
+        "Card",
+        "Check",
+        "Money Order"
+      ]
+    },
+    "last4": {
+      "type": "string"
+    },
+    "is_default": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "nickname",
+    "type"
+  ]
+}

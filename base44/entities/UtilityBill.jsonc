@@ -1,0 +1,38 @@
+{
+  "name": "UtilityBill",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string"
+    },
+    "utility_type": {
+      "type": "string",
+      "enum": [
+        "Electric",
+        "Gas",
+        "Water",
+        "Internet",
+        "Other"
+      ]
+    },
+    "provider_name": {
+      "type": "string"
+    },
+    "account_number": {
+      "type": "string"
+    },
+    "monthly_amount": {
+      "type": "number"
+    },
+    "due_day": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "utility_type",
+    "provider_name",
+    "monthly_amount",
+    "due_day"
+  ]
+}

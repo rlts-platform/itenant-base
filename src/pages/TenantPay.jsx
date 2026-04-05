@@ -3,6 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { DollarSign, CreditCard, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import BillReminders from "../components/payments/BillReminders";
+import UtilityBillsTracker from "../components/tenant/UtilityBillsTracker";
+import SavedPaymentMethods from "../components/tenant/SavedPaymentMethods";
 import { Button } from "@/components/ui/button";
 
 const isInIframe = () => {
@@ -144,6 +146,10 @@ export default function TenantPay() {
       )}
 
       {tenant && <BillReminders tenantId={tenant.id} />}
+
+      {tenant && <SavedPaymentMethods tenantId={tenant.id} />}
+
+      {tenant && <UtilityBillsTracker tenantId={tenant.id} />}
     </div>
   );
 }
