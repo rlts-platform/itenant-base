@@ -53,7 +53,7 @@ export default function Layout() {
   const location = useLocation();
 
   const handleLogout = async () => {
-    await base44.auth.logout();
+    await base44.auth.logout('/');
   };
 
   useEffect(() => {
@@ -176,16 +176,14 @@ export default function Layout() {
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b px-4 flex items-center justify-between shrink-0" style={{ backgroundColor: '#FFFFFF', borderColor: 'rgba(124,111,205,0.15)' }}>
-          <button className="md:hidden p-2 rounded-lg hover:bg-secondary transition-colors" onClick={() => setMobileOpen(true)}>
+        <header className="h-14 border-b px-4 flex items-center justify-between shrink-0 md:hidden" style={{ backgroundColor: '#FFFFFF', borderColor: 'rgba(124,111,205,0.15)' }}>
+          <button className="p-2 rounded-lg hover:bg-secondary transition-colors" onClick={() => setMobileOpen(true)}>
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex-1" />
-          <div className="flex items-center gap-2">
-            <button className="relative p-2 rounded-xl hover:bg-secondary transition-colors">
-              <Bell className="w-4 h-4" />
-            </button>
-          </div>
+          <button className="relative p-2 rounded-xl hover:bg-secondary transition-colors">
+            <Bell className="w-4 h-4" />
+          </button>
         </header>
 
         <main className="flex-1 overflow-y-auto">
