@@ -3,7 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useFirstName } from "@/hooks/useFirstName";
 import { Link } from "react-router-dom";
-import { DollarSign, Wrench, FileText, MessageSquare, AlertTriangle } from "lucide-react";
+import { DollarSign, Wrench, FileText, MessageSquare, AlertTriangle, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function TenantDashboard() {
   const { user } = useAuth();
@@ -12,6 +13,8 @@ export default function TenantDashboard() {
   const [orders, setOrders] = useState([]);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [emergencyAlerts, setEmergencyAlerts] = useState([]);
+  const [dismissedAlerts, setDismissedAlerts] = useState([]);
 
   useEffect(() => {
     async function load() {
@@ -19,14 +22,27 @@ export default function TenantDashboard() {
       const t = tenants[0];
       setTenant(t);
       if (t) {
-        const [leases, wo, pays] = await Promise.all([
+        const [leases, wo, pays, accounts, broadcasts] = await Promise.all([
           base44.entities.Lease.filter({ tenant_id: t.id }),
           base44.entities.WorkOrder.filter({ tenant_id: t.id }),
           base44.entities.Payment.filter({ tenant_id: t.id }),
+          base44.entities.Account.list(),
+          base44.entities.Broadcast.list(),
         ]);
         setLease(leases.find(l => l.status === "active") || leases[0] || null);
         setOrders(wo.filter(w => w.status !== "closed").slice(0, 3));
         setPayments(pays.slice(0, 3));
+        
+        // Get emergency alerts for this tenant
+        const account = accounts.find(a => a.id === t.account_id);
+        if (account) {
+          const alerts = broadcasts.filter(b =>
+            b.type === "emergency_alert" &&
+            b.sent_at &&
+            (b.recipient_mode === "all_tenants" || b.recipient_tenant_ids?.includes(t.id))
+          );
+          setEmergencyAlerts(alerts.sort((a, b) => new Date(b.sent_at) - new Date(a.sent_at)));
+        }
       }
       setLoading(false);
     }
@@ -39,6 +55,24 @@ export default function TenantDashboard() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
+      {emergencyAlerts.map(alert => (
+        !dismissedAlerts.includes(alert.id) && (
+          <div key={alert.id} className="bg-red-50 border-2 border-red-400 rounded-xl p-4 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-red-700">🚨 Emergency Alert</p>
+              <p className="font-semibold text-sm mt-1 text-red-700">{alert.subject}</p>
+            </div>
+            <button
+              onClick={() => setDismissedAlerts([...dismissedAlerts, alert.id])}
+              className="text-red-600 hover:text-red-700 shrink-0"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )
+      ))}
+
       <div>
         <h1 className="text-2xl font-outfit font-700">Welcome, {firstName}</h1>
         <p className="text-sm text-muted-foreground mt-1">Here's your rental overview</p>

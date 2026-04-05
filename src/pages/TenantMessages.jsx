@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { MessageSquare, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import TenantAnnouncements from "../components/tenant/TenantAnnouncements";
 
 export default function TenantMessages() {
   const { user } = useAuth();
@@ -11,9 +12,19 @@ export default function TenantMessages() {
   const [newMsg, setNewMsg] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [tenant, setTenant] = useState(null);
+  const [account, setAccount] = useState(null);
+  const [activeTab, setActiveTab] = useState("announcements"); // announcements or messages
   const bottomRef = useRef(null);
 
   const load = async () => {
+    const tenants = await base44.entities.Tenant.filter({ email: user?.email });
+    const t = tenants[0];
+    setTenant(t);
+    if (t) {
+      const accounts = await base44.entities.Account.filter({ id: t.account_id });
+      setAccount(accounts[0]);
+    }
     const sent = await base44.entities.Message.filter({ from_user: user?.email });
     const received = await base44.entities.Message.filter({ to_user: user?.email });
     const all = [...sent, ...received].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
@@ -52,6 +63,32 @@ export default function TenantMessages() {
         <p className="text-sm text-muted-foreground mt-1">Communicate with your property manager</p>
       </div>
 
+      <div className="flex gap-1 bg-secondary/50 rounded-lg p-1 w-fit">
+        <button
+          onClick={() => setActiveTab("announcements")}
+          className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
+            activeTab === "announcements" ? "bg-white shadow" : "hover:bg-white/50"
+          }`}
+        >
+          Announcements
+        </button>
+        <button
+          onClick={() => setActiveTab("messages")}
+          className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${
+            activeTab === "messages" ? "bg-white shadow" : "hover:bg-white/50"
+          }`}
+        >
+          Direct Messages
+        </button>
+      </div>
+
+      {activeTab === "announcements" && (
+        <div className="bg-card border border-border rounded-xl p-4">
+          <TenantAnnouncements tenant={tenant} account={account} />
+        </div>
+      )}
+
+      {activeTab === "messages" && (
       <div className="bg-card border border-border rounded-xl flex flex-col" style={{ height: "60vh" }}>
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.length === 0 ? (
@@ -91,6 +128,7 @@ export default function TenantMessages() {
           </Button>
         </div>
       </div>
+      )}
     </div>
   );
 }

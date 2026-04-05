@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useFirstName } from "@/hooks/useFirstName";
-import { Building2, Home, Users, Wrench, DollarSign, AlertTriangle, CheckCircle, Plus, CreditCard } from "lucide-react";
+import { Building2, Home, Users, Wrench, DollarSign, AlertTriangle, CheckCircle, Plus, CreditCard, Megaphone } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import AnalyticsPreview from "../components/analytics/AnalyticsPreview";
+import BroadcastComposer from "../components/messages/BroadcastComposer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +41,7 @@ export default function ClientDashboard() {
   const [overdueCount, setOverdueCount] = useState(0);
   const [overdueAmount, setOverdueAmount] = useState(0);
   const [allTenants, setAllTenants] = useState([]);
+  const [broadcastComposerOpen, setBroadcastComposerOpen] = useState(false);
 
   // Quick action dialogs
   const [woOpen, setWoOpen] = useState(false);
@@ -186,8 +188,17 @@ export default function ClientDashboard() {
             </div>
             <span className="text-sm font-semibold">Record Payment</span>
           </button>
-        </div>
-      </motion.div>
+          <button
+            onClick={() => setBroadcastComposerOpen(true)}
+            className="flex flex-col items-center gap-2 bg-white border border-border rounded-2xl p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+              <Megaphone className="w-6 h-6 text-indigo-600" />
+            </div>
+            <span className="text-sm font-semibold">Broadcast</span>
+          </button>
+          </div>
+          </motion.div>
 
       {/* Work Order Dialog */}
       <Dialog open={woOpen} onOpenChange={setWoOpen}>
@@ -216,6 +227,16 @@ export default function ClientDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Broadcast Composer */}
+      <BroadcastComposer
+        open={broadcastComposerOpen}
+        onClose={() => setBroadcastComposerOpen(false)}
+        tenants={allTenants}
+        properties={[]} // Loaded in useEffect
+        account={null}
+        onSent={() => { setBroadcastComposerOpen(false); }}
+      />
 
       {/* Payment Dialog */}
       <Dialog open={payOpen} onOpenChange={setPayOpen}>
