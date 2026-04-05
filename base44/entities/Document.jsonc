@@ -18,6 +18,12 @@
         "other"
       ]
     },
+    "subcategory": {
+      "type": "string"
+    },
+    "body_text": {
+      "type": "string"
+    },
     "tenant_id": {
       "type": "string"
     },
@@ -29,7 +35,6 @@
     }
   },
   "required": [
-    "file_url",
     "file_name",
     "account_id"
   ]

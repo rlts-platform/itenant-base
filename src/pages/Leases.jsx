@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, FileText, Pencil, Trash2, CheckCircle, Circle } from "lucide-react";
+import { Plus, FileText, Pencil, Trash2, CheckCircle, Circle, Sparkles, RefreshCw } from "lucide-react";
+import LeaseGenerator from "../components/LeaseGenerator";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,8 @@ export default function Leases() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ tenant_id: "", unit_id: "", start_date: "", end_date: "", rent_amount: "", deposit_amount: "", status: "draft", signed_by_tenant: false, signed_by_client: false });
   const [loading, setLoading] = useState(true);
+  const [genOpen, setGenOpen] = useState(false);
+  const [renewData, setRenewData] = useState(null);
 
   const load = async () => {
     const [l, t, u] = await Promise.all([base44.entities.Lease.list("-created_date"), base44.entities.Tenant.list(), base44.entities.Unit.list()]);
@@ -46,7 +49,10 @@ export default function Leases() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div><h1 className="text-2xl font-outfit font-700">Leases</h1><p className="text-sm text-muted-foreground mt-1">{leases.length} leases</p></div>
-        <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />New Lease</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />New Lease</Button>
+          <Button onClick={() => { setRenewData(null); setGenOpen(true); }} className="gap-2"><Sparkles className="w-4 h-4" />Generate Lease</Button>
+        </div>
       </div>
 
       {leases.length === 0 ? (
@@ -82,6 +88,7 @@ export default function Leases() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-primary" title="Renew Lease" onClick={() => { setRenewData(l); setGenOpen(true); }}><RefreshCw className="w-3 h-3" /></Button>
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(l)}><Pencil className="w-3 h-3" /></Button>
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(l.id)}><Trash2 className="w-3 h-3" /></Button>
                     </div>
@@ -92,6 +99,13 @@ export default function Leases() {
           </table>
         </div>
       )}
+
+      <LeaseGenerator
+        open={genOpen}
+        onClose={() => { setGenOpen(false); setRenewData(null); }}
+        onSaved={load}
+        renewData={renewData}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
