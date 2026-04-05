@@ -4,6 +4,20 @@ export default function ModalWrapper({ open, onOpenChange, title, description, c
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPortal>
+        {/* Backdrop Overlay */}
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.75)",
+            zIndex: 999,
+            backdropFilter: "blur(4px)",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) onOpenChange(false);
+          }}
+        />
+        {/* Modal Content Container */}
         <div
           style={{
             position: "fixed",
@@ -14,18 +28,13 @@ export default function ModalWrapper({ open, onOpenChange, title, description, c
             alignItems: "flex-start",
             paddingTop: "5vh",
             paddingBottom: "5vh",
-            zIndex: 999,
-            background: "rgba(0,0,0,0.5)",
-            backdropFilter: "blur(4px)",
+            zIndex: 1000,
+            pointerEvents: "none",
           }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) onOpenChange(false);
-          }}
-        >
+          >
           <div
             style={{
               position: "relative",
-              zIndex: 1000,
               maxHeight: "90vh",
               overflowY: "auto",
               borderRadius: "12px",
@@ -34,6 +43,7 @@ export default function ModalWrapper({ open, onOpenChange, title, description, c
               maxWidth: "500px",
               margin: "0 auto",
               boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              pointerEvents: "auto",
             }}
           >
             {(title || description) && (
