@@ -1,0 +1,83 @@
+{
+  "name": "TeamMember",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "manager",
+        "maintenance",
+        "leasing_agent",
+        "accountant"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "invited",
+        "active"
+      ]
+    },
+    "permissions": {
+      "type": "object",
+      "properties": {
+        "view_properties": {
+          "type": "boolean"
+        },
+        "edit_property_info": {
+          "type": "boolean"
+        },
+        "create_work_orders": {
+          "type": "boolean"
+        },
+        "view_financials": {
+          "type": "boolean"
+        },
+        "record_payments": {
+          "type": "boolean"
+        },
+        "manage_tenants": {
+          "type": "boolean"
+        },
+        "generate_documents": {
+          "type": "boolean"
+        },
+        "access_messages": {
+          "type": "boolean"
+        },
+        "manage_vendors": {
+          "type": "boolean"
+        },
+        "manage_automations": {
+          "type": "boolean"
+        }
+      }
+    },
+    "invite_token": {
+      "type": "string"
+    },
+    "invite_expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "account_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "role",
+    "account_id"
+  ]
+}

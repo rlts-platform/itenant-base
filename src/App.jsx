@@ -29,6 +29,7 @@ import TenantMessages from './pages/TenantMessages';
 import TenantCommunity from './pages/TenantCommunity';
 import TenantProfile from './pages/TenantProfile';
 import InvitePage from './pages/InvitePage';
+import Team from './pages/Team';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -94,6 +95,7 @@ const AuthenticatedApp = () => {
         <Route path="/tenant/community" element={<TenantCommunity />} />
         <Route path="/tenant/profile" element={<TenantProfile />} />
         <Route path="/invite/:token" element={<InvitePage />} />
+        <Route path="/team" element={<Team />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>

@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,19 +11,20 @@ import {
 import { cn } from "@/lib/utils";
 
 const clientNav = [
-  { label: "Dashboard", icon: LayoutDashboard, to: "/" },
-  { label: "Properties", icon: Building2, to: "/properties" },
-  { label: "Units", icon: Home, to: "/units" },
-  { label: "Tenants", icon: Users, to: "/tenants" },
-  { label: "Leases", icon: FileText, to: "/leases" },
-  { label: "Maintenance", icon: Wrench, to: "/maintenance" },
-  { label: "Messages", icon: MessageSquare, to: "/messages" },
-  { label: "Payments", icon: CreditCard, to: "/payments" },
-  { label: "Financials", icon: BarChart3, to: "/financials" },
-  { label: "Documents", icon: FolderOpen, to: "/documents" },
-  { label: "Vendors", icon: Package, to: "/vendors" },
-  { label: "Automations", icon: Zap, to: "/automations" },
-  { label: "Settings", icon: Settings, to: "/settings" },
+  { label: "Dashboard", icon: LayoutDashboard, to: "/", permission: null },
+  { label: "Properties", icon: Building2, to: "/properties", permission: "view_properties" },
+  { label: "Units", icon: Home, to: "/units", permission: "view_properties" },
+  { label: "Tenants", icon: Users, to: "/tenants", permission: "manage_tenants" },
+  { label: "Leases", icon: FileText, to: "/leases", permission: "manage_tenants" },
+  { label: "Maintenance", icon: Wrench, to: "/maintenance", permission: "create_work_orders" },
+  { label: "Messages", icon: MessageSquare, to: "/messages", permission: "access_messages" },
+  { label: "Payments", icon: CreditCard, to: "/payments", permission: "record_payments" },
+  { label: "Financials", icon: BarChart3, to: "/financials", permission: "view_financials" },
+  { label: "Documents", icon: FolderOpen, to: "/documents", permission: "generate_documents" },
+  { label: "Vendors", icon: Package, to: "/vendors", permission: "manage_vendors" },
+  { label: "Automations", icon: Zap, to: "/automations", permission: "manage_automations" },
+  { label: "Team", icon: Users2, to: "/team", permission: null },
+  { label: "Settings", icon: Settings, to: "/settings", permission: null },
 ];
 
 const tenantNav = [
@@ -45,15 +46,33 @@ const ownerNav = [
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [teamMember, setTeamMember] = useState(null);
   const { user } = useAuth();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await base44.auth.logout();
   };
-  const location = useLocation();
+
+  useEffect(() => {
+    if (user?.role === 'team_member') {
+      base44.entities.TeamMember.filter({ email: user.email }).then(members => {
+        if (members[0]) setTeamMember(members[0]);
+      });
+    }
+  }, [user]);
 
   const role = user?.role || "user";
-  const nav = role === "platform_owner" ? ownerNav : location.pathname.startsWith("/tenant") ? tenantNav : clientNav;
+  const permissions = teamMember?.permissions || {};
+  const isTeamMember = role === 'team_member';
+
+  const filteredClientNav = isTeamMember
+    ? clientNav.filter(item => !item.permission || permissions[item.permission])
+    : clientNav;
+
+  const nav = role === "platform_owner" ? ownerNav
+    : location.pathname.startsWith("/tenant") ? tenantNav
+    : filteredClientNav;
 
   const NavLink = ({ item }) => {
     const active = location.pathname === item.to || (item.to !== "/" && location.pathname.startsWith(item.to));
