@@ -23,6 +23,11 @@ import Settings from './pages/Settings';
 import OwnerDashboard from './pages/OwnerDashboard';
 import TenantDashboard from './pages/TenantDashboard';
 import TenantPay from './pages/TenantPay';
+import TenantMaintenance from './pages/TenantMaintenance';
+import TenantDocuments from './pages/TenantDocuments';
+import TenantMessages from './pages/TenantMessages';
+import TenantCommunity from './pages/TenantCommunity';
+import TenantProfile from './pages/TenantProfile';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -82,6 +87,11 @@ const AuthenticatedApp = () => {
         <Route path="/owner" element={<OwnerDashboard />} />
         <Route path="/tenant" element={<TenantDashboard />} />
         <Route path="/tenant/pay" element={<TenantPay />} />
+        <Route path="/tenant/maintenance" element={<TenantMaintenance />} />
+        <Route path="/tenant/documents" element={<TenantDocuments />} />
+        <Route path="/tenant/messages" element={<TenantMessages />} />
+        <Route path="/tenant/community" element={<TenantCommunity />} />
+        <Route path="/tenant/profile" element={<TenantProfile />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>

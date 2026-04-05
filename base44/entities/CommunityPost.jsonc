@@ -1,0 +1,34 @@
+{
+  "name": "CommunityPost",
+  "type": "object",
+  "properties": {
+    "body": {
+      "type": "string"
+    },
+    "author_name": {
+      "type": "string"
+    },
+    "author_email": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    },
+    "likes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pinned": {
+      "type": "boolean"
+    },
+    "image_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "body",
+    "author_email"
+  ]
+}

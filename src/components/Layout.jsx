@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Building2, Home, Users, FileText, Wrench,
   CreditCard, BarChart3, FolderOpen, MessageSquare, Package,
-  Users2, Zap, Settings, LogOut, Bell, Menu, X, DollarSign, ShieldCheck
+  Users2, Zap, Settings, LogOut, Bell, Menu, DollarSign, ShieldCheck, UserCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +32,8 @@ const tenantNav = [
   { label: "Maintenance", icon: Wrench, to: "/tenant/maintenance" },
   { label: "Documents", icon: FolderOpen, to: "/tenant/documents" },
   { label: "Messages", icon: MessageSquare, to: "/tenant/messages" },
-  { label: "Profile", icon: Settings, to: "/tenant/profile" },
+  { label: "Community", icon: Users2, to: "/tenant/community" },
+  { label: "Profile", icon: UserCircle, to: "/tenant/profile" },
 ];
 
 const ownerNav = [
