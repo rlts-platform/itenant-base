@@ -149,8 +149,8 @@ export default function Messages() {
             </>
           )}
         </div>
+        <PropertySelector open={propSelectorOpen} onClose={() => setPropSelectorOpen(false)} onSelect={(prop, unit) => { setSelectedProp(prop); setSelectedUnit(unit); }} />
       </div>
-      <PropertySelector open={propSelectorOpen} onClose={() => setPropSelectorOpen(false)} onSelect={(prop, unit) => { setSelectedProp(prop); setSelectedUnit(unit); }} />
       )}
 
       {activeTab === "broadcasts" && (
