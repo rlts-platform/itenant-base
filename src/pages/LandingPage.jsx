@@ -1,4 +1,3 @@
-import { base44 } from "@/api/base44Client";
 import { useState } from "react";
 import { Zap, Wrench, BarChart3, Bot, CheckCircle2, Building2, Users, CreditCard, FolderOpen, MessageSquare, X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
