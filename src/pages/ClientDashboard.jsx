@@ -101,7 +101,7 @@ export default function ClientDashboard() {
     </div>
   );
 
-  const firstName = user?.full_name?.split(" ")[0] || "there";
+  const firstName = user?.full_name?.split(" ")[0] || appUser?.business_name?.split(" ")[0] || "there";
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
