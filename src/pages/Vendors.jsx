@@ -3,8 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { Plus, Package, Pencil, Trash2, Star, Phone, Mail, MapPin, ShoppingCart } from "lucide-react";
 import FindLocalVendorsPanel from "../components/vendors/FindLocalVendorsPanel";
 import FindSuppliesPanel from "../components/vendors/FindSuppliesPanel";
+import ModalWrapper from "../components/ModalWrapper";
+import FormGrid from "../components/FormGrid";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -42,12 +43,12 @@ export default function Vendors() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="space-y-3">
         <div><h1 className="text-2xl font-outfit font-700">Vendors</h1><p className="text-sm text-muted-foreground mt-1">{vendors.length} vendors</p></div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setSuppliesOpen(true)} className="gap-2"><ShoppingCart className="w-4 h-4" />Find Supplies</Button>
-          <Button variant="outline" onClick={() => setLocalOpen(true)} className="gap-2"><MapPin className="w-4 h-4" />Find Local Vendors</Button>
-          <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Add Vendor</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => setSuppliesOpen(true)} className="gap-2 h-11"><ShoppingCart className="w-4 h-4" /><span className="hidden sm:inline">Find Supplies</span></Button>
+          <Button variant="outline" onClick={() => setLocalOpen(true)} className="gap-2 h-11"><MapPin className="w-4 h-4" /><span className="hidden sm:inline">Find Vendors</span></Button>
+          <Button onClick={openAdd} className="gap-2 h-11 ml-auto"><Plus className="w-4 h-4" /><span className="hidden sm:inline">Add Vendor</span></Button>
         </div>
       </div>
 
@@ -84,9 +85,7 @@ export default function Vendors() {
       <FindLocalVendorsPanel open={localOpen} onClose={() => setLocalOpen(false)} properties={properties} onSaved={load} />
       <FindSuppliesPanel open={suppliesOpen} onClose={() => setSuppliesOpen(false)} />
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>{editing ? "Edit Vendor" : "Add Vendor"}</DialogTitle></DialogHeader>
+      <ModalWrapper open={open} onOpenChange={setOpen} title={editing ? "Edit Vendor" : "Add Vendor"}>
           <div className="space-y-4">
             <div><Label>Name</Label><Input className="mt-1" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
             <div><Label>Category</Label>
@@ -95,18 +94,17 @@ export default function Vendors() {
                 <SelectContent>{CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>Phone</Label><Input className="mt-1" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
-              <div><Label>Email</Label><Input className="mt-1" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
-            </div>
+            <FormGrid>
+              <div><Label>Phone</Label><Input className="mt-1" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="555-1234" /></div>
+              <div><Label>Email</Label><Input type="email" className="mt-1" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="vendor@example.com" /></div>
+            </FormGrid>
             <div><Label>Rating (1–5)</Label><Input type="number" min="1" max="5" className="mt-1" value={form.rating} onChange={e => setForm(f => ({ ...f, rating: e.target.value }))} /></div>
           </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={save}>Save</Button>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setOpen(false)} className="h-11 px-4">Cancel</Button>
+            <Button onClick={save} className="h-11 px-4">Save</Button>
           </div>
-        </DialogContent>
-      </Dialog>
+      </ModalWrapper>
     </div>
   );
 }

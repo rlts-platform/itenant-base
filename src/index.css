@@ -131,6 +131,17 @@
       grid-template-columns: 1fr;
     }
   }
+  /* Modal dropdown selectors — always full width */
+  [role="dialog"] select,
+  [role="dialog"] [class*="SelectTrigger"] {
+    width: 100%;
+  }
+  /* Ensure dropdown menus don't overflow in modals */
+  [role="dialog"] [role="listbox"],
+  [role="dialog"] [data-radix-select-content] {
+    width: 100vw;
+    max-width: calc(100% + 24px);
+  }
   /* Prevent input placeholder truncation */
   input::placeholder,
   textarea::placeholder,
@@ -144,6 +155,10 @@
     textarea,
     select {
       font-size: 16px !important;
+      min-height: 44px !important;
+    }
+    button {
+      min-height: 44px !important;
     }
   }
 }

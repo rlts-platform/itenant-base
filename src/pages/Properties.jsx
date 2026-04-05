@@ -67,15 +67,15 @@ export default function Properties() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="flex items-start justify-between">
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="space-y-3">
         <div>
           <h1 className="text-3xl font-outfit font-800 text-foreground">Properties</h1>
           <p className="text-muted-foreground text-sm mt-1">Manage your rental properties</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {properties.length > 0 && <ExportButton pageName="Properties" onExport={exportProperties} />}
-          <Button onClick={() => setWizardOpen(true)} className="gap-2 rounded-xl shadow-sm">
-            <Plus className="w-4 h-4" />Add Property
+          <Button onClick={() => setWizardOpen(true)} className="gap-2 rounded-xl shadow-sm h-11 ml-auto">
+            <Plus className="w-4 h-4" /><span className="hidden sm:inline">Add Property</span>
           </Button>
         </div>
       </motion.div>
@@ -108,20 +108,20 @@ export default function Properties() {
                       <span className="text-sm">{p.address}</span>
                     </div>
                     {p.type && <span className="mt-2 inline-block text-xs bg-secondary text-secondary-foreground px-2.5 py-0.5 rounded-full capitalize">{p.type.replace(/_/g, " ")}</span>}
-      <div className="flex gap-2 mt-3">
-                      <button onClick={() => setSelectedId(p.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors">
-                        View Profile <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/apply/${p.id}`); alert("Application link copied!"); }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-sm font-medium hover:bg-secondary transition-colors"
-                      >
-                        <Link2 className="w-3.5 h-3.5" /> Copy Link
-                      </button>
-                      <button onClick={() => remove(p.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-sm font-medium text-destructive hover:bg-red-50 transition-colors">
-                        <Trash2 className="w-3.5 h-3.5" /> Delete
-                      </button>
-                    </div>
+      <div className="flex flex-wrap gap-2 mt-3">
+             <button onClick={() => setSelectedId(p.id)} className="flex items-center justify-center gap-1.5 px-3 h-11 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors flex-1 sm:flex-none">
+               View Profile <ChevronRight className="w-3.5 h-3.5 hidden sm:inline" />
+             </button>
+             <button
+               onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/apply/${p.id}`); alert("Application link copied!"); }}
+               className="flex items-center justify-center gap-1.5 px-3 h-11 rounded-lg border border-border text-sm font-medium hover:bg-secondary transition-colors flex-1 sm:flex-none"
+             >
+               <Link2 className="w-3.5 h-3.5" /><span className="hidden sm:inline">Copy Link</span>
+             </button>
+             <button onClick={() => remove(p.id)} className="flex items-center justify-center gap-1.5 px-3 h-11 rounded-lg border border-border text-sm font-medium text-destructive hover:bg-red-50 transition-colors flex-1 sm:flex-none">
+               <Trash2 className="w-3.5 h-3.5" /><span className="hidden sm:inline">Delete</span>
+             </button>
+           </div>
                   </div>
                 </div>
               </motion.div>

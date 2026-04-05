@@ -83,10 +83,10 @@ export default function Messages() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-outfit font-700">Messages</h1>
-        <Button onClick={() => setBroadcastComposerOpen(true)} className="gap-2"><Megaphone className="w-4 h-4" />New Broadcast</Button>
-      </div>
+      <div className="flex items-center justify-between gap-3">
+         <h1 className="text-2xl font-outfit font-700 truncate">Messages</h1>
+         <Button onClick={() => setBroadcastComposerOpen(true)} className="gap-2 h-11 shrink-0"><Megaphone className="w-4 h-4" /><span className="hidden sm:inline">New Broadcast</span></Button>
+       </div>
 
       <div className="flex gap-1 bg-secondary/50 rounded-lg p-1 w-fit">
         <button

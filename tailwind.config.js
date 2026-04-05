@@ -7,6 +7,7 @@ module.exports = {
       "text-emerald-700", "text-red-700", "text-yellow-700", "text-violet-700",
       "bg-emerald-100", "bg-red-100", "bg-yellow-100", "bg-violet-100",
       "text-[#1A1A2E]", "text-[#6B7280]", "text-[#9CA3AF]", "text-[#7C6FCD]", "bg-[#F4F3FF]", "bg-[#FFFFFF]",
+      "h-11", "min-h-[44px]", "px-4", "py-2", "flex-col-reverse", "sm:flex-row",
     ],
   theme: {
   	extend: {
