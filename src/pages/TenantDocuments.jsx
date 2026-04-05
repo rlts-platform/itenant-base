@@ -4,12 +4,19 @@ import { useAuth } from "@/lib/AuthContext";
 import { FolderOpen, FileText, Download, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const CATEGORY_LABELS = {
+const FOLDER_MAP = {
   lease: "Leases",
   receipt: "Receipts",
   notice: "Notices",
   inspection: "Inspections",
   other: "Other",
+};
+
+const AUTO_FOLDER_KEY = (doc) => {
+  if (doc.subcategory?.includes("lease")) return "Leases";
+  if (["notice", "violation", "eviction"].some(w => doc.subcategory?.includes(w))) return "Notices";
+  if (["receipt", "invoice"].some(w => doc.subcategory?.includes(w))) return "Receipts";
+  return "Other";
 };
 
 export default function TenantDocuments() {
@@ -25,16 +32,22 @@ export default function TenantDocuments() {
       const t = tenants[0];
       setTenant(t);
       if (t) {
-        const d = await base44.entities.Document.filter({ tenant_id: t.id });
-        setDocs(d.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
+        const allDocs = await base44.entities.Document.list("-created_date");
+        const shared = allDocs.filter(d => d.shared_with?.includes(t.id));
+        setDocs(shared);
+        if (shared.length > 0) {
+          await base44.entities.Tenant.update(t.id, {
+            unviewed_docs: shared.filter(d => !d.viewed_by_tenants?.includes(t.id)).length
+          });
+        }
       }
       setLoading(false);
     }
     load();
   }, [user]);
 
-  const categories = ["all", ...new Set(docs.map(d => d.category).filter(Boolean))];
-  const filtered = activeCategory === "all" ? docs : docs.filter(d => d.category === activeCategory);
+  const folders = ["all", "Leases", "Notices", "Receipts", "Other"];
+  const filtered = activeCategory === "all" ? docs : docs.filter(d => AUTO_FOLDER_KEY(d) === activeCategory);
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
@@ -47,10 +60,10 @@ export default function TenantDocuments() {
 
       {docs.length > 0 && (
         <div className="flex gap-2 flex-wrap">
-          {categories.map(c => (
-            <button key={c} onClick={() => setActiveCategory(c)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${activeCategory === c ? "bg-primary text-white" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}>
-              {c === "all" ? "All" : (CATEGORY_LABELS[c] || c)}
+          {folders.map(f => (
+            <button key={f} onClick={() => setActiveCategory(f)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${activeCategory === f ? "bg-primary text-white" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}>
+              {f === "all" ? "All Documents" : f}
             </button>
           ))}
         </div>
@@ -71,18 +84,25 @@ export default function TenantDocuments() {
                   <FileText className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{doc.file_name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5 capitalize">
-                    {CATEGORY_LABELS[doc.category] || doc.category} · {new Date(doc.created_date).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {doc.file_url && (
-                    <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="sm" className="gap-1.5 text-xs rounded-lg"><Download className="w-3.5 h-3.5" />Download</Button>
-                    </a>
-                  )}
-                </div>
+                        <p className="font-medium text-sm truncate">{doc.file_name}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {AUTO_FOLDER_KEY(doc)} · Shared {new Date(doc.created_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {doc.file_url && (
+                          <>
+                            <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
+                              <Button variant="outline" size="sm" className="gap-1.5 text-xs rounded-lg"><Download className="w-3.5 h-3.5" />Download</Button>
+                            </a>
+                            <Button variant="outline" size="sm" className="gap-1.5 text-xs rounded-lg" onClick={() => {
+                              const a = document.createElement("a");
+                              a.href = `mailto:${tenant?.email}?subject=Document: ${doc.file_name}&body=Please find the attached document.`;
+                              a.click();
+                            }}><Mail className="w-3.5 h-3.5" />Email to me</Button>
+                          </>
+                        )}
+                      </div>
               </div>
             ))}
           </div>
