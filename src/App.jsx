@@ -33,10 +33,16 @@ import Team from './pages/Team';
 import Assistant from './pages/Assistant';
 import Reports from './pages/Reports';
 import OwnerRevenue from './pages/OwnerRevenue';
+import ApplyPage from './pages/ApplyPage';
+import Applications from './pages/Applications';
+import ApplicationDetail from './pages/ApplicationDetail';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
   const navigate = useNavigate();
+
+  // Public routes — skip auth enforcement
+  if (window.location.pathname.startsWith('/apply/')) return <ApplyPage />;
 
   // Role-based redirect after login
   useEffect(() => {
@@ -102,6 +108,8 @@ const AuthenticatedApp = () => {
         <Route path="/assistant" element={<Assistant />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/owner/revenue" element={<OwnerRevenue />} />
+        <Route path="/applications" element={<Applications />} />
+        <Route path="/apply/:propertyId" element={<ApplyPage />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>

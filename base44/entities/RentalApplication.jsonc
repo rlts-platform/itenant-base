@@ -1,0 +1,127 @@
+{
+  "name": "RentalApplication",
+  "type": "object",
+  "properties": {
+    "property_id": {
+      "type": "string"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "dob": {
+      "type": "string",
+      "format": "date"
+    },
+    "current_address": {
+      "type": "string"
+    },
+    "time_at_current": {
+      "type": "string"
+    },
+    "previous_address": {
+      "type": "string"
+    },
+    "employer_name": {
+      "type": "string"
+    },
+    "job_title": {
+      "type": "string"
+    },
+    "employment_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "monthly_income": {
+      "type": "number"
+    },
+    "supervisor_name": {
+      "type": "string"
+    },
+    "supervisor_phone": {
+      "type": "string"
+    },
+    "pay_stub_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "other_income": {
+      "type": "number"
+    },
+    "prev_landlord_name": {
+      "type": "string"
+    },
+    "prev_landlord_phone": {
+      "type": "string"
+    },
+    "ref1_name": {
+      "type": "string"
+    },
+    "ref1_phone": {
+      "type": "string"
+    },
+    "ref1_relationship": {
+      "type": "string"
+    },
+    "ref2_name": {
+      "type": "string"
+    },
+    "ref2_phone": {
+      "type": "string"
+    },
+    "ref2_relationship": {
+      "type": "string"
+    },
+    "gov_id_url": {
+      "type": "string"
+    },
+    "has_pets": {
+      "type": "boolean"
+    },
+    "pets": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "vehicles": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "consent": {
+      "type": "boolean"
+    },
+    "signature": {
+      "type": "string"
+    },
+    "signature_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "income_to_rent_ratio": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "under_review",
+        "approved",
+        "denied"
+      ]
+    },
+    "email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "property_id",
+    "full_name",
+    "email",
+    "consent",
+    "gov_id_url"
+  ]
+}

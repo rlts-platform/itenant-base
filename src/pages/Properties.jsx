@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Building2, MapPin, Pencil, Trash2, ChevronRight } from "lucide-react";
+import { Plus, Building2, MapPin, Pencil, Trash2, ChevronRight, Link2 } from "lucide-react";
 import PropertyProfile from "./PropertyProfile";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -85,6 +85,12 @@ export default function Properties() {
                       </button>
                       <button onClick={() => openEdit(p)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-sm font-medium hover:bg-secondary transition-colors">
                         <Pencil className="w-3.5 h-3.5" /> Edit
+                      </button>
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/apply/${p.id}`); alert("Application link copied!"); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-sm font-medium hover:bg-secondary transition-colors"
+                      >
+                        <Link2 className="w-3.5 h-3.5" /> Copy Link
                       </button>
                       <button onClick={() => remove(p.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-sm font-medium text-destructive hover:bg-red-50 transition-colors">
                         <Trash2 className="w-3.5 h-3.5" /> Delete

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Building2, Home, Users, FileText, Wrench,
   CreditCard, BarChart3, FolderOpen, MessageSquare, Package,
-  Users2, Zap, Settings, LogOut, Bell, Menu, DollarSign, ShieldCheck, UserCircle, Bot, ClipboardList
+  Users2, Zap, Settings, LogOut, Bell, Menu, DollarSign, ShieldCheck, UserCircle, Bot, ClipboardList, FilePlus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,7 @@ const clientNav = [
   { label: "Properties", icon: Building2, to: "/properties", permission: "view_properties" },
   { label: "Units", icon: Home, to: "/units", permission: "view_properties" },
   { label: "Tenants", icon: Users, to: "/tenants", permission: "manage_tenants" },
+  { label: "Applications", icon: FilePlus, to: "/applications", permission: "manage_tenants" },
   { label: "Leases", icon: FileText, to: "/leases", permission: "manage_tenants" },
   { label: "Maintenance", icon: Wrench, to: "/maintenance", permission: "create_work_orders" },
   { label: "Messages", icon: MessageSquare, to: "/messages", permission: "access_messages" },
