@@ -89,7 +89,7 @@ export default function AllTenantsTab({ tenants, units, properties, leases, paym
         </Select>
       </div>
 
-      <div className="bg-[hsl(var(--card))] rounded-xl border border-border overflow-hidden">
+      <div className="bg-[hsl(var(--background-hsl))] rounded-xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
