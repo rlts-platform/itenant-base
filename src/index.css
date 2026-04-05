@@ -120,6 +120,32 @@
     outline: none;
     box-shadow: 0 0 0 2px rgba(124,111,205,0.15) !important;
   }
+  /* Responsive form grids */
+  .form-grid-2col {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 768px) {
+    .form-grid-2col {
+      grid-template-columns: 1fr;
+    }
+  }
+  /* Prevent input placeholder truncation */
+  input::placeholder,
+  textarea::placeholder,
+  select::placeholder {
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  @media (max-width: 768px) {
+    input,
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
 }
 
 /* Dark mode support */

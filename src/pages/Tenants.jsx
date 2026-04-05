@@ -6,6 +6,7 @@ import ExportButton from "../components/ExportButton";
 import { formatDate, formatCurrency } from "@/lib/csvExport";
 import TenantDetail from "./TenantDetail";
 import ModalWrapper from "@/components/ModalWrapper";
+import FormGrid from "@/components/FormGrid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -220,10 +221,10 @@ export default function Tenants() {
       {/* Add/Edit Tenant Dialog */}
       <ModalWrapper open={open} onOpenChange={setOpen} title={editing ? "Edit Tenant" : "Add Tenant"}>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>First Name</Label><Input className="mt-1" value={form.first_name} onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} /></div>
-              <div><Label>Last Name</Label><Input className="mt-1" value={form.last_name} onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))} /></div>
-            </div>
+            <FormGrid>
+              <div><Label>First Name</Label><Input className="mt-1" value={form.first_name} onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} placeholder="John" /></div>
+              <div><Label>Last Name</Label><Input className="mt-1" value={form.last_name} onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))} placeholder="Doe" /></div>
+            </FormGrid>
             <div><Label>Email</Label><Input className="mt-1" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} /></div>
             <div><Label>Phone</Label><Input className="mt-1" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} /></div>
             <div><Label>Unit</Label>

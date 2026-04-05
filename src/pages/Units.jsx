@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Plus, Home, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ModalWrapper from "@/components/ModalWrapper";
+import FormGrid from "@/components/FormGrid";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -84,26 +85,32 @@ export default function Units() {
       )}
 
       <ModalWrapper open={open} onOpenChange={setOpen} title={editing ? "Edit Unit" : "Add Unit"}>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2"><Label>Property</Label>
+          <div className="space-y-4">
+            <div><Label>Property</Label>
               <Select value={form.property_id} onValueChange={v => setForm(f => ({ ...f, property_id: v }))}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="Select property" /></SelectTrigger>
                 <SelectContent>{properties.map(p => <SelectItem key={p.id} value={p.id}>{p.nickname || p.address}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div><Label>Unit Number</Label><Input className="mt-1" value={form.unit_number} onChange={e => setForm(f => ({ ...f, unit_number: e.target.value }))} /></div>
-            <div><Label>Status</Label>
-              <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v }))}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="vacant">Vacant</SelectItem><SelectItem value="occupied">Occupied</SelectItem></SelectContent>
-              </Select>
-            </div>
-            <div><Label>Bedrooms</Label><Input type="number" className="mt-1" value={form.bedrooms} onChange={e => setForm(f => ({ ...f, bedrooms: e.target.value }))} /></div>
-            <div><Label>Bathrooms</Label><Input type="number" className="mt-1" value={form.bathrooms} onChange={e => setForm(f => ({ ...f, bathrooms: e.target.value }))} /></div>
-            <div><Label>Sq Ft</Label><Input type="number" className="mt-1" value={form.sqft} onChange={e => setForm(f => ({ ...f, sqft: e.target.value }))} /></div>
-            <div><Label>Rent Amount</Label><Input type="number" className="mt-1" value={form.rent_amount} onChange={e => setForm(f => ({ ...f, rent_amount: e.target.value }))} /></div>
-            <div><Label>Deposit Amount</Label><Input type="number" className="mt-1" value={form.deposit_amount} onChange={e => setForm(f => ({ ...f, deposit_amount: e.target.value }))} /></div>
-            <div className="col-span-2 flex items-center gap-3">
+            <FormGrid>
+              <div><Label>Unit Number</Label><Input className="mt-1" value={form.unit_number} onChange={e => setForm(f => ({ ...f, unit_number: e.target.value }))} placeholder="A101" /></div>
+              <div><Label>Status</Label>
+                <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="vacant">Vacant</SelectItem><SelectItem value="occupied">Occupied</SelectItem></SelectContent>
+                </Select>
+              </div>
+            </FormGrid>
+            <FormGrid>
+              <div><Label>Bedrooms</Label><Input type="number" className="mt-1" value={form.bedrooms} onChange={e => setForm(f => ({ ...f, bedrooms: e.target.value }))} placeholder="2" /></div>
+              <div><Label>Bathrooms</Label><Input type="number" className="mt-1" value={form.bathrooms} onChange={e => setForm(f => ({ ...f, bathrooms: e.target.value }))} placeholder="1" /></div>
+            </FormGrid>
+            <FormGrid>
+              <div><Label>Sq Ft</Label><Input type="number" className="mt-1" value={form.sqft} onChange={e => setForm(f => ({ ...f, sqft: e.target.value }))} placeholder="1200" /></div>
+              <div><Label>Rent Amount</Label><Input type="number" className="mt-1" value={form.rent_amount} onChange={e => setForm(f => ({ ...f, rent_amount: e.target.value }))} placeholder="2500" /></div>
+            </FormGrid>
+            <div><Label>Deposit Amount</Label><Input type="number" className="mt-1" value={form.deposit_amount} onChange={e => setForm(f => ({ ...f, deposit_amount: e.target.value }))} placeholder="2500" /></div>
+            <div className="flex items-center gap-3">
               <Switch checked={form.pet_friendly} onCheckedChange={v => setForm(f => ({ ...f, pet_friendly: v }))} />
               <Label>Pet Friendly</Label>
             </div>

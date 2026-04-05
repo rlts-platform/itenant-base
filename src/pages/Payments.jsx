@@ -6,6 +6,7 @@ import ExportButton from "../components/ExportButton";
 import { formatDate, formatCurrency } from "@/lib/csvExport";
 import ActivityLogHistory from "../components/ActivityLogHistory";
 import ModalWrapper from "@/components/ModalWrapper";
+import FormGrid from "@/components/FormGrid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -248,9 +249,11 @@ export default function Payments() {
             {/* Part 1 */}
             <div className="space-y-3 border border-border rounded-lg p-3">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{form.is_split ? "Part 1" : "Payment Details"}</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Amount ($)</Label><Input type="number" className="mt-1" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} /></div>
-                <div><Label>Payment Delivery Date</Label><Input type="date" className="mt-1" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} /></div>
+              <FormGrid>
+                <div><Label>Amount ($)</Label><Input type="number" className="mt-1" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} placeholder="0.00" /></div>
+                <div><Label>Payment Date</Label><Input type="date" className="mt-1" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} /></div>
+              </FormGrid>
+              <FormGrid>
                 <div><Label>Method</Label>
                   <Select value={form.method} onValueChange={v => setForm(f => ({ ...f, method: v }))}>
                     <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
@@ -263,7 +266,7 @@ export default function Payments() {
                     <SelectContent>{["pending","confirmed","failed"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-              </div>
+              </FormGrid>
               <div><Label>Check Number</Label><Input className="mt-1" value={form.check_number} onChange={e => setForm(f => ({ ...f, check_number: e.target.value }))} /></div>
               <div>
                 <Label>Proof Photo (permanent — cannot be deleted)</Label>
@@ -280,15 +283,15 @@ export default function Payments() {
             {form.is_split && (
               <div className="space-y-3 border border-primary/30 bg-primary/5 rounded-lg p-3">
                 <p className="text-xs font-semibold text-primary uppercase tracking-wide">Part 2</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div><Label>Amount ($)</Label><Input type="number" className="mt-1" value={form.split_amount_2} onChange={e => setForm(f => ({ ...f, split_amount_2: e.target.value }))} /></div>
+                <FormGrid>
+                  <div><Label>Amount ($)</Label><Input type="number" className="mt-1" value={form.split_amount_2} onChange={e => setForm(f => ({ ...f, split_amount_2: e.target.value }))} placeholder="0.00" /></div>
                   <div><Label>Method</Label>
                     <Select value={form.split_method_2} onValueChange={v => setForm(f => ({ ...f, split_method_2: v }))}>
                       <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                       <SelectContent>{METHODS.map(m => <SelectItem key={m} value={m}>{m.replace("_"," ")}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
-                </div>
+                </FormGrid>
                 <div>
                   <Label>Proof Photo</Label>
                   <label className="mt-1 flex items-center gap-2 cursor-pointer border border-dashed border-border rounded-lg px-4 py-2.5 hover:bg-secondary/50 transition-colors">

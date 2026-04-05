@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import ModalWrapper from "@/components/ModalWrapper";
+import FormGrid from "@/components/FormGrid";
 import { Wrench, Plus, AlertTriangle, Clock, CheckCircle, X, Upload, Loader2, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -187,19 +188,21 @@ Normal: cosmetic, minor repairs, slow drains.`,
       {/* Submit Dialog */}
       <ModalWrapper open={open} onOpenChange={setOpen} title="Submit Maintenance Request">
           <div className="space-y-4">
-            <div><Label>Issue Title</Label><Input className="mt-1" value={form.summary} onChange={e => setForm(f => ({ ...f, summary: e.target.value }))} placeholder="e.g. Kitchen faucet is leaking" /></div>
-            <div><Label>Category</Label>
-              <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>{CATEGORIES.map(c => <SelectItem key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div><Label>Urgency</Label>
-              <Select value={form.urgency} onValueChange={v => setForm(f => ({ ...f, urgency: v }))}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>{URGENCIES.map(u => <SelectItem key={u} value={u}>{u.charAt(0).toUpperCase() + u.slice(1)}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
+            <div><Label>Issue Title</Label><Input className="mt-1" value={form.summary} onChange={e => setForm(f => ({ ...f, summary: e.target.value }))} placeholder="Kitchen faucet leaking" /></div>
+            <FormGrid>
+              <div><Label>Category</Label>
+                <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>{CATEGORIES.map(c => <SelectItem key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div><Label>Urgency</Label>
+                <Select value={form.urgency} onValueChange={v => setForm(f => ({ ...f, urgency: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>{URGENCIES.map(u => <SelectItem key={u} value={u}>{u.charAt(0).toUpperCase() + u.slice(1)}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </FormGrid>
             <div><Label>Description</Label><Textarea className="mt-1" rows={4} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe the issue in detail..." /></div>
             <div>
               <Label>Photos (optional)</Label>
