@@ -5,6 +5,9 @@
     "summary": {
       "type": "string"
     },
+    "description": {
+      "type": "string"
+    },
     "category": {
       "type": "string",
       "enum": [
@@ -53,6 +56,15 @@
     },
     "account_id": {
       "type": "string"
+    },
+    "photo_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ai_emergency": {
+      "type": "boolean"
     }
   },
   "required": [

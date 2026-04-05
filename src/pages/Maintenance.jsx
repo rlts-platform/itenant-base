@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Wrench, AlertTriangle, Pencil, Trash2, ShoppingCart } from "lucide-react";
+import { Plus, Wrench, AlertTriangle, Pencil, Trash2, ShoppingCart, Loader2, Flame } from "lucide-react";
 import FindSuppliesPanel from "../components/vendors/FindSuppliesPanel";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -27,6 +27,29 @@ export default function Maintenance() {
   const [loading, setLoading] = useState(true);
   const [suppliesOpen, setSuppliesOpen] = useState(false);
   const [suppliesPrefill, setSuppliesPrefill] = useState("");
+  const [triaging, setTriaging] = useState(false);
+
+  const runAITriage = async (summary, description) => {
+    const text = `${summary} ${description || ""}`.trim();
+    if (!text) return null;
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `Analyze this maintenance request: "${text}"
+
+Return urgency (one of: normal, urgent, emergency) and category (one of: plumbing, electrical, hvac, appliance, pest, structural, other).
+Emergency keywords: fire, flood, gas leak, no heat, sewage, security breach.
+Urgent: active leaks, broken locks, no hot water, broken AC.
+Normal: cosmetic, minor repairs.`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          urgency: { type: "string" },
+          category: { type: "string" },
+          is_emergency: { type: "boolean" }
+        }
+      }
+    });
+    return result;
+  };
 
   const openSupplies = (summary = "") => { setSuppliesPrefill(summary); setSuppliesOpen(true); };
 
@@ -41,8 +64,19 @@ export default function Maintenance() {
 
   const save = async () => {
     const data = { ...form, cost: form.cost ? Number(form.cost) : undefined };
-    if (editing) await base44.entities.WorkOrder.update(editing.id, data);
-    else await base44.entities.WorkOrder.create(data);
+    if (editing) {
+      await base44.entities.WorkOrder.update(editing.id, data);
+    } else {
+      setTriaging(true);
+      const triage = await runAITriage(form.summary, form.description);
+      setTriaging(false);
+      if (triage) {
+        data.urgency = triage.urgency || data.urgency;
+        data.category = triage.category || data.category;
+        data.ai_emergency = triage.is_emergency || false;
+      }
+      await base44.entities.WorkOrder.create(data);
+    }
     setOpen(false); load();
   };
   const remove = async (id) => { await base44.entities.WorkOrder.delete(id); load(); };
@@ -70,6 +104,19 @@ export default function Maintenance() {
         ))}
       </div>
 
+      {/* Emergency banner */}
+      {filtered.some(o => o.ai_emergency && o.status !== "closed") && (
+        <div className="flex items-start gap-3 bg-red-50 border border-red-300 rounded-xl px-4 py-3">
+          <Flame className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-red-700">Emergency Alert</p>
+            <p className="text-xs text-red-600 mt-0.5">
+              {filtered.filter(o => o.ai_emergency && o.status !== "closed").map(o => o.summary).join(" · ")}
+            </p>
+          </div>
+        </div>
+      )}
+
       {filtered.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-16 text-center">
           <Wrench className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
@@ -85,16 +132,26 @@ export default function Maintenance() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
+                  {o.ai_emergency && o.status !== "closed" && <Flame className="w-4 h-4 text-red-600 shrink-0" />}
                   <h3 className="font-semibold text-sm">{o.summary}</h3>
                   <Badge variant={URGENCY_COLOR[o.urgency]}>{o.urgency}</Badge>
                   <Badge variant={STATUS_COLOR[o.status]}>{o.status?.replace("_"," ")}</Badge>
                   <span className="text-xs bg-secondary px-2 py-0.5 rounded-full">{o.category}</span>
                 </div>
                 <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
-                  <span>Tenant: {tenantName(o.tenant_id)}</span>
-                  {o.cost && <span>Cost: ${o.cost}</span>}
-                  {o.permission_to_enter && <span>✓ Entry permitted</span>}
+                   <span>Tenant: {tenantName(o.tenant_id)}</span>
+                   {o.cost && <span>Cost: ${o.cost}</span>}
+                   {o.permission_to_enter && <span>✓ Entry permitted</span>}
                 </div>
+                {o.photo_urls?.length > 0 && (
+                  <div className="flex gap-1.5 mt-2 flex-wrap">
+                    {o.photo_urls.map((url, i) => (
+                      <a key={i} href={url} target="_blank" rel="noreferrer">
+                        <img src={url} className="w-12 h-12 object-cover rounded-md border border-border hover:opacity-80 transition-opacity" />
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="flex gap-1 shrink-0">
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" title="Find Supplies" onClick={() => openSupplies(o.summary)}><ShoppingCart className="w-3.5 h-3.5" /></Button>
@@ -112,6 +169,7 @@ export default function Maintenance() {
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editing ? "Edit Work Order" : "New Work Order"}</DialogTitle></DialogHeader>
           <div className="space-y-4">
+            {triaging && <div className="flex items-center gap-2 text-sm text-primary"><Loader2 className="w-4 h-4 animate-spin" />AI is triaging this request…</div>}
             <div><Label>Summary</Label><Textarea className="mt-1" value={form.summary} onChange={e => setForm(f => ({ ...f, summary: e.target.value }))} /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Category</Label>

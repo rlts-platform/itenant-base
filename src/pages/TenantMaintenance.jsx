@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Wrench, Plus, AlertTriangle, Clock, CheckCircle, X } from "lucide-react";
+import { Wrench, Plus, AlertTriangle, Clock, CheckCircle, X, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,40 @@ export default function TenantMaintenance() {
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState({ summary: "", category: "plumbing", urgency: "normal", description: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [photoUrls, setPhotoUrls] = useState([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [triaging, setTriaging] = useState(false);
+
+  const handlePhotoUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setUploadingPhotos(true);
+    const urls = await Promise.all(files.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => r.file_url)));
+    setPhotoUrls(prev => [...prev, ...urls]);
+    setUploadingPhotos(false);
+  };
+
+  const runAITriage = async (summary, description) => {
+    const text = `${summary} ${description}`.trim();
+    if (!text) return null;
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `Analyze this maintenance request and classify it. Text: "${text}"
+
+Return urgency (one of: normal, urgent, emergency) and category (one of: plumbing, electrical, hvac, appliance, pest, structural, other).
+Emergency examples: fire, flood, gas leak, no heat in winter, sewage backup, security breach, major electrical failure.
+Urgent: active leaks, broken locks, no hot water, broken AC in summer.
+Normal: cosmetic, minor repairs, slow drains.`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          urgency: { type: "string" },
+          category: { type: "string" },
+          is_emergency: { type: "boolean" }
+        }
+      }
+    });
+    return result;
+  };
 
   useEffect(() => {
     async function load() {
@@ -50,13 +84,25 @@ export default function TenantMaintenance() {
 
   const submit = async () => {
     setSubmitting(true);
-    await base44.entities.WorkOrder.create({
-      ...form,
+    setTriaging(true);
+    // AI triage
+    const triage = await runAITriage(form.summary, form.description);
+    setTriaging(false);
+    const urgency = triage?.urgency || form.urgency;
+    const category = triage?.category || form.category;
+    const created = await base44.entities.WorkOrder.create({
+      summary: form.summary,
+      description: form.description,
+      category,
+      urgency,
+      ai_emergency: triage?.is_emergency || false,
       tenant_id: tenant?.id,
+      photo_urls: photoUrls,
       status: "new",
     });
     setOpen(false);
     setForm({ summary: "", category: "plumbing", urgency: "normal", description: "" });
+    setPhotoUrls([]);
     const wo = await base44.entities.WorkOrder.filter({ tenant_id: tenant?.id });
     setOrders(wo.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
     setSubmitting(false);
@@ -123,6 +169,25 @@ export default function TenantMaintenance() {
               </Select>
             </div>
             <div><Label>Description</Label><Textarea className="mt-1" rows={4} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe the issue in detail..." /></div>
+            <div>
+              <Label>Photos (optional)</Label>
+              <label className="mt-1 flex items-center gap-2 cursor-pointer border border-dashed border-border rounded-lg px-4 py-3 hover:bg-secondary/50 transition-colors">
+                <Upload className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">{uploadingPhotos ? "Uploading…" : "Click to upload photos"}</span>
+                <input type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} />
+              </label>
+              {photoUrls.length > 0 && (
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  {photoUrls.map((url, i) => (
+                    <div key={i} className="relative">
+                      <img src={url} className="w-16 h-16 object-cover rounded-lg border border-border" />
+                      <button type="button" onClick={() => setPhotoUrls(p => p.filter((_, j) => j !== i))} className="absolute -top-1.5 -right-1.5 bg-destructive text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {triaging && <div className="flex items-center gap-2 text-sm text-primary"><Loader2 className="w-4 h-4 animate-spin" />AI is analyzing your request…</div>}
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
@@ -137,12 +202,30 @@ export default function TenantMaintenance() {
           <DialogHeader><DialogTitle>Request Details</DialogTitle></DialogHeader>
           {selected && (
             <div className="space-y-3">
+              {selected.ai_emergency && (
+                <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-sm font-medium">
+                  <AlertTriangle className="w-4 h-4 shrink-0" /> Emergency — your property manager has been alerted.
+                </div>
+              )}
               <div><p className="text-xs text-muted-foreground">Issue</p><p className="font-semibold">{selected.summary}</p></div>
+              {selected.description && <div><p className="text-xs text-muted-foreground">Description</p><p className="text-sm">{selected.description}</p></div>}
               <div className="flex gap-4">
                 <div><p className="text-xs text-muted-foreground">Category</p><p className="text-sm capitalize">{selected.category}</p></div>
                 <div><p className="text-xs text-muted-foreground">Urgency</p><p className="text-sm capitalize">{selected.urgency}</p></div>
                 <div><p className="text-xs text-muted-foreground">Status</p><p className="text-sm capitalize">{selected.status?.replace("_", " ")}</p></div>
               </div>
+              {selected.photo_urls?.length > 0 && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1.5">Photos</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {selected.photo_urls.map((url, i) => (
+                      <a key={i} href={url} target="_blank" rel="noreferrer">
+                        <img src={url} className="w-20 h-20 object-cover rounded-lg border border-border hover:opacity-80 transition-opacity" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div><p className="text-xs text-muted-foreground">Submitted</p><p className="text-sm">{new Date(selected.created_date).toLocaleString()}</p></div>
             </div>
           )}
