@@ -5,7 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save } from "lucide-react";
+import { Save, Plug, Bell, CreditCard, User } from "lucide-react";
+import IntegrationsTab from "../components/settings/IntegrationsTab";
+import NotificationsTab from "../components/settings/NotificationsTab";
+import BillingTab from "../components/settings/BillingTab";
+
+const TABS = [
+  { id: "account",       label: "Account",       icon: User },
+  { id: "integrations",  label: "Integrations",  icon: Plug },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "billing",       label: "Billing",       icon: CreditCard },
+];
 
 export default function Settings() {
   const { user } = useAuth();
@@ -13,51 +23,93 @@ export default function Settings() {
   const [form, setForm] = useState({ company_name: "", plan_tier: "starter", subscription_status: "active" });
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("account");
 
-  useEffect(() => {
-    base44.entities.Account.filter({ owner_email: user?.email }).then(accounts => {
-      if (accounts[0]) { setAccount(accounts[0]); setForm({ company_name: accounts[0].company_name || "", plan_tier: accounts[0].plan_tier || "starter", subscription_status: accounts[0].subscription_status || "active" }); }
-      setLoading(false);
-    });
-  }, [user]);
+  const load = async () => {
+    const accounts = await base44.entities.Account.filter({ owner_email: user?.email });
+    if (accounts[0]) {
+      setAccount(accounts[0]);
+      setForm({ company_name: accounts[0].company_name || "", plan_tier: accounts[0].plan_tier || "starter", subscription_status: accounts[0].subscription_status || "active" });
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, [user]);
 
   const save = async () => {
     if (account) await base44.entities.Account.update(account.id, { ...form, owner_email: user?.email });
-    else await base44.entities.Account.create({ ...form, owner_email: user?.email });
+    else { const a = await base44.entities.Account.create({ ...form, owner_email: user?.email }); setAccount(a); }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+    load();
   };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
-      <div><h1 className="text-2xl font-outfit font-700">Settings</h1><p className="text-sm text-muted-foreground mt-1">Manage your account settings</p></div>
+    <div className="p-6 max-w-3xl mx-auto space-y-6">
+      <div><h1 className="text-2xl font-outfit font-bold">Settings</h1><p className="text-sm text-muted-foreground mt-1">Manage your account, integrations, and preferences</p></div>
 
-      <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-        <h2 className="font-semibold">Account Info</h2>
-        <div><Label>Company Name</Label><Input className="mt-1" value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} /></div>
-        <div><Label>Plan</Label>
-          <Select value={form.plan_tier} onValueChange={v => setForm(f => ({ ...f, plan_tier: v }))}>
-            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-            <SelectContent>{["starter","growth","pro","enterprise"].map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-          </Select>
-        </div>
-        <div><Label>Subscription Status</Label>
-          <Select value={form.subscription_status} onValueChange={v => setForm(f => ({ ...f, subscription_status: v }))}>
-            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-            <SelectContent>{["active","trialing","past_due","canceled"].map(s => <SelectItem key={s} value={s}>{s.replace("_"," ")}</SelectItem>)}</SelectContent>
-          </Select>
-        </div>
-        <Button onClick={save} className="gap-2"><Save className="w-4 h-4" />{saved ? "Saved!" : "Save Changes"}</Button>
+      {/* Tab bar */}
+      <div className="flex gap-1 bg-secondary/50 rounded-xl p-1 w-fit flex-wrap">
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.id ? "bg-white shadow text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <t.icon className="w-3.5 h-3.5" /> {t.label}
+          </button>
+        ))}
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-6 space-y-2">
-        <h2 className="font-semibold">Your Profile</h2>
-        <p className="text-sm text-muted-foreground">Name: {user?.full_name}</p>
-        <p className="text-sm text-muted-foreground">Email: {user?.email}</p>
-        <p className="text-sm text-muted-foreground">Role: {user?.role}</p>
-      </div>
+      {/* Account tab */}
+      {tab === "account" && (
+        <div className="space-y-4">
+          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+            <h2 className="font-semibold">Account Info</h2>
+            <div><Label>Company Name</Label><Input className="mt-1" value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} /></div>
+            <div><Label>Plan</Label>
+              <Select value={form.plan_tier} onValueChange={v => setForm(f => ({ ...f, plan_tier: v }))}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>{["starter","growth","pro","enterprise"].map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div><Label>Subscription Status</Label>
+              <Select value={form.subscription_status} onValueChange={v => setForm(f => ({ ...f, subscription_status: v }))}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>{["active","trialing","past_due","canceled"].map(s => <SelectItem key={s} value={s}>{s.replace("_"," ")}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <Button onClick={save} className="gap-2"><Save className="w-4 h-4" />{saved ? "Saved!" : "Save Changes"}</Button>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-6 space-y-2">
+            <h2 className="font-semibold">Your Profile</h2>
+            <p className="text-sm text-muted-foreground">Name: {user?.full_name}</p>
+            <p className="text-sm text-muted-foreground">Email: {user?.email}</p>
+            <p className="text-sm text-muted-foreground">Role: {user?.role}</p>
+          </div>
+        </div>
+      )}
+
+      {tab === "integrations" && account && (
+        <IntegrationsTab account={account} onSaved={load} />
+      )}
+      {tab === "integrations" && !account && (
+        <div className="bg-card border border-border rounded-xl p-10 text-center text-sm text-muted-foreground">Save your account info first to configure integrations.</div>
+      )}
+
+      {tab === "notifications" && account && (
+        <NotificationsTab account={account} onSaved={load} />
+      )}
+      {tab === "notifications" && !account && (
+        <div className="bg-card border border-border rounded-xl p-10 text-center text-sm text-muted-foreground">Save your account info first to configure notifications.</div>
+      )}
+
+      {tab === "billing" && (
+        <BillingTab account={account} />
+      )}
     </div>
   );
 }

@@ -28,6 +28,24 @@
     },
     "owner_email": {
       "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "twilio_sid": {
+      "type": "string"
+    },
+    "twilio_token": {
+      "type": "string"
+    },
+    "twilio_phone": {
+      "type": "string"
+    },
+    "resend_key": {
+      "type": "string"
+    },
+    "notification_prefs": {
+      "type": "string"
     }
   },
   "required": [
