@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { ClipboardList, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import ShareApplicationLink from "../components/ShareApplicationLink";
 import ApplicationDetail from "./ApplicationDetail";
 
 const STATUS_COLOR = { new: "outline", under_review: "secondary", approved: "default", denied: "destructive" };
@@ -38,45 +39,55 @@ export default function Applications() {
       </div>
 
       {apps.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl p-16 text-center">
-          <ClipboardList className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-          <p className="font-semibold">No applications yet</p>
-          <p className="text-sm text-muted-foreground mt-1">Share your property application link to start receiving applications.</p>
+        <div className="bg-card border border-border rounded-xl p-12 text-center space-y-6">
+          <div>
+            <ClipboardList className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="font-semibold">No applications yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Share your property application link to start receiving applications.</p>
+          </div>
+          <div className="flex justify-center">
+            <ShareApplicationLink propertyId={properties[0]?.id} propertyName={properties[0]?.nickname || properties[0]?.address} />
+          </div>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-secondary/50 text-muted-foreground text-xs">
-              <tr>
-                {["Applicant", "Property", "Submitted", "Income-to-Rent", "Status", ""].map(h => (
-                  <th key={h} className="text-left px-4 py-3 font-medium">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {apps.map((a, i) => (
-                <tr
-                  key={a.id}
-                  className={`${i % 2 === 0 ? "bg-card" : "bg-secondary/20"} cursor-pointer hover:bg-secondary/40 transition-colors`}
-                  onClick={() => setSelectedId(a.id)}
-                >
-                  <td className="px-4 py-3 font-medium">{a.full_name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{propName(a.property_id)}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{a.created_date ? new Date(a.created_date).toLocaleDateString() : "—"}</td>
-                  <td className={`px-4 py-3 font-semibold ${ratioColor(a.income_to_rent_ratio)}`}>
-                    {a.income_to_rent_ratio ? `${a.income_to_rent_ratio}x` : "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant={STATUS_COLOR[a.status] || "secondary"}>{STATUS_LABEL[a.status] || a.status}</Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Eye className="w-4 h-4 text-muted-foreground" />
-                  </td>
+        <>
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/50 text-muted-foreground text-xs">
+                <tr>
+                  {["Applicant", "Property", "Submitted", "Income-to-Rent", "Status", ""].map(h => (
+                    <th key={h} className="text-left px-4 py-3 font-medium">{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {apps.map((a, i) => (
+                  <tr
+                    key={a.id}
+                    className={`${i % 2 === 0 ? "bg-card" : "bg-secondary/20"} cursor-pointer hover:bg-secondary/40 transition-colors`}
+                    onClick={() => setSelectedId(a.id)}
+                  >
+                    <td className="px-4 py-3 font-medium">{a.full_name}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{propName(a.property_id)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{a.created_date ? new Date(a.created_date).toLocaleDateString() : "—"}</td>
+                    <td className={`px-4 py-3 font-semibold ${ratioColor(a.income_to_rent_ratio)}`}>
+                      {a.income_to_rent_ratio ? `${a.income_to_rent_ratio}x` : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge variant={STATUS_COLOR[a.status] || "secondary"}>{STATUS_LABEL[a.status] || a.status}</Badge>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex justify-center">
+            <ShareApplicationLink propertyId={properties[0]?.id} propertyName={properties[0]?.nickname || properties[0]?.address} />
+          </div>
+        </>
       )}
     </div>
   );
