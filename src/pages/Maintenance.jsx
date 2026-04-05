@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Wrench, AlertTriangle, Pencil, Trash2 } from "lucide-react";
+import { Plus, Wrench, AlertTriangle, Pencil, Trash2, ShoppingCart } from "lucide-react";
+import FindSuppliesPanel from "../components/vendors/FindSuppliesPanel";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,10 @@ export default function Maintenance() {
   const [filter, setFilter] = useState("all");
   const [form, setForm] = useState({ summary: "", category: "plumbing", urgency: "normal", status: "new", tenant_id: "", unit_id: "", property_id: "", permission_to_enter: false, cost: "" });
   const [loading, setLoading] = useState(true);
+  const [suppliesOpen, setSuppliesOpen] = useState(false);
+  const [suppliesPrefill, setSuppliesPrefill] = useState("");
+
+  const openSupplies = (summary = "") => { setSuppliesPrefill(summary); setSuppliesOpen(true); };
 
   const load = async () => {
     const [o, t, u, p] = await Promise.all([base44.entities.WorkOrder.list("-created_date"), base44.entities.Tenant.list(), base44.entities.Unit.list(), base44.entities.Property.list()]);
@@ -51,7 +56,10 @@ export default function Maintenance() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div><h1 className="text-2xl font-outfit font-700">Maintenance</h1><p className="text-sm text-muted-foreground mt-1">{orders.length} work orders</p></div>
-        <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />New Work Order</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => openSupplies()} className="gap-2"><ShoppingCart className="w-4 h-4" />Find Supplies</Button>
+          <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />New Work Order</Button>
+        </div>
       </div>
 
       <div className="flex gap-2">
@@ -89,6 +97,7 @@ export default function Maintenance() {
                 </div>
               </div>
               <div className="flex gap-1 shrink-0">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" title="Find Supplies" onClick={() => openSupplies(o.summary)}><ShoppingCart className="w-3.5 h-3.5" /></Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(o)}><Pencil className="w-3.5 h-3.5" /></Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => remove(o.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
               </div>
@@ -96,6 +105,8 @@ export default function Maintenance() {
           ))}
         </div>
       )}
+
+      <FindSuppliesPanel open={suppliesOpen} onClose={(v) => setSuppliesOpen(v === false ? false : !suppliesOpen)} prefill={suppliesPrefill} />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">

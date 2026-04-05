@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Package, Pencil, Trash2, Star, Phone, Mail } from "lucide-react";
+import { Plus, Package, Pencil, Trash2, Star, Phone, Mail, MapPin, ShoppingCart } from "lucide-react";
+import FindLocalVendorsPanel from "../components/vendors/FindLocalVendorsPanel";
+import FindSuppliesPanel from "../components/vendors/FindSuppliesPanel";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -11,12 +13,18 @@ const CATEGORIES = ["plumbing","electrical","hvac","cleaning","landscaping","gen
 
 export default function Vendors() {
   const [vendors, setVendors] = useState([]);
+  const [properties, setProperties] = useState([]);
   const [open, setOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(false);
+  const [suppliesOpen, setSuppliesOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: "", category: "general", phone: "", email: "", rating: 5 });
   const [loading, setLoading] = useState(true);
 
-  const load = async () => { const v = await base44.entities.Vendor.list(); setVendors(v); setLoading(false); };
+  const load = async () => {
+    const [v, p] = await Promise.all([base44.entities.Vendor.list(), base44.entities.Property.list()]);
+    setVendors(v); setProperties(p); setLoading(false);
+  };
   useEffect(() => { load(); }, []);
 
   const openAdd = () => { setEditing(null); setForm({ name: "", category: "general", phone: "", email: "", rating: 5 }); setOpen(true); };
@@ -36,7 +44,11 @@ export default function Vendors() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div><h1 className="text-2xl font-outfit font-700">Vendors</h1><p className="text-sm text-muted-foreground mt-1">{vendors.length} vendors</p></div>
-        <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Add Vendor</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setSuppliesOpen(true)} className="gap-2"><ShoppingCart className="w-4 h-4" />Find Supplies</Button>
+          <Button variant="outline" onClick={() => setLocalOpen(true)} className="gap-2"><MapPin className="w-4 h-4" />Find Local Vendors</Button>
+          <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Add Vendor</Button>
+        </div>
       </div>
 
       {vendors.length === 0 ? (
@@ -68,6 +80,9 @@ export default function Vendors() {
           ))}
         </div>
       )}
+
+      <FindLocalVendorsPanel open={localOpen} onClose={() => setLocalOpen(false)} properties={properties} onSaved={load} />
+      <FindSuppliesPanel open={suppliesOpen} onClose={() => setSuppliesOpen(false)} />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
