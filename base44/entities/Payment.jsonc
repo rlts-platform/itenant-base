@@ -32,7 +32,31 @@
     "proof_image_url": {
       "type": "string"
     },
+    "proof_upload_date": {
+      "type": "string"
+    },
     "check_number": {
+      "type": "string"
+    },
+    "is_split": {
+      "type": "boolean"
+    },
+    "split_amount_2": {
+      "type": "number"
+    },
+    "split_method_2": {
+      "type": "string",
+      "enum": [
+        "check",
+        "money_order",
+        "cash",
+        "zelle"
+      ]
+    },
+    "split_proof_url_2": {
+      "type": "string"
+    },
+    "split_proof_upload_date_2": {
       "type": "string"
     },
     "account_id": {

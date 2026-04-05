@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { DollarSign, CreditCard, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import BillReminders from "../components/payments/BillReminders";
 import { Button } from "@/components/ui/button";
 
 const isInIframe = () => {
@@ -124,19 +125,25 @@ export default function TenantPay() {
           </div>
           <div className="divide-y divide-border">
             {payments.map(p => (
-              <div key={p.id} className="flex items-center justify-between px-5 py-3">
-                <div>
-                  <p className="text-sm font-medium">${Number(p.amount).toLocaleString()}</p>
-                  <p className="text-xs text-muted-foreground">{p.date} · {p.method}</p>
+              <div key={p.id} className="px-5 py-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">${Number(p.amount).toLocaleString()}{p.is_split && p.split_amount_2 ? ` + $${Number(p.split_amount_2).toLocaleString()} split` : ""}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{p.method?.replace("_"," ")}</p>
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${p.status === "confirmed" ? "bg-emerald-100 text-emerald-700" : "bg-yellow-100 text-yellow-700"}`}>{p.status}</span>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${p.status === "confirmed" ? "bg-emerald-100 text-emerald-700" : "bg-yellow-100 text-yellow-700"}`}>
-                  {p.status}
-                </span>
+                <div className="flex gap-4 mt-1">
+                  <p className="text-xs text-muted-foreground">📅 Payment delivered: {p.date}</p>
+                  {p.proof_upload_date && <p className="text-xs text-muted-foreground">🕐 Funds documented: {new Date(p.proof_upload_date).toLocaleDateString()}</p>}
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
+
+      {tenant && <BillReminders tenantId={tenant.id} />}
     </div>
   );
 }

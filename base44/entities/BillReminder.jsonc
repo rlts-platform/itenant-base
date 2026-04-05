@@ -1,0 +1,41 @@
+{
+  "name": "BillReminder",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    },
+    "reminder_type": {
+      "type": "string",
+      "enum": [
+        "rent_due",
+        "utility",
+        "lease_renewal"
+      ]
+    },
+    "timing": {
+      "type": "string",
+      "enum": [
+        "3_days_before",
+        "1_week_before",
+        "day_of"
+      ]
+    },
+    "notify_email": {
+      "type": "boolean"
+    },
+    "notify_sms": {
+      "type": "boolean"
+    },
+    "is_active": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "reminder_type",
+    "timing"
+  ]
+}
