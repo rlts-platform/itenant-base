@@ -37,6 +37,7 @@ import OwnerClients from './pages/OwnerClients';
 import ApplyPage from './pages/ApplyPage';
 import Applications from './pages/Applications';
 import ApplicationDetail from './pages/ApplicationDetail';
+import LandingPage from './pages/LandingPage';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -44,6 +45,10 @@ const AuthenticatedApp = () => {
 
   // Public routes — skip auth enforcement
   if (window.location.pathname.startsWith('/apply/')) return <ApplyPage />;
+  if (window.location.pathname === '/' && (isLoadingPublicSettings || isLoadingAuth)) {
+    return <div style={{ backgroundColor: '#0D0F14', minHeight: '100vh' }} />;
+  }
+  if (window.location.pathname === '/' && authError?.type === 'auth_required') return <LandingPage />;
 
   // Role-based redirect after login
   useEffect(() => {
@@ -73,7 +78,6 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
@@ -83,6 +87,7 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route element={<Layout />}>
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/" element={<ClientDashboard />} />
         <Route path="/properties" element={<Properties />} />
         <Route path="/units" element={<Units />} />

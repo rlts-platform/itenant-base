@@ -101,9 +101,9 @@ export default function Layout() {
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white border-r border-border">
+    <div className="flex flex-col h-full border-r border-border" style={{ backgroundColor: '#16191F' }}>
       <div className="flex items-center gap-3 px-5 py-5">
-        <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center shrink-0 shadow-md">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-md" style={{ backgroundColor: '#7C6FCD' }}>
           <ShieldCheck className="w-5 h-5 text-white" />
         </div>
         <span className="font-outfit font-800 text-foreground text-xl tracking-tight">iTenant</span>
@@ -115,7 +115,7 @@ export default function Layout() {
 
       <div className="p-3 border-t border-border">
         <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold shrink-0">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ backgroundColor: '#7C6FCD' }}>
             {user?.full_name?.[0] || "U"}
           </div>
           <div className="flex-1 min-w-0">
@@ -169,7 +169,7 @@ export default function Layout() {
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-border bg-white px-4 flex items-center justify-between shrink-0">
+        <header className="h-14 border-b border-border px-4 flex items-center justify-between shrink-0" style={{ backgroundColor: '#16191F' }}>
           <button className="md:hidden p-2 rounded-lg hover:bg-secondary transition-colors" onClick={() => setMobileOpen(true)}>
             <Menu className="w-5 h-5" />
           </button>
