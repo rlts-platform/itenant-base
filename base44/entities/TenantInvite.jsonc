@@ -1,0 +1,37 @@
+{
+  "name": "TenantInvite",
+  "type": "object",
+  "properties": {
+    "token": {
+      "type": "string"
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "expired"
+      ]
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "token",
+    "tenant_id",
+    "email",
+    "status",
+    "expires_at"
+  ]
+}

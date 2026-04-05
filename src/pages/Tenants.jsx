@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Users, Pencil, Trash2, Mail, Phone } from "lucide-react";
+import { Plus, Users, Pencil, Trash2, Mail, Phone, Send, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -16,9 +16,16 @@ export default function Tenants() {
   const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone: "", status: "active", unit_id: "" });
   const [loading, setLoading] = useState(true);
 
+  const [invites, setInvites] = useState([]);
+  const [sendingInvite, setSendingInvite] = useState(null);
+
   const load = async () => {
-    const [t, u] = await Promise.all([base44.entities.Tenant.list("-created_date"), base44.entities.Unit.list()]);
-    setTenants(t); setUnits(u); setLoading(false);
+    const [t, u, inv] = await Promise.all([
+      base44.entities.Tenant.list("-created_date"),
+      base44.entities.Unit.list(),
+      base44.entities.TenantInvite.list()
+    ]);
+    setTenants(t); setUnits(u); setInvites(inv); setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
@@ -26,13 +33,45 @@ export default function Tenants() {
   const openEdit = (t) => { setEditing(t); setForm({ first_name: t.first_name, last_name: t.last_name, email: t.email, phone: t.phone || "", status: t.status, unit_id: t.unit_id || "" }); setOpen(true); };
 
   const save = async () => {
-    if (editing) await base44.entities.Tenant.update(editing.id, form);
-    else await base44.entities.Tenant.create(form);
-    setOpen(false); load();
+    let tenantId;
+    if (editing) {
+      await base44.entities.Tenant.update(editing.id, form);
+      tenantId = editing.id;
+    } else {
+      const created = await base44.entities.Tenant.create({ ...form, status: 'pending' });
+      tenantId = created.id;
+    }
+    setOpen(false);
+    // Auto-send invite for new tenants
+    if (!editing) {
+      await base44.functions.invoke('sendTenantInvite', { tenant_id: tenantId });
+    }
+    load();
+  };
+
+  const resendInvite = async (t) => {
+    setSendingInvite(t.id);
+    await base44.functions.invoke('sendTenantInvite', { tenant_id: t.id });
+    setSendingInvite(null);
+    load();
+  };
+
+  const getInviteStatus = (tenantId) => {
+    const inv = invites
+      .filter(i => i.tenant_id === tenantId)
+      .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
+    return inv || null;
   };
   const remove = async (id) => { await base44.entities.Tenant.delete(id); load(); };
   const unitName = (id) => units.find(u => u.id === id)?.unit_number || "—";
   const statusColor = { active: "default", inactive: "secondary", pending: "outline" };
+
+  const inviteBadge = (inv) => {
+    if (!inv) return null;
+    if (inv.status === 'accepted') return <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">Active</span>;
+    if (inv.status === 'expired') return <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-medium flex items-center gap-1"><Clock className="w-3 h-3" />Expired</span>;
+    return <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 font-medium flex items-center gap-1"><Send className="w-3 h-3" />Invited</span>;
+  };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
@@ -67,10 +106,26 @@ export default function Tenants() {
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Mail className="w-3 h-3" />{t.email}</div>
                 {t.phone && <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{t.phone}</div>}
               </div>
-              <div className="flex items-center gap-2 mt-3">
+              <div className="flex items-center gap-2 mt-3 flex-wrap">
                 <Badge variant={statusColor[t.status] || "secondary"}>{t.status}</Badge>
                 {t.unit_id && <span className="text-xs text-muted-foreground">Unit {unitName(t.unit_id)}</span>}
+                {inviteBadge(getInviteStatus(t.id))}
               </div>
+              {(() => {
+                const inv = getInviteStatus(t.id);
+                const showResend = !inv || inv.status === 'pending' || inv.status === 'expired';
+                if (showResend && inv?.status !== 'accepted') return (
+                  <button
+                    onClick={() => resendInvite(t)}
+                    disabled={sendingInvite === t.id}
+                    className="mt-2 text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50"
+                  >
+                    <Send className="w-3 h-3" />
+                    {sendingInvite === t.id ? 'Sending…' : inv ? 'Resend Invite' : 'Send Invite'}
+                  </button>
+                );
+                return null;
+              })()}
             </div>
           ))}
         </div>
