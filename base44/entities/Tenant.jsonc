@@ -14,6 +14,16 @@
     "phone": {
       "type": "string"
     },
+    "dob": {
+      "type": "string",
+      "format": "date"
+    },
+    "emergency_contact_name": {
+      "type": "string"
+    },
+    "emergency_contact_phone": {
+      "type": "string"
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -26,6 +36,9 @@
       "type": "string"
     },
     "account_id": {
+      "type": "string"
+    },
+    "notes": {
       "type": "string"
     }
   },

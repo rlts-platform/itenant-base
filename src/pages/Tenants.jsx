@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, Users, Pencil, Trash2, Mail, Phone, Send, Clock } from "lucide-react";
+import TenantDetail from "./TenantDetail";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -15,9 +16,12 @@ export default function Tenants() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone: "", status: "active", unit_id: "" });
   const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState(null);
 
   const [invites, setInvites] = useState([]);
   const [sendingInvite, setSendingInvite] = useState(null);
+
+  if (selectedId) return <TenantDetail tenantId={selectedId} onBack={() => setSelectedId(null)} />;
 
   const load = async () => {
     const [t, u, inv] = await Promise.all([
@@ -93,15 +97,15 @@ export default function Tenants() {
           {tenants.map(t => (
             <div key={t.id} className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-3">
-                <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-semibold text-sm">
+                <button onClick={() => setSelectedId(t.id)} className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-semibold text-sm hover:ring-2 hover:ring-violet-300 transition-all">
                   {t.first_name?.[0]}{t.last_name?.[0]}
-                </div>
+                </button>
                 <div className="flex gap-1">
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(t)}><Pencil className="w-3.5 h-3.5" /></Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => remove(t.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
                 </div>
               </div>
-              <h3 className="font-semibold">{t.first_name} {t.last_name}</h3>
+              <button onClick={() => setSelectedId(t.id)} className="font-semibold hover:text-primary transition-colors text-left">{t.first_name} {t.last_name}</button>
               <div className="space-y-1 mt-2">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Mail className="w-3 h-3" />{t.email}</div>
                 {t.phone && <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{t.phone}</div>}
