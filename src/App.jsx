@@ -38,6 +38,7 @@ import ApplyPage from './pages/ApplyPage';
 import Applications from './pages/Applications';
 import ApplicationDetail from './pages/ApplicationDetail';
 import LandingPage from './pages/LandingPage';
+import SignaturePage from './pages/SignaturePage';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -89,6 +90,7 @@ const AuthenticatedApp = () => {
   <Routes>
     {/* Standalone public routes — no sidebar */}
     <Route path="/landing" element={<LandingPage />} />
+    <Route path="/sign/:token" element={<SignaturePage />} />
     <Route element={<Layout />}>
       <Route path="/" element={<ClientDashboard />} />
         <Route path="/properties" element={<Properties />} />

@@ -32,6 +32,35 @@
     },
     "account_id": {
       "type": "string"
+    },
+    "signature_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "pending",
+        "signed",
+        "declined"
+      ]
+    },
+    "signature_token": {
+      "type": "string"
+    },
+    "signature_requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "signer_name": {
+      "type": "string"
+    },
+    "signer_email": {
+      "type": "string"
+    },
+    "tenant_signature": {
+      "type": "string"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [

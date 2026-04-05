@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Upload, Trash2, ExternalLink, Download, Sparkles, Loader2, Pencil } from "lucide-react";
+import { Plus, Upload, Trash2, ExternalLink, Sparkles, Loader2, PenLine, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import FolderTree, { SUBCATEGORY_LABELS, FOLDER_TREE } from "../components/documents/FolderTree";
 import DeleteGuardDialog from "../components/documents/DeleteGuardDialog";
 import DocGeneratorModal from "../components/documents/DocGeneratorModal";
+import SignatureRequestModal from "../components/documents/SignatureRequestModal";
 
 // Flat list of all subcategory options for the dropdown
 const ALL_SUBCATEGORIES = FOLDER_TREE.flatMap(f =>
@@ -29,6 +30,7 @@ export default function Documents() {
   const [aiCategorizing, setAiCategorizing] = useState(false);
   const [fileUrl, setFileUrl] = useState("");
   const [loading, setLoading] = useState(true);
+  const [signDoc, setSignDoc] = useState(null);
 
   const load = async () => {
     const [d, t, p] = await Promise.all([
@@ -130,10 +132,17 @@ export default function Documents() {
               return (
                 <div key={d.id} className="bg-card border border-border rounded-xl p-4 hover:shadow-md transition-shadow flex flex-col gap-2">
                   <div className="flex items-start justify-between">
-                    <Badge variant="secondary" className="text-xs">{folderLabel}</Badge>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant="secondary" className="text-xs">{folderLabel}</Badge>
+                      {d.signature_status && d.signature_status !== "none" && (
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: d.signature_status === "signed" ? "#F0FDF4" : d.signature_status === "declined" ? "#FEF2F2" : "#FEF9C3", color: d.signature_status === "signed" ? "#22C55E" : d.signature_status === "declined" ? "#EF4444" : "#F59E0B" }}>
+                          {d.signature_status === "signed" ? "✓ Signed" : d.signature_status === "declined" ? "✗ Declined" : "⏳ Pending"}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex gap-1">
-                      {(d.file_url || d.body_text) && (
-                        <a
+                        {(d.file_url || d.body_text) && (
+                          <a
                           href={d.file_url || "#"}
                           target="_blank"
                           rel="noreferrer"
@@ -145,6 +154,11 @@ export default function Documents() {
                         >
                           <Button variant="ghost" size="icon" className="h-7 w-7"><ExternalLink className="w-3 h-3" /></Button>
                         </a>
+                      )}
+                      {d.signature_status !== "signed" && (
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title="Request e-signature" onClick={() => setSignDoc(d)}>
+                          <PenLine className="w-3 h-3" style={{ color: '#7C6FCD' }} />
+                        </Button>
                       )}
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => requestDelete(d)}>
                         <Trash2 className="w-3 h-3" />
@@ -215,7 +229,15 @@ export default function Documents() {
       {/* Delete Guard */}
       <DeleteGuardDialog doc={deleteGuard} onConfirm={confirmDelete} onCancel={() => setDeleteGuard(null)} />
 
-      {/* AI Generator */}
+      {signDoc && (
+        <SignatureRequestModal
+          doc={signDoc}
+          tenants={tenants}
+          onClose={() => setSignDoc(null)}
+          onSaved={() => { setSignDoc(null); load(); }}
+        />
+      )}
+
       <DocGeneratorModal
         open={genOpen}
         onClose={() => setGenOpen(false)}
