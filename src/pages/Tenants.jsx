@@ -14,7 +14,6 @@ import AllTenantsTab from "../components/tenants/AllTenantsTab";
 import ApplicationsTab from "../components/tenants/ApplicationsTab";
 import InvitesTab from "../components/tenants/InvitesTab";
 import MoveOutsTab from "../components/tenants/MoveOutsTab";
-import { useEffect, useState } from "react";
 
 const TABS = [
 { id: "tenants", label: "All Tenants", icon: Users },
