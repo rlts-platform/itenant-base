@@ -1,32 +1,71 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Send, MessageSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { MessageSquare } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
+import PropertySelector from "../components/messages/PropertySelector";
+import ConversationList from "../components/messages/ConversationList";
+import MessageThread from "../components/messages/MessageThread";
+import MessageInput from "../components/messages/MessageInput";
 
 export default function Messages() {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [tenants, setTenants] = useState([]);
+  const [properties, setProperties] = useState([]);
+  const [units, setUnits] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [body, setBody] = useState("");
+  const [selectedProp, setSelectedProp] = useState(null);
+  const [selectedUnit, setSelectedUnit] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [propSelectorOpen, setPropSelectorOpen] = useState(false);
+  const [unreadCounts, setUnreadCounts] = useState({});
 
   const load = async () => {
-    const [m, t] = await Promise.all([base44.entities.Message.list("-created_date"), base44.entities.Tenant.list()]);
-    setMessages(m); setTenants(t); setLoading(false);
+    const [m, t, p, u] = await Promise.all([
+      base44.entities.Message.list("-created_date"),
+      base44.entities.Tenant.list(),
+      base44.entities.Property.list(),
+      base44.entities.Unit.list(),
+    ]);
+    setMessages(m);
+    setTenants(t);
+    setProperties(p);
+    setUnits(u);
+    
+    // Calculate unread counts
+    const counts = {};
+    m.forEach(msg => {
+      if (msg.to_user === user?.email && !msg.read) {
+        counts[msg.from_user] = (counts[msg.from_user] || 0) + 1;
+      }
+    });
+    setUnreadCounts(counts);
+    setLoading(false);
   };
-  useEffect(() => { load(); }, []);
 
-  const thread = selected ? messages.filter(m => m.from_user === selected || m.to_user === selected) : [];
-  const send = async () => {
-    if (!body.trim() || !selected) return;
-    await base44.entities.Message.create({ body, from_user: user?.email, to_user: selected, read: false });
-    setBody(""); load();
+  useEffect(() => { load(); }, [user]);
+  useEffect(() => {
+    if (!selected) {
+      setSelectedProp(null);
+      setSelectedUnit(null);
+    }
+  }, [selected]);
+
+  const send = async (data) => {
+    if (!selected || !selectedProp || !selectedUnit) return;
+    await base44.entities.Message.create({
+      body: data.body,
+      from_user: user?.email,
+      to_user: selected,
+      property_id: selectedProp,
+      unit_id: selectedUnit,
+      attachments: data.attachments || [],
+      urgent: data.urgent || false,
+      read: false,
+    });
+    load();
   };
 
-  const tenantName = (email) => { const t = tenants.find(t => t.email === email); return t ? `${t.first_name} ${t.last_name}` : email; };
   const conversations = [...new Set(messages.flatMap(m => [m.from_user, m.to_user]).filter(e => e !== user?.email))];
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
@@ -35,29 +74,16 @@ export default function Messages() {
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-outfit font-700 mb-6">Messages</h1>
       <div className="bg-card border border-border rounded-xl overflow-hidden flex h-[600px]">
-        <div className="w-64 border-r border-border flex flex-col">
-          <div className="p-3 border-b border-border">
-            <p className="text-xs text-muted-foreground font-medium">CONVERSATIONS</p>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            {conversations.length === 0 ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">No conversations</div>
-            ) : conversations.map(email => (
-              <button key={email} onClick={() => setSelected(email)}
-                className={`w-full text-left p-3 hover:bg-secondary/50 transition-colors ${selected === email ? "bg-accent text-accent-foreground" : ""}`}>
-                <div className="font-medium text-sm">{tenantName(email)}</div>
-                <div className="text-xs text-muted-foreground truncate">{email}</div>
-              </button>
-            ))}
-          </div>
-          <div className="p-3 border-t border-border">
-            <div className="text-xs text-muted-foreground mb-2">New conversation with:</div>
-            <select className="w-full text-sm border border-border rounded-md px-2 py-1.5 bg-background" onChange={e => setSelected(e.target.value)} value={selected || ""}>
-              <option value="">Select tenant</option>
-              {tenants.map(t => <option key={t.id} value={t.email}>{t.first_name} {t.last_name}</option>)}
-            </select>
-          </div>
-        </div>
+        <ConversationList
+          conversations={conversations}
+          tenants={tenants}
+          messages={messages}
+          selected={selected}
+          onSelect={setSelected}
+          unreadCounts={unreadCounts}
+          properties={properties}
+          units={units}
+        />
 
         <div className="flex-1 flex flex-col">
           {!selected ? (
@@ -66,24 +92,30 @@ export default function Messages() {
             </div>
           ) : (
             <>
-              <div className="p-4 border-b border-border"><h3 className="font-semibold">{tenantName(selected)}</h3></div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {thread.slice().reverse().map(m => (
-                  <div key={m.id} className={`flex ${m.from_user === user?.email ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[70%] px-3 py-2 rounded-xl text-sm ${m.from_user === user?.email ? "bg-primary text-white" : "bg-secondary"}`}>
-                      {m.body}
-                    </div>
-                  </div>
-                ))}
+              <div className="p-4 border-b border-border flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold">{tenants.find(t => t.email === selected)?.first_name} {tenants.find(t => t.email === selected)?.last_name}</h3>
+                  {selectedProp && selectedUnit && (
+                    <p className="text-xs text-muted-foreground">📍 {properties.find(p => p.id === selectedProp)?.nickname || properties.find(p => p.id === selectedProp)?.address} — Unit {units.find(u => u.id === selectedUnit)?.unit_number}</p>
+                  )}
+                </div>
+                {!selectedProp && <button onClick={() => setPropSelectorOpen(true)} className="text-primary text-xs underline">Link property</button>}
               </div>
-              <div className="p-3 border-t border-border flex gap-2">
-                <Input value={body} onChange={e => setBody(e.target.value)} placeholder="Type a message..." onKeyDown={e => e.key === "Enter" && send()} />
-                <Button onClick={send} size="icon"><Send className="w-4 h-4" /></Button>
-              </div>
+              {selectedProp && selectedUnit ? (
+                <>
+                  <MessageThread messages={messages} selectedRecipient={selected} properties={properties} units={units} />
+                  <MessageInput onSend={send} propertyId={selectedProp} unitId={selectedUnit} selectedRecipient={selected} />
+                </>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+                  <button onClick={() => setPropSelectorOpen(true)} className="text-primary underline">Link a property & unit to start messaging</button>
+                </div>
+              )}
             </>
           )}
         </div>
       </div>
+      <PropertySelector open={propSelectorOpen} onClose={() => setPropSelectorOpen(false)} onSelect={(prop, unit) => { setSelectedProp(prop); setSelectedUnit(unit); }} />
     </div>
   );
 }

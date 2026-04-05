@@ -14,6 +14,37 @@
     "read": {
       "type": "boolean"
     },
+    "read_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "unit_id": {
+      "type": "string"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "file_url": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_type": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "urgent": {
+      "type": "boolean",
+      "default": false
+    },
     "account_id": {
       "type": "string"
     }
