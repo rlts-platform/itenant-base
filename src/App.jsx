@@ -31,6 +31,7 @@ import TenantProfile from './pages/TenantProfile';
 import InvitePage from './pages/InvitePage';
 import Team from './pages/Team';
 import Assistant from './pages/Assistant';
+import Reports from './pages/Reports';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -98,6 +99,7 @@ const AuthenticatedApp = () => {
         <Route path="/invite/:token" element={<InvitePage />} />
         <Route path="/team" element={<Team />} />
         <Route path="/assistant" element={<Assistant />} />
+        <Route path="/reports" element={<Reports />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>
