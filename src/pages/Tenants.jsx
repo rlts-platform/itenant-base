@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Users, Pencil, Trash2, Mail, Phone, Send, Clock } from "lucide-react";
+import { Plus, Users, FileText, Clock, ClipboardList } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import TenantDetail from "./TenantDetail";
 import { Button } from "@/components/ui/button";
@@ -8,36 +8,64 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import AllTenantsTab from "../components/tenants/AllTenantsTab";
+import ApplicationsTab from "../components/tenants/ApplicationsTab";
+import InvitesTab from "../components/tenants/InvitesTab";
+import MoveOutsTab from "../components/tenants/MoveOutsTab";
+
+const TABS = [
+  { id: "tenants", label: "All Tenants", icon: Users },
+  { id: "applications", label: "Applications", icon: ClipboardList },
+  { id: "invites", label: "Invites", icon: Clock },
+  { id: "moveouts", label: "Move Outs", icon: FileText },
+];
 
 export default function Tenants() {
   const [tenants, setTenants] = useState([]);
   const [units, setUnits] = useState([]);
+  const [properties, setProperties] = useState([]);
+  const [leases, setLeases] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [invites, setInvites] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("tenants");
+  const [selectedId, setSelectedId] = useState(null);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone: "", status: "active", unit_id: "" });
-  const [loading, setLoading] = useState(true);
-  const [selectedId, setSelectedId] = useState(null);
-
-  const [invites, setInvites] = useState([]);
   const [sendingInvite, setSendingInvite] = useState(null);
+  const [search, setSearch] = useState("");
+  const [filterProperty, setFilterProperty] = useState("all");
   const location = useLocation();
+
+  const load = async () => {
+    const [t, u, p, l, pay, inv, apps] = await Promise.all([
+      base44.entities.Tenant.list("-created_date"),
+      base44.entities.Unit.list(),
+      base44.entities.Property.list(),
+      base44.entities.Lease.list(),
+      base44.entities.Payment.list("-date", 200),
+      base44.entities.TenantInvite.list(),
+      base44.entities.RentalApplication.list("-created_date"),
+    ]);
+    setTenants(t); setUnits(u); setProperties(p); setLeases(l);
+    setPayments(pay); setInvites(inv); setApplications(apps);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    if (location.state?.openAdd) { openAdd(); window.history.replaceState({}, ""); }
+  }, [location.state]);
 
   if (selectedId) return <TenantDetail tenantId={selectedId} onBack={() => setSelectedId(null)} />;
 
-  const load = async () => {
-    const [t, u, inv] = await Promise.all([
-      base44.entities.Tenant.list("-created_date"),
-      base44.entities.Unit.list(),
-      base44.entities.TenantInvite.list()
-    ]);
-    setTenants(t); setUnits(u); setInvites(inv); setLoading(false);
+  const openAdd = () => {
+    setEditing(null);
+    setForm({ first_name: "", last_name: "", email: "", phone: "", status: "active", unit_id: "" });
+    setOpen(true);
   };
-  useEffect(() => { load(); }, []);
-  useEffect(() => { if (location.state?.openAdd) { openAdd(); window.history.replaceState({}, ""); } }, [location.state]);
-
-  const openAdd = () => { setEditing(null); setForm({ first_name: "", last_name: "", email: "", phone: "", status: "active", unit_id: "" }); setOpen(true); };
-  const openEdit = (t) => { setEditing(t); setForm({ first_name: t.first_name, last_name: t.last_name, email: t.email, phone: t.phone || "", status: t.status, unit_id: t.unit_id || "" }); setOpen(true); };
 
   const save = async () => {
     let tenantId;
@@ -45,99 +73,108 @@ export default function Tenants() {
       await base44.entities.Tenant.update(editing.id, form);
       tenantId = editing.id;
     } else {
-      const created = await base44.entities.Tenant.create({ ...form, status: 'pending' });
+      const created = await base44.entities.Tenant.create({ ...form, status: "pending" });
       tenantId = created.id;
+      await base44.functions.invoke("sendTenantInvite", { tenant_id: tenantId });
     }
     setOpen(false);
-    // Auto-send invite for new tenants
-    if (!editing) {
-      await base44.functions.invoke('sendTenantInvite', { tenant_id: tenantId });
-    }
     load();
   };
 
   const resendInvite = async (t) => {
     setSendingInvite(t.id);
-    await base44.functions.invoke('sendTenantInvite', { tenant_id: t.id });
+    await base44.functions.invoke("sendTenantInvite", { tenant_id: t.id });
     setSendingInvite(null);
     load();
   };
 
-  const getInviteStatus = (tenantId) => {
-    const inv = invites
-      .filter(i => i.tenant_id === tenantId)
-      .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
-    return inv || null;
-  };
-  const remove = async (id) => { await base44.entities.Tenant.delete(id); load(); };
-  const unitName = (id) => units.find(u => u.id === id)?.unit_number || "—";
-  const statusColor = { active: "default", inactive: "secondary", pending: "outline" };
+  // Stats
+  const activeLeases = leases.filter(l => l.status === "active").length;
+  const pendingInvites = invites.filter(i => i.status === "pending").length;
+  const appsWaiting = applications.filter(a => a.status === "new" || a.status === "under_review").length;
 
-  const inviteBadge = (inv) => {
-    if (!inv) return null;
-    if (inv.status === 'accepted') return <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">Active</span>;
-    if (inv.status === 'expired') return <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-medium flex items-center gap-1"><Clock className="w-3 h-3" />Expired</span>;
-    return <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 font-medium flex items-center gap-1"><Send className="w-3 h-3" />Invited</span>;
-  };
+  const now = new Date();
+  const thirtyDaysOut = new Date(now.getTime() + 30 * 86400000);
+  const moveOutCount = leases.filter(l => l.status === "active" && l.end_date && new Date(l.end_date) <= thirtyDaysOut).length;
+
+  const stats = [
+    { label: "Total Tenants", value: tenants.length, color: "#7C6FCD" },
+    { label: "Active Leases", value: activeLeases, color: "#22C55E" },
+    { label: "Pending Invites", value: pendingInvites, color: "#F59E0B" },
+    { label: "Applications Waiting", value: appsWaiting, color: "#3B82F6" },
+  ];
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-outfit font-700">Tenants</h1><p className="text-sm text-muted-foreground mt-1">{tenants.length} tenants</p></div>
-        <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Add Tenant</Button>
+        <div>
+          <h1 className="text-2xl font-outfit font-bold">Tenant CRM</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Manage all tenants, applications, and move-outs</p>
+        </div>
+        <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4"/>Add Tenant</Button>
       </div>
 
-      {tenants.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl p-16 text-center">
-          <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-          <p className="font-semibold">No tenants yet</p>
-          <Button onClick={openAdd} className="mt-4 gap-2"><Plus className="w-4 h-4" />Add Tenant</Button>
-        </div>
-      ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tenants.map(t => (
-            <div key={t.id} className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-3">
-                <button onClick={() => setSelectedId(t.id)} className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-semibold text-sm hover:ring-2 hover:ring-violet-300 transition-all">
-                  {t.first_name?.[0]}{t.last_name?.[0]}
-                </button>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(t)}><Pencil className="w-3.5 h-3.5" /></Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => remove(t.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
-                </div>
-              </div>
-              <button onClick={() => setSelectedId(t.id)} className="font-semibold hover:text-primary transition-colors text-left">{t.first_name} {t.last_name}</button>
-              <div className="space-y-1 mt-2">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Mail className="w-3 h-3" />{t.email}</div>
-                {t.phone && <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{t.phone}</div>}
-              </div>
-              <div className="flex items-center gap-2 mt-3 flex-wrap">
-                <Badge variant={statusColor[t.status] || "secondary"}>{t.status}</Badge>
-                {t.unit_id && <span className="text-xs text-muted-foreground">Unit {unitName(t.unit_id)}</span>}
-                {inviteBadge(getInviteStatus(t.id))}
-              </div>
-              {(() => {
-                const inv = getInviteStatus(t.id);
-                const showResend = !inv || inv.status === 'pending' || inv.status === 'expired';
-                if (showResend && inv?.status !== 'accepted') return (
-                  <button
-                    onClick={() => resendInvite(t)}
-                    disabled={sendingInvite === t.id}
-                    className="mt-2 text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50"
-                  >
-                    <Send className="w-3 h-3" />
-                    {sendingInvite === t.id ? 'Sending…' : inv ? 'Resend Invite' : 'Send Invite'}
-                  </button>
-                );
-                return null;
-              })()}
-            </div>
-          ))}
-        </div>
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((s, i) => (
+          <div key={i} className="bg-card border border-border rounded-xl p-5">
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">{s.label}</p>
+            <p className="text-3xl font-bold" style={{ color: s.color }}>{s.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-border gap-1">
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            onClick={() => { setTab(t.id); setSearch(""); }}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all"
+            style={{
+              borderBottom: tab === t.id ? "2px solid #7C6FCD" : "2px solid transparent",
+              color: tab === t.id ? "#7C6FCD" : "#6B7280",
+            }}
+          >
+            <t.icon className="w-4 h-4" />
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      {tab === "tenants" && (
+        <AllTenantsTab
+          tenants={tenants} units={units} properties={properties}
+          leases={leases} payments={payments} invites={invites}
+          onSelect={setSelectedId} onResendInvite={resendInvite} sendingInvite={sendingInvite}
+          search={search} setSearch={setSearch}
+          filterProperty={filterProperty} setFilterProperty={setFilterProperty}
+        />
+      )}
+      {tab === "applications" && (
+        <ApplicationsTab
+          applications={applications} properties={properties}
+          onRefresh={load} search={search} setSearch={setSearch}
+        />
+      )}
+      {tab === "invites" && (
+        <InvitesTab
+          invites={invites} tenants={tenants}
+          onRefresh={load} search={search} setSearch={setSearch}
+        />
+      )}
+      {tab === "moveouts" && (
+        <MoveOutsTab
+          tenants={tenants} leases={leases} units={units} properties={properties}
+          onRefresh={load}
+        />
       )}
 
+      {/* Add/Edit Tenant Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editing ? "Edit Tenant" : "Add Tenant"}</DialogTitle></DialogHeader>
@@ -154,16 +191,10 @@ export default function Tenants() {
                 <SelectContent>{units.map(u => <SelectItem key={u.id} value={u.id}>Unit {u.unit_number}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div><Label>Status</Label>
-              <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v }))}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem><SelectItem value="pending">Pending</SelectItem></SelectContent>
-              </Select>
-            </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={save}>Save</Button>
+            <Button onClick={save} disabled={!form.first_name || !form.email}>Save & Send Invite</Button>
           </div>
         </DialogContent>
       </Dialog>

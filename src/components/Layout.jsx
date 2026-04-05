@@ -74,7 +74,7 @@ export default function Layout() {
     : clientNav;
 
   const nav = role === "platform_owner" ? ownerNav
-    : location.pathname.startsWith("/tenant") ? tenantNav
+    : (location.pathname === "/tenant" || location.pathname.startsWith("/tenant/")) ? tenantNav
     : filteredClientNav;
 
   const NavLink = ({ item }) => {
