@@ -6,33 +6,33 @@
 
 @layer base {
   :root {
-    --background: 225 22% 7%;
-    --foreground: 0 0% 100%;
-    --card: 220 16% 11%;
-    --card-foreground: 0 0% 100%;
-    --popover: 220 16% 11%;
-    --popover-foreground: 0 0% 100%;
+    --background: 245 60% 98%;
+    --foreground: 240 43% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 43% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 43% 14%;
     --primary: 250 52% 62%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 16% 16%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 220 16% 16%;
-    --muted-foreground: 215 14% 65%;
-    --accent: 250 52% 62%;
-    --accent-foreground: 0 0% 100%;
+    --secondary: 245 60% 97%;
+    --secondary-foreground: 250 52% 62%;
+    --muted: 245 40% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 245 60% 97%;
+    --accent-foreground: 250 52% 62%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 220 20% 14%;
-    --input: 220 20% 14%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 250 40% 90%;
+    --input: 250 40% 90%;
     --ring: 250 52% 62%;
     --radius: 0.875rem;
-    --sidebar-background: 220 16% 11%;
-    --sidebar-foreground: 215 14% 65%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 9% 46%;
     --sidebar-primary: 250 52% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 16% 16%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 20% 14%;
+    --sidebar-accent: 245 60% 97%;
+    --sidebar-accent-foreground: 250 52% 62%;
+    --sidebar-border: 250 40% 90%;
     --sidebar-ring: 250 52% 62%;
     --chart-1: 250 52% 62%;
     --chart-2: 142 71% 45%;
@@ -78,9 +78,9 @@
   }
   body {
     @apply bg-background text-foreground font-inter;
-    background-color: #0D0F14;
+    background-color: #F4F3FF;
   }
   input, textarea, select {
-    color-scheme: dark;
+    color-scheme: light;
   }
 }

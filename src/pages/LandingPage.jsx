@@ -1,223 +1,190 @@
 import { base44 } from "@/api/base44Client";
-import { ShieldCheck, Zap, Wrench, BarChart3, Sparkles, Bot, CreditCard, FileText, Users, CheckCircle } from "lucide-react";
+import { ShieldCheck, Zap, Wrench, BarChart3, Bot, CheckCircle2, Building2, Users, CreditCard, FolderOpen, MessageSquare, Bell } from "lucide-react";
 
-const HERO_IMAGE = "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2075&auto=format&fit=crop";
+const HERO_IMAGE = "https://media.base44.com/images/public/69d176412565789962328166/ea0f27858_Screenshot2026-04-05at22803AM.png";
 
-const features = [
-  { icon: Sparkles, title: "AI Lease Generator", desc: "Generate state-compliant lease agreements in seconds with our AI engine." },
-  { icon: CreditCard, title: "Rent Collection", desc: "Accept bank transfer, card, check, or money order with photo proof." },
-  { icon: Wrench, title: "Maintenance Tracking", desc: "AI triages urgency and assigns vendors automatically." },
-  { icon: BarChart3, title: "Financial Hub", desc: "Track income, expenses, and estimate taxes across your portfolio." },
-  { icon: Zap, title: "Smart Automations", desc: "16 built-in presets for reminders, renewals, and move-ins." },
-  { icon: Users, title: "Tenant Portal", desc: "Tenants pay rent, submit requests, and access documents in one place." },
+const FEATURES = [
+  { icon: Building2, title: "Property Management", desc: "Track every property, unit, and tenant in one place with full history and audit trails." },
+  { icon: Wrench, title: "Maintenance Tracking", desc: "AI-triaged work orders, vendor assignments, and photo documentation built in." },
+  { icon: CreditCard, title: "Payments & Financials", desc: "Log rent payments, split payments, generate financial reports, and track expenses." },
+  { icon: Bot, title: "AI Lease Generator", desc: "Generate state-compliant lease agreements in seconds using your property data." },
+  { icon: Zap, title: "Smart Automations", desc: "Set up automated reminders, notifications, and workflows — no code required." },
+  { icon: FolderOpen, title: "Document Hub", desc: "Centralized document storage with AI categorization and tenant-facing access." },
 ];
 
-const floating = [
+const ROLES = [
+  { title: "For Landlords", desc: "Manage properties, track rent, handle maintenance, and stay compliant — all from one dashboard." },
+  { title: "For Tenants", desc: "Pay rent, submit maintenance requests, sign documents, and communicate with your landlord." },
+  { title: "For Property Managers", desc: "Oversee multiple properties, assign team members, automate workflows, and generate reports." },
+];
+
+const PLANS = [
+  { name: "Starter", price: "$0", units: "Up to 3 units", features: ["Property & tenant profiles", "Maintenance tracking", "Rent logging", "Document storage"], highlight: false },
+  { name: "Growth", price: "$29", units: "Up to 15 units", features: ["Everything in Starter", "AI lease generator", "Automated reminders", "Financial reports"], highlight: true },
+  { name: "Pro", price: "$79", units: "Up to 50 units", features: ["Everything in Growth", "Team members", "Smart automations", "Custom branding"], highlight: false },
+  { name: "Enterprise", price: "Custom", units: "Unlimited", features: ["Everything in Pro", "Dedicated support", "API access", "White-label options"], highlight: false },
+];
+
+const TILES = [
   { icon: Bot, label: "AI Lease Generator" },
   { icon: Wrench, label: "Maintenance Tracking" },
   { icon: BarChart3, label: "Financial Hub" },
-  { icon: Sparkles, label: "Smart Automations" },
-];
-
-const plans = [
-  { name: "Starter", price: 29, units: "Up to 10 units", features: ["Tenant portal", "Maintenance tracking", "Basic automations", "Document storage"], popular: false, primary: true },
-  { name: "Growth", price: 79, units: "Up to 50 units", features: ["Everything in Starter", "AI Lease Generator", "Financial Hub", "Priority support"], popular: true, primary: true },
-  { name: "Pro", price: 149, units: "Up to 200 units", features: ["Everything in Growth", "Full AI suite", "Dedicated phone number", "Advanced reporting"], popular: false, primary: false },
-  { name: "Enterprise", price: 299, units: "Unlimited units", features: ["Everything in Pro", "White label", "Custom integrations", "Dedicated support"], popular: false, primary: false },
-];
-
-const roles = [
-  { title: "Landlords & Property Managers", desc: "Manage every property, unit, tenant, lease, and dollar from one dashboard." },
-  { title: "Tenants", desc: "Pay rent, submit maintenance requests, message your landlord, and access all your documents." },
-  { title: "Platform Owner", desc: "Full visibility into all clients, MRR, ARR, and platform health in real time." },
+  { icon: Zap, label: "Smart Automations" },
 ];
 
 export default function LandingPage() {
-  const goToAuth = () => base44.auth.redirectToLogin();
+  const handleLogin = () => base44.auth.redirectToLogin();
+  const handleSignup = () => base44.auth.redirectToLogin();
 
   return (
-    <div style={{ backgroundColor: "#0D0F14", color: "#fff", fontFamily: "Inter, sans-serif", minHeight: "100vh" }}>
-      {/* HEADER */}
-      <header style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        backdropFilter: "blur(16px)", backgroundColor: "rgba(13,15,20,0.8)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 40px", height: 64,
-      }}>
+    <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#F4F3FF", color: "#1A1A2E", overflowX: "hidden" }}>
+
+      {/* Background blobs */}
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: -120, left: -120, width: 500, height: 500, borderRadius: "50%", background: "rgba(124,111,205,0.12)", filter: "blur(80px)" }} />
+        <div style={{ position: "absolute", bottom: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: "rgba(124,111,205,0.10)", filter: "blur(80px)" }} />
+      </div>
+
+      {/* Header */}
+      <header style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(124,111,205,0.12)", padding: "0 40px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 34, height: 34, borderRadius: 10, background: "#7C6FCD", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <ShieldCheck size={18} color="#fff" />
           </div>
-          <span style={{ fontWeight: 800, fontSize: 20, letterSpacing: "-0.02em" }}>iTenant</span>
+          <span style={{ fontWeight: 800, fontSize: 20, letterSpacing: "-0.5px", color: "#1A1A2E" }}>iTenant</span>
         </div>
-        <div style={{ display: "flex", gap: 12 }}>
-          <button onClick={goToAuth} style={{ padding: "8px 20px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.2)", background: "transparent", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 500 }}>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={handleLogin} style={{ padding: "8px 20px", borderRadius: 999, background: "#fff", border: "1px solid rgba(124,111,205,0.4)", color: "#7C6FCD", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
             Log In
           </button>
-          <button onClick={goToAuth} style={{ padding: "8px 20px", borderRadius: 999, background: "#7C6FCD", border: "none", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 600 }}>
+          <button onClick={handleSignup} style={{ padding: "8px 20px", borderRadius: 999, background: "#7C6FCD", color: "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer", border: "none" }}>
             Get Started
           </button>
         </div>
       </header>
 
-      {/* HERO */}
-      <div style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: `url(${HERO_IMAGE})`,
-          backgroundSize: "cover", backgroundPosition: "center",
-        }} />
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(to bottom, rgba(13,15,20,0.85) 0%, rgba(13,15,20,0.97) 100%)",
-        }} />
-        <div style={{ position: "relative", textAlign: "center", padding: "0 24px", maxWidth: 780, width: "100%" }}>
+      {/* Hero */}
+      <section style={{ position: "relative", minHeight: 620, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+        {/* Hero bg image */}
+        <div style={{ position: "absolute", inset: 0, backgroundImage: `url(${HERO_IMAGE})`, backgroundSize: "cover", backgroundPosition: "center", zIndex: 0 }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(244,243,255,0.82) 0%, rgba(244,243,255,0.93) 100%)", zIndex: 1 }} />
+
+        <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "80px 24px 60px", maxWidth: 720 }}>
           {/* Badge */}
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            border: "1px solid rgba(124,111,205,0.4)", backgroundColor: "rgba(124,111,205,0.1)",
-            color: "#7C6FCD", borderRadius: 999, padding: "6px 16px", fontSize: 13, fontWeight: 500,
-            marginBottom: 28,
-          }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#7C6FCD", display: "inline-block" }} />
-            Smarter Property Management
+          <div style={{ display: "inline-block", marginBottom: 20, padding: "5px 16px", borderRadius: 999, background: "rgba(124,111,205,0.08)", border: "1px solid rgba(124,111,205,0.4)", color: "#7C6FCD", fontWeight: 600, fontSize: 13 }}>
+            • Smarter Property Management
           </div>
-          <h1 style={{ fontSize: "clamp(40px, 6vw, 68px)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1, margin: "0 0 20px" }}>
+          <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", fontWeight: 800, letterSpacing: "-1.5px", color: "#1A1A2E", lineHeight: 1.12, margin: "0 0 18px" }}>
             Property Management.<br />Simplified.
           </h1>
-          <p style={{ fontSize: 18, color: "#9CA3AF", lineHeight: 1.7, marginBottom: 36, maxWidth: 620, margin: "0 auto 36px" }}>
-            The all-in-one platform for landlords, property managers, and tenants. Collect rent, manage maintenance, generate AI leases, and automate everything — from one place.
+          <p style={{ fontSize: 18, color: "#6B7280", marginBottom: 36, lineHeight: 1.7 }}>
+            The all-in-one platform for landlords, property managers, and tenants.<br />Automate the boring. Focus on what matters.
           </p>
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 20 }}>
-            <button onClick={goToAuth} style={{ padding: "14px 32px", borderRadius: 999, background: "#7C6FCD", border: "none", color: "#fff", cursor: "pointer", fontSize: 16, fontWeight: 600 }}>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            <button onClick={handleSignup} style={{ padding: "14px 32px", borderRadius: 999, background: "#7C6FCD", color: "#fff", fontWeight: 700, fontSize: 16, cursor: "pointer", border: "none", boxShadow: "0 4px 20px rgba(124,111,205,0.35)" }}>
               Get Started Free
             </button>
-            <button onClick={goToAuth} style={{ padding: "14px 32px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.2)", background: "transparent", color: "#fff", cursor: "pointer", fontSize: 16, fontWeight: 500 }}>
+            <button onClick={handleLogin} style={{ padding: "14px 32px", borderRadius: 999, background: "#fff", border: "1px solid rgba(124,111,205,0.4)", color: "#7C6FCD", fontWeight: 700, fontSize: 16, cursor: "pointer" }}>
               Log In
             </button>
           </div>
-          <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap" }}>
-            {["✓ No credit card required", "✓ 14-day free trial", "✓ Cancel anytime"].map(t => (
-              <span key={t} style={{ fontSize: 13, color: "#9CA3AF" }}>{t}</span>
+          <div style={{ display: "flex", gap: 24, justifyContent: "center", marginTop: 24, flexWrap: "wrap" }}>
+            {["No credit card required", "14-day free trial", "Cancel anytime"].map(t => (
+              <span key={t} style={{ fontSize: 13, color: "#6B7280", display: "flex", alignItems: "center", gap: 6 }}>
+                <CheckCircle2 size={14} color="#22C55E" /> {t}
+              </span>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* Floating tiles */}
-        <div style={{
-          position: "absolute", bottom: -48, left: "50%", transform: "translateX(-50%)",
-          display: "flex", gap: 16, padding: "0 24px", width: "100%", maxWidth: 900,
-          justifyContent: "center", flexWrap: "wrap",
-        }}>
-          {floating.map(({ icon: Icon, label }) => (
-            <div key={label} style={{
-              background: "rgba(22,25,31,0.95)", border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 20, padding: "24px 28px", display: "flex", flexDirection: "column",
-              alignItems: "center", gap: 12, minWidth: 160, flex: 1, maxWidth: 200,
-              boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
-              transform: "perspective(600px) rotateX(4deg)",
-              backdropFilter: "blur(10px)",
+      {/* Feature tiles */}
+      <section style={{ background: "#F4F3FF", padding: "48px 40px" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 20 }}>
+          {TILES.map((tile, i) => (
+            <div key={i} style={{
+              background: "#fff", border: "1px solid rgba(124,111,205,0.18)", borderRadius: 16,
+              padding: "24px 20px", textAlign: "center",
+              boxShadow: "0 2px 16px rgba(124,111,205,0.08)",
+              transform: `perspective(800px) rotateY(${i % 2 === 0 ? -3 : 3}deg) rotateX(2deg)`,
+              transition: "transform 0.2s",
             }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(124,111,205,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Icon size={22} color="#7C6FCD" />
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(124,111,205,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+                <tile.icon size={22} color="#7C6FCD" />
               </div>
-              <span style={{ fontSize: 13, fontWeight: 600, textAlign: "center", color: "#fff" }}>{label}</span>
+              <p style={{ fontWeight: 700, fontSize: 14, color: "#1A1A2E" }}>{tile.label}</p>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* FEATURES */}
-      <div style={{ backgroundColor: "#0D0F14", padding: "140px 24px 80px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: "#7C6FCD", marginBottom: 12, textTransform: "uppercase" }}>Features</div>
-            <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, letterSpacing: "-0.02em" }}>Everything you need to run your properties</h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20 }}>
-            {features.map(({ icon: Icon, title, desc }) => (
-              <div key={title} style={{
-                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: 20, padding: 28,
-              }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(124,111,205,0.15)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                  <Icon size={22} color="#7C6FCD" />
+      {/* Features grid */}
+      <section style={{ background: "#fff", padding: "80px 40px" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+          <p style={{ textAlign: "center", fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#7C6FCD", marginBottom: 10 }}>Everything you need</p>
+          <h2 style={{ textAlign: "center", fontSize: "clamp(1.6rem, 3vw, 2.4rem)", fontWeight: 800, color: "#1A1A2E", marginBottom: 48, letterSpacing: "-0.5px" }}>Built for modern property management</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+            {FEATURES.map((f, i) => (
+              <div key={i} style={{ background: "#fff", border: "1px solid rgba(124,111,205,0.12)", borderRadius: 16, padding: "24px", boxShadow: "0 2px 16px rgba(124,111,205,0.06)" }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(124,111,205,0.08)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+                  <f.icon size={20} color="#7C6FCD" />
                 </div>
-                <h3 style={{ fontWeight: 700, fontSize: 17, marginBottom: 8 }}>{title}</h3>
-                <p style={{ color: "#9CA3AF", fontSize: 14, lineHeight: 1.6 }}>{desc}</p>
+                <h3 style={{ fontWeight: 700, fontSize: 15, color: "#1A1A2E", marginBottom: 6 }}>{f.title}</h3>
+                <p style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.6 }}>{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ROLES */}
-      <div style={{ backgroundColor: "#16191F", padding: "80px 24px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, letterSpacing: "-0.02em", textAlign: "center", marginBottom: 48 }}>
-            Built for everyone in the rental process
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
-            {roles.map(({ title, desc }) => (
-              <div key={title} style={{
-                background: "rgba(255,255,255,0.04)", borderRadius: 20,
-                borderLeft: "4px solid #7C6FCD", border: "1px solid rgba(255,255,255,0.08)",
-                borderLeftWidth: 4, borderLeftColor: "#7C6FCD",
-                padding: 28, display: "flex", flexDirection: "column", gap: 16,
-              }}>
-                <div style={{ borderLeft: "4px solid #7C6FCD", paddingLeft: 16 }}>
-                  <h3 style={{ fontWeight: 700, fontSize: 18, marginBottom: 8 }}>{title}</h3>
-                  <p style={{ color: "#9CA3AF", fontSize: 14, lineHeight: 1.6 }}>{desc}</p>
-                </div>
-                <button onClick={goToAuth} style={{
-                  marginTop: "auto", padding: "10px 20px", borderRadius: 999, background: "#7C6FCD",
-                  border: "none", color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 600, alignSelf: "flex-start",
-                }}>
-                  Get Started
-                </button>
+      {/* Roles */}
+      <section style={{ background: "#F4F3FF", padding: "80px 40px" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <h2 style={{ textAlign: "center", fontSize: "clamp(1.5rem, 3vw, 2.2rem)", fontWeight: 800, color: "#1A1A2E", marginBottom: 40, letterSpacing: "-0.5px" }}>Built for everyone in the rental ecosystem</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
+            {ROLES.map((r, i) => (
+              <div key={i} style={{ background: "#fff", border: "1px solid rgba(124,111,205,0.12)", borderLeft: "4px solid #7C6FCD", borderRadius: 16, padding: "24px", boxShadow: "0 2px 12px rgba(124,111,205,0.07)" }}>
+                <h3 style={{ fontWeight: 700, fontSize: 16, color: "#1A1A2E", marginBottom: 10 }}>{r.title}</h3>
+                <p style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.65 }}>{r.desc}</p>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* PRICING */}
-      <div style={{ backgroundColor: "#0D0F14", padding: "80px 24px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, letterSpacing: "-0.02em", textAlign: "center", marginBottom: 48 }}>
-            Simple, transparent pricing
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 20 }}>
-            {plans.map(p => (
-              <div key={p.name} style={{
-                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: 20, padding: 28, display: "flex", flexDirection: "column", gap: 20, position: "relative",
-                ...(p.popular ? { boxShadow: "0 0 0 2px #7C6FCD" } : {}),
+      {/* Pricing */}
+      <section style={{ background: "#fff", padding: "80px 40px" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+          <p style={{ textAlign: "center", fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#7C6FCD", marginBottom: 10 }}>Pricing</p>
+          <h2 style={{ textAlign: "center", fontSize: "clamp(1.5rem, 3vw, 2.2rem)", fontWeight: 800, color: "#1A1A2E", marginBottom: 48, letterSpacing: "-0.5px" }}>Simple, transparent pricing</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 }}>
+            {PLANS.map((p, i) => (
+              <div key={i} style={{
+                background: "#fff", borderRadius: 18, padding: "28px 22px",
+                border: p.highlight ? "2px solid #7C6FCD" : "1px solid rgba(124,111,205,0.14)",
+                boxShadow: p.highlight ? "0 0 32px rgba(124,111,205,0.18)" : "0 2px 12px rgba(124,111,205,0.05)",
+                position: "relative",
               }}>
-                {p.popular && (
-                  <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: "#7C6FCD", color: "#fff", fontSize: 11, fontWeight: 700, padding: "4px 14px", borderRadius: 999, letterSpacing: "0.05em" }}>
+                {p.highlight && (
+                  <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", padding: "3px 14px", borderRadius: 999, background: "#7C6FCD", color: "#fff", fontSize: 11, fontWeight: 700, letterSpacing: "0.05em" }}>
                     MOST POPULAR
                   </div>
                 )}
-                <div>
-                  <h3 style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>{p.name}</h3>
-                  <div style={{ fontSize: 36, fontWeight: 800, letterSpacing: "-0.03em" }}>${p.price}<span style={{ fontSize: 16, fontWeight: 400, color: "#9CA3AF" }}>/mo</span></div>
-                  <div style={{ fontSize: 13, color: "#9CA3AF", marginTop: 4 }}>{p.units}</div>
-                </div>
-                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10, flex: 1 }}>
-                  {p.features.map(f => (
-                    <li key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: "#9CA3AF" }}>
-                      <CheckCircle size={14} color="#22C55E" style={{ flexShrink: 0 }} />
-                      {f}
+                <p style={{ fontWeight: 700, fontSize: 15, color: "#1A1A2E", marginBottom: 4 }}>{p.name}</p>
+                <p style={{ fontSize: 28, fontWeight: 800, color: "#7C6FCD", marginBottom: 4 }}>{p.price}<span style={{ fontSize: 14, fontWeight: 500, color: "#6B7280" }}>{p.price !== "Custom" ? "/mo" : ""}</span></p>
+                <p style={{ fontSize: 12, color: "#6B7280", marginBottom: 16 }}>{p.units}</p>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, spaceY: 8 }}>
+                  {p.features.map((f, j) => (
+                    <li key={j} style={{ fontSize: 13, color: "#6B7280", display: "flex", alignItems: "center", gap: 8, marginBottom: 7 }}>
+                      <CheckCircle2 size={14} color="#22C55E" /> {f}
                     </li>
                   ))}
                 </ul>
-                <button onClick={goToAuth} style={{
-                  padding: "12px", borderRadius: 999, cursor: "pointer", fontSize: 14, fontWeight: 600,
-                  ...(p.primary
-                    ? { background: "#7C6FCD", border: "none", color: "#fff" }
-                    : { background: "transparent", border: "1px solid rgba(255,255,255,0.2)", color: "#fff" }),
+                <button onClick={handleSignup} style={{
+                  marginTop: 20, width: "100%", padding: "10px", borderRadius: 999, fontWeight: 700, fontSize: 14, cursor: "pointer",
+                  background: p.highlight ? "#7C6FCD" : "#fff",
+                  color: p.highlight ? "#fff" : "#7C6FCD",
+                  border: p.highlight ? "none" : "1px solid rgba(124,111,205,0.4)",
                 }}>
                   Get Started
                 </button>
@@ -225,33 +192,17 @@ export default function LandingPage() {
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* FOOTER */}
-      <footer style={{
-        backgroundColor: "#16191F", borderTop: "1px solid rgba(255,255,255,0.08)",
-        padding: "48px 40px 32px",
-      }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 24, marginBottom: 32 }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                <div style={{ width: 30, height: 30, borderRadius: 8, background: "#7C6FCD", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <ShieldCheck size={16} color="#fff" />
-                </div>
-                <span style={{ fontWeight: 800, fontSize: 18 }}>iTenant</span>
-              </div>
-              <p style={{ color: "#9CA3AF", fontSize: 14 }}>Smarter property management for everyone.</p>
-            </div>
-            <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-              <button onClick={goToAuth} style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontSize: 14, padding: 0 }}>Log In</button>
-              <button onClick={goToAuth} style={{ background: "none", border: "none", color: "#9CA3AF", cursor: "pointer", fontSize: 14, padding: 0 }}>Get Started</button>
-            </div>
+      {/* Footer */}
+      <footer style={{ background: "#F4F3FF", borderTop: "1px solid rgba(124,111,205,0.15)", padding: "32px 40px", textAlign: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 10 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: "#7C6FCD", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <ShieldCheck size={14} color="#fff" />
           </div>
-          <div style={{ textAlign: "center", color: "#9CA3AF", fontSize: 13, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24 }}>
-            © 2026 iTenant. All rights reserved.
-          </div>
+          <span style={{ fontWeight: 800, fontSize: 16, color: "#1A1A2E" }}>iTenant</span>
         </div>
+        <p style={{ fontSize: 13, color: "#6B7280" }}>© {new Date().getFullYear()} iTenant. All rights reserved.</p>
       </footer>
     </div>
   );

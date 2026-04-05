@@ -82,50 +82,52 @@ export default function Layout() {
       <Link
         to={item.to}
         onClick={() => setMobileOpen(false)}
+        style={active ? { color: '#7C6FCD' } : { color: '#6B7280' }}
         className={cn(
           "relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
-          active ? "text-primary" : "text-sidebar-foreground hover:text-foreground hover:bg-secondary/60"
         )}
       >
         {active && (
           <motion.div
             layoutId="nav-active"
-            className="absolute inset-0 bg-accent rounded-xl"
+            className="absolute inset-0 rounded-xl"
+            style={{ background: 'rgba(124,111,205,0.1)' }}
             transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
           />
         )}
-        <item.icon className={cn("relative w-4 h-4 shrink-0 transition-transform duration-200", active ? "text-primary" : "group-hover:scale-110")} />
+        <item.icon className="relative w-4 h-4 shrink-0" style={{ color: active ? '#7C6FCD' : '#6B7280' }} />
         <span className="relative text-sm font-medium">{item.label}</span>
       </Link>
     );
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full border-r border-border" style={{ backgroundColor: '#16191F' }}>
+    <div className="flex flex-col h-full border-r" style={{ backgroundColor: '#FFFFFF', borderColor: 'rgba(124,111,205,0.15)' }}>
       <div className="flex items-center gap-3 px-5 py-5">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-md" style={{ backgroundColor: '#7C6FCD' }}>
           <ShieldCheck className="w-5 h-5 text-white" />
         </div>
-        <span className="font-outfit font-800 text-foreground text-xl tracking-tight">iTenant</span>
+        <span className="font-outfit font-800 text-xl tracking-tight" style={{ color: '#1A1A2E' }}>iTenant</span>
       </div>
 
       <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
         {nav.map(item => <NavLink key={item.to} item={item} />)}
       </nav>
 
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t" style={{ borderColor: 'rgba(124,111,205,0.15)' }}>
         <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1">
           <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ backgroundColor: '#7C6FCD' }}>
             {user?.full_name?.[0] || "U"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate">{user?.full_name}</p>
-            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            <p className="text-sm font-semibold truncate" style={{ color: '#1A1A2E' }}>{user?.full_name}</p>
+            <p className="text-xs truncate" style={{ color: '#6B7280' }}>{user?.email}</p>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 rounded-xl w-full text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+          className="flex items-center gap-3 px-3 py-2 rounded-xl w-full transition-all hover:bg-gray-50"
+          style={{ color: '#6B7280' }}
         >
           <LogOut className="w-4 h-4 shrink-0" />
           <span className="text-sm font-medium">Logout</span>
@@ -137,7 +139,7 @@ export default function Layout() {
   const pageKey = location.pathname;
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#F4F3FF' }}>
       {/* Desktop Sidebar */}
       <div className="hidden md:flex shrink-0 w-60">
         <SidebarContent />
@@ -169,7 +171,7 @@ export default function Layout() {
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-border px-4 flex items-center justify-between shrink-0" style={{ backgroundColor: '#16191F' }}>
+        <header className="h-14 border-b px-4 flex items-center justify-between shrink-0" style={{ backgroundColor: '#FFFFFF', borderColor: 'rgba(124,111,205,0.15)' }}>
           <button className="md:hidden p-2 rounded-lg hover:bg-secondary transition-colors" onClick={() => setMobileOpen(true)}>
             <Menu className="w-5 h-5" />
           </button>
