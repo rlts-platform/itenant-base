@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import { useFirstName } from "@/hooks/useFirstName";
 import { Link } from "react-router-dom";
 import { DollarSign, Wrench, FileText, MessageSquare, AlertTriangle } from "lucide-react";
 
@@ -32,12 +34,14 @@ export default function TenantDashboard() {
     load();
   }, [user]);
 
+  const { firstName } = useFirstName(user);
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-outfit font-700">Welcome, {tenant?.first_name || user?.full_name}</h1>
+        <h1 className="text-2xl font-outfit font-700">Welcome, {firstName}</h1>
         <p className="text-sm text-muted-foreground mt-1">Here's your rental overview</p>
       </div>
 

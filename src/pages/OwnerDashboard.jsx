@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
+import { useFirstName } from "@/hooks/useFirstName";
 import { Users2, DollarSign, TrendingUp, UserPlus, UserMinus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -31,6 +34,8 @@ function last12Months() {
 }
 
 export default function OwnerDashboard() {
+  const { user } = useAuth();
+  const { firstName } = useFirstName(user);
   const [accounts, setAccounts] = useState([]);
   const [stats, setStats] = useState({ properties: 0, units: 0, tenants: 0 });
   const [loading, setLoading] = useState(true);
@@ -88,8 +93,8 @@ export default function OwnerDashboard() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-outfit font-bold" style={{ color: '#1A1A2E' }}>Platform Overview</h1>
-        <p className="text-sm mt-1" style={{ color: '#6B7280' }}>All clients and revenue at a glance</p>
+        <h1 className="text-2xl font-outfit font-bold" style={{ color: '#1A1A2E' }}>Welcome, {firstName}</h1>
+        <p className="text-sm mt-1" style={{ color: '#6B7280' }}>Platform overview and analytics</p>
       </div>
 
       {/* KPI Cards */}

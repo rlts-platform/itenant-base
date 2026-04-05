@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import { useFirstName } from "@/hooks/useFirstName";
 import { Building2, Home, Users, Wrench, DollarSign, AlertTriangle, CheckCircle, Plus, CreditCard } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -95,13 +96,13 @@ export default function ClientDashboard() {
     setPayForm({ tenant_id: "", amount: "", method: "check", date: new Date().toISOString().split("T")[0] });
   };
 
+  const { firstName } = useFirstName(user);
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
-
-  const firstName = user?.full_name?.split(" ")[0] || appUser?.business_name?.split(" ")[0] || "there";
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">

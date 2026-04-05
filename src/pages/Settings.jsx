@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import { useFirstName } from "@/hooks/useFirstName";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -86,6 +88,14 @@ export default function Settings() {
       {/* Account tab */}
       {tab === "account" && (
         <div className="space-y-4">
+          {!user?.full_name?.trim() && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-sm font-bold text-yellow-700">!</span>
+              </div>
+              <p className="text-sm" style={{ color: '#92400E' }}>Add your name to personalize your experience</p>
+            </div>
+          )}
           <div className="bg-card border border-border rounded-xl p-6 space-y-4">
             <h2 className="font-semibold" style={{ color: '#1A1A2E' }}>Account Info</h2>
             <div><Label>Company Name</Label><Input className="mt-1" value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} /></div>
@@ -106,7 +116,7 @@ export default function Settings() {
 
           <div className="bg-card border border-border rounded-xl p-6 space-y-2">
            <h2 className="font-semibold" style={{ color: '#1A1A2E' }}>Your Profile</h2>
-           <p className="text-sm" style={{ color: '#4B5563' }}>Name: {user?.full_name}</p>
+           <p className="text-sm" style={{ color: '#4B5563' }}>Name: {user?.full_name || "(Not set - add your name above)"}</p>
            <p className="text-sm" style={{ color: '#4B5563' }}>Email: {user?.email}</p>
            <p className="text-sm" style={{ color: '#4B5563' }}>Role: {user?.role}</p>
           </div>
