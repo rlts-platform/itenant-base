@@ -1,0 +1,47 @@
+{
+  "name": "Inquiry",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string"
+    },
+    "business_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "units_count": {
+      "type": "number"
+    },
+    "message": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "New",
+        "Contacted",
+        "Qualified",
+        "Closed"
+      ],
+      "default": "New"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "full_name",
+    "business_name",
+    "email",
+    "phone",
+    "units_count",
+    "submitted_at",
+    "status"
+  ]
+}

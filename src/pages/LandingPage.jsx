@@ -1,5 +1,6 @@
 import { base44 } from "@/api/base44Client";
-import { ShieldCheck, Zap, Wrench, BarChart3, Bot, CheckCircle2, Building2, Users, CreditCard, FolderOpen, MessageSquare, Bell } from "lucide-react";
+import { useState } from "react";
+import { ShieldCheck, Zap, Wrench, BarChart3, Bot, CheckCircle2, Building2, Users, CreditCard, FolderOpen, MessageSquare, Bell, X } from "lucide-react";
 
 const HERO_IMAGE = "https://media.base44.com/images/public/69d176412565789962328166/74bcfb124_Screenshot2026-04-05at22803AM.png";
 
@@ -19,10 +20,10 @@ const ROLES = [
 ];
 
 const PLANS = [
-  { name: "Starter", price: "$0", units: "Up to 3 units", features: ["Property & tenant profiles", "Maintenance tracking", "Rent logging", "Document storage"], highlight: false },
-  { name: "Growth", price: "$29", units: "Up to 15 units", features: ["Everything in Starter", "AI lease generator", "Automated reminders", "Financial reports"], highlight: true },
-  { name: "Pro", price: "$79", units: "Up to 50 units", features: ["Everything in Growth", "Team members", "Smart automations", "Custom branding"], highlight: false },
-  { name: "Enterprise", price: "Custom", units: "Unlimited", features: ["Everything in Pro", "Dedicated support", "API access", "White-label options"], highlight: false },
+  { name: "Starter", price: "$0", units: "Up to 3 units", features: ["Property & tenant profiles", "Maintenance tracking", "Rent logging", "Document storage"], highlight: false, isEnterprise: false },
+  { name: "Growth", price: "$29", units: "Up to 15 units", features: ["Everything in Starter", "AI lease generator", "Automated reminders", "Financial reports"], highlight: true, isEnterprise: false },
+  { name: "Pro", price: "$79", units: "Up to 50 units", features: ["Everything in Growth", "Team members", "Smart automations", "Custom branding"], highlight: false, isEnterprise: false },
+  { name: "Enterprise", price: "$299", units: "Unlimited", features: ["Everything in Pro", "White-label options", "Custom integrations", "Dedicated support"], highlight: false, isEnterprise: true },
 ];
 
 const TILES = [
@@ -35,6 +36,10 @@ const TILES = [
 export default function LandingPage() {
   const handleLogin = () => base44.auth.redirectToLogin();
   const handleSignup = () => base44.auth.redirectToLogin();
+  const [contactOpen, setContactOpen] = useState(false);
+  const [contactForm, setContactForm] = useState({ full_name: '', business_name: '', email: '', phone: '', units_count: '', message: '' });
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+  const [contactSuccess, setContactSuccess] = useState(false);
 
   return (
     <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#F4F3FF", color: "#1A1A2E", overflowX: "hidden" }}>
@@ -181,19 +186,94 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <button onClick={handleSignup} style={{
+                <button onClick={p.isEnterprise ? () => setContactOpen(true) : handleSignup} style={{
                   marginTop: 20, width: "100%", padding: "10px", borderRadius: 999, fontWeight: 700, fontSize: 14, cursor: "pointer",
-                  background: p.highlight ? "#7C6FCD" : "#fff",
-                  color: p.highlight ? "#fff" : "#7C6FCD",
-                  border: p.highlight ? "none" : "1px solid rgba(124,111,205,0.4)",
+                  background: p.isEnterprise ? "#fff" : p.highlight ? "#7C6FCD" : "#fff",
+                  color: p.isEnterprise ? "#7C6FCD" : p.highlight ? "#fff" : "#7C6FCD",
+                  border: p.isEnterprise ? "2px solid #7C6FCD" : p.highlight ? "none" : "1px solid rgba(124,111,205,0.4)",
                 }}>
-                  Get Started
+                  {p.isEnterprise ? "Contact Us" : "Get Started"}
                 </button>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Contact Us Modal */}
+      {contactOpen && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "20px" }}>
+          <div style={{ background: "#fff", borderRadius: 20, padding: "32px", maxWidth: 500, width: "100%", maxHeight: "90vh", overflow: "auto" }}>
+            {!contactSuccess ? (
+              <>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                  <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1A1A2E", margin: 0 }}>Enterprise Plan Inquiry</h2>
+                  <button onClick={() => setContactOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                    <X size={24} color="#6B7280" />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1A1A2E", marginBottom: 6 }}>Full Name *</label>
+                    <input type="text" placeholder="John Smith" value={contactForm.full_name} onChange={e => setContactForm(f => ({ ...f, full_name: e.target.value }))} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(124,111,205,0.3)", fontSize: 14, boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1A1A2E", marginBottom: 6 }}>Business Name *</label>
+                    <input type="text" placeholder="Your Company LLC" value={contactForm.business_name} onChange={e => setContactForm(f => ({ ...f, business_name: e.target.value }))} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(124,111,205,0.3)", fontSize: 14, boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1A1A2E", marginBottom: 6 }}>Email Address *</label>
+                    <input type="email" placeholder="john@company.com" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(124,111,205,0.3)", fontSize: 14, boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1A1A2E", marginBottom: 6 }}>Phone Number *</label>
+                    <input type="tel" placeholder="(555) 123-4567" value={contactForm.phone} onChange={e => setContactForm(f => ({ ...f, phone: e.target.value }))} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(124,111,205,0.3)", fontSize: 14, boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1A1A2E", marginBottom: 6 }}>Approximate Number of Units *</label>
+                    <input type="number" placeholder="50" value={contactForm.units_count} onChange={e => setContactForm(f => ({ ...f, units_count: e.target.value }))} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(124,111,205,0.3)", fontSize: 14, boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#1A1A2E", marginBottom: 6 }}>Message or Specific Needs</label>
+                    <textarea placeholder="Tell us about your needs..." value={contactForm.message} onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(124,111,205,0.3)", fontSize: 14, boxSizing: "border-box", minHeight: 100, fontFamily: "inherit", resize: "vertical" }} />
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
+                  <button onClick={() => setContactOpen(false)} style={{ flex: 1, padding: "12px", borderRadius: 999, background: "#fff", border: "1px solid rgba(124,111,205,0.4)", color: "#7C6FCD", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Cancel</button>
+                  <button onClick={async () => {
+                    if (!contactForm.full_name || !contactForm.business_name || !contactForm.email || !contactForm.phone || !contactForm.units_count) {
+                      alert("Please fill in all required fields");
+                      return;
+                    }
+                    setContactSubmitting(true);
+                    try {
+                      const res = await base44.functions.invoke('submitEnterpriseInquiry', contactForm);
+                      if (res.data?.success) {
+                        setContactSuccess(true);
+                      } else {
+                        alert("Error submitting inquiry. Please try again.");
+                      }
+                    } catch (error) {
+                      alert("Error submitting inquiry. Please try again.");
+                      console.error(error);
+                    }
+                    setContactSubmitting(false);
+                  }} disabled={contactSubmitting} style={{ flex: 1, padding: "12px", borderRadius: 999, background: "#7C6FCD", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", border: "none" }}>Send Inquiry</button>
+                </div>
+              </>
+            ) : (
+              <div style={{ textAlign: "center", padding: "20px 0" }}>
+                <div style={{ width: 60, height: 60, borderRadius: "50%", background: "rgba(34,197,94,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                  <CheckCircle2 size={32} color="#22C55E" />
+                </div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1A1A2E", marginBottom: 12 }}>Thank You</h3>
+                <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 24, lineHeight: 1.6 }}>We will be in touch within 24 hours to discuss your Enterprise plan.</p>
+                <button onClick={() => { setContactOpen(false); setContactSuccess(false); setContactForm({ full_name: '', business_name: '', email: '', phone: '', units_count: '', message: '' }); }} style={{ padding: "10px 24px", borderRadius: 999, background: "#7C6FCD", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", border: "none" }}>Close</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer style={{ background: "#F4F3FF", borderTop: "1px solid rgba(124,111,205,0.15)", padding: "32px 40px", textAlign: "center" }}>
