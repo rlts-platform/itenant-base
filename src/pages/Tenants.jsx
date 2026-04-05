@@ -14,11 +14,11 @@ import InvitesTab from "../components/tenants/InvitesTab";
 import MoveOutsTab from "../components/tenants/MoveOutsTab";
 
 const TABS = [
-  { id: "tenants", label: "All Tenants", icon: Users },
-  { id: "applications", label: "Applications", icon: ClipboardList },
-  { id: "invites", label: "Invites", icon: Clock },
-  { id: "moveouts", label: "Move Outs", icon: FileText },
-];
+{ id: "tenants", label: "All Tenants", icon: Users },
+{ id: "applications", label: "Applications", icon: ClipboardList },
+{ id: "invites", label: "Invites", icon: Clock },
+{ id: "moveouts", label: "Move Outs", icon: FileText }];
+
 
 export default function Tenants() {
   const [tenants, setTenants] = useState([]);
@@ -41,22 +41,22 @@ export default function Tenants() {
 
   const load = async () => {
     const [t, u, p, l, pay, inv, apps] = await Promise.all([
-      base44.entities.Tenant.list("-created_date"),
-      base44.entities.Unit.list(),
-      base44.entities.Property.list(),
-      base44.entities.Lease.list(),
-      base44.entities.Payment.list("-date", 200),
-      base44.entities.TenantInvite.list(),
-      base44.entities.RentalApplication.list("-created_date"),
-    ]);
-    setTenants(t); setUnits(u); setProperties(p); setLeases(l);
-    setPayments(pay); setInvites(inv); setApplications(apps);
+    base44.entities.Tenant.list("-created_date"),
+    base44.entities.Unit.list(),
+    base44.entities.Property.list(),
+    base44.entities.Lease.list(),
+    base44.entities.Payment.list("-date", 200),
+    base44.entities.TenantInvite.list(),
+    base44.entities.RentalApplication.list("-created_date")]
+    );
+    setTenants(t);setUnits(u);setProperties(p);setLeases(l);
+    setPayments(pay);setInvites(inv);setApplications(apps);
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {load();}, []);
   useEffect(() => {
-    if (location.state?.openAdd) { openAdd(); window.history.replaceState({}, ""); }
+    if (location.state?.openAdd) {openAdd();window.history.replaceState({}, "");}
   }, [location.state]);
 
   if (selectedId) return <TenantDetail tenantId={selectedId} onBack={() => setSelectedId(null)} />;
@@ -89,20 +89,20 @@ export default function Tenants() {
   };
 
   // Stats
-  const activeLeases = leases.filter(l => l.status === "active").length;
-  const pendingInvites = invites.filter(i => i.status === "pending").length;
-  const appsWaiting = applications.filter(a => a.status === "new" || a.status === "under_review").length;
+  const activeLeases = leases.filter((l) => l.status === "active").length;
+  const pendingInvites = invites.filter((i) => i.status === "pending").length;
+  const appsWaiting = applications.filter((a) => a.status === "new" || a.status === "under_review").length;
 
   const now = new Date();
   const thirtyDaysOut = new Date(now.getTime() + 30 * 86400000);
-  const moveOutCount = leases.filter(l => l.status === "active" && l.end_date && new Date(l.end_date) <= thirtyDaysOut).length;
+  const moveOutCount = leases.filter((l) => l.status === "active" && l.end_date && new Date(l.end_date) <= thirtyDaysOut).length;
 
   const stats = [
-    { label: "Total Tenants", value: tenants.length, color: "#7C6FCD" },
-    { label: "Active Leases", value: activeLeases, color: "#22C55E" },
-    { label: "Pending Invites", value: pendingInvites, color: "#F59E0B" },
-    { label: "Applications Waiting", value: appsWaiting, color: "#3B82F6" },
-  ];
+  { label: "Total Tenants", value: tenants.length, color: "#7C6FCD" },
+  { label: "Active Leases", value: activeLeases, color: "#22C55E" },
+  { label: "Pending Invites", value: pendingInvites, color: "#F59E0B" },
+  { label: "Applications Waiting", value: appsWaiting, color: "#3B82F6" }];
+
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
@@ -114,65 +114,65 @@ export default function Tenants() {
           <h1 className="text-2xl font-outfit font-bold">Tenant CRM</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Manage all tenants, applications, and move-outs</p>
         </div>
-        <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4"/>Add Tenant</Button>
+        <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Add Tenant</Button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((s, i) => (
-          <div key={i} className="bg-card border border-border rounded-xl p-5">
+        {stats.map((s, i) =>
+        <div key={i} className="bg-[hsl(var(--background-hsl))] p-5 rounded-xl border border-border">
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">{s.label}</p>
             <p className="text-3xl font-bold" style={{ color: s.color }}>{s.value}</p>
           </div>
-        ))}
+        )}
       </div>
 
       {/* Tabs */}
       <div className="flex border-b border-border gap-1">
-        {TABS.map(t => (
-          <button
-            key={t.id}
-            onClick={() => { setTab(t.id); setSearch(""); }}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all"
-            style={{
-              borderBottom: tab === t.id ? "2px solid #7C6FCD" : "2px solid transparent",
-              color: tab === t.id ? "#7C6FCD" : "#6B7280",
-            }}
-          >
+        {TABS.map((t) =>
+        <button
+          key={t.id}
+          onClick={() => {setTab(t.id);setSearch("");}}
+          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all"
+          style={{
+            borderBottom: tab === t.id ? "2px solid #7C6FCD" : "2px solid transparent",
+            color: tab === t.id ? "#7C6FCD" : "#6B7280"
+          }}>
+          
             <t.icon className="w-4 h-4" />
             {t.label}
           </button>
-        ))}
+        )}
       </div>
 
       {/* Tab Content */}
-      {tab === "tenants" && (
-        <AllTenantsTab
-          tenants={tenants} units={units} properties={properties}
-          leases={leases} payments={payments} invites={invites}
-          onSelect={setSelectedId} onResendInvite={resendInvite} sendingInvite={sendingInvite}
-          search={search} setSearch={setSearch}
-          filterProperty={filterProperty} setFilterProperty={setFilterProperty}
-        />
-      )}
-      {tab === "applications" && (
-        <ApplicationsTab
-          applications={applications} properties={properties}
-          onRefresh={load} search={search} setSearch={setSearch}
-        />
-      )}
-      {tab === "invites" && (
-        <InvitesTab
-          invites={invites} tenants={tenants}
-          onRefresh={load} search={search} setSearch={setSearch}
-        />
-      )}
-      {tab === "moveouts" && (
-        <MoveOutsTab
-          tenants={tenants} leases={leases} units={units} properties={properties}
-          onRefresh={load}
-        />
-      )}
+      {tab === "tenants" &&
+      <AllTenantsTab
+        tenants={tenants} units={units} properties={properties}
+        leases={leases} payments={payments} invites={invites}
+        onSelect={setSelectedId} onResendInvite={resendInvite} sendingInvite={sendingInvite}
+        search={search} setSearch={setSearch}
+        filterProperty={filterProperty} setFilterProperty={setFilterProperty} />
+
+      }
+      {tab === "applications" &&
+      <ApplicationsTab
+        applications={applications} properties={properties}
+        onRefresh={load} search={search} setSearch={setSearch} />
+
+      }
+      {tab === "invites" &&
+      <InvitesTab
+        invites={invites} tenants={tenants}
+        onRefresh={load} search={search} setSearch={setSearch} />
+
+      }
+      {tab === "moveouts" &&
+      <MoveOutsTab
+        tenants={tenants} leases={leases} units={units} properties={properties}
+        onRefresh={load} />
+
+      }
 
       {/* Add/Edit Tenant Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -180,15 +180,15 @@ export default function Tenants() {
           <DialogHeader><DialogTitle>{editing ? "Edit Tenant" : "Add Tenant"}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>First Name</Label><Input className="mt-1" value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} /></div>
-              <div><Label>Last Name</Label><Input className="mt-1" value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} /></div>
+              <div><Label>First Name</Label><Input className="mt-1" value={form.first_name} onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))} /></div>
+              <div><Label>Last Name</Label><Input className="mt-1" value={form.last_name} onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))} /></div>
             </div>
-            <div><Label>Email</Label><Input className="mt-1" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
-            <div><Label>Phone</Label><Input className="mt-1" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
+            <div><Label>Email</Label><Input className="mt-1" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} /></div>
+            <div><Label>Phone</Label><Input className="mt-1" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} /></div>
             <div><Label>Unit</Label>
-              <Select value={form.unit_id} onValueChange={v => setForm(f => ({ ...f, unit_id: v }))}>
+              <Select value={form.unit_id} onValueChange={(v) => setForm((f) => ({ ...f, unit_id: v }))}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="Select unit" /></SelectTrigger>
-                <SelectContent>{units.map(u => <SelectItem key={u.id} value={u.id}>Unit {u.unit_number}</SelectItem>)}</SelectContent>
+                <SelectContent>{units.map((u) => <SelectItem key={u.id} value={u.id}>Unit {u.unit_number}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>
@@ -198,6 +198,6 @@ export default function Tenants() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 }
