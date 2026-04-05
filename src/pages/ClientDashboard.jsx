@@ -106,10 +106,10 @@ export default function ClientDashboard() {
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-        <h1 className="text-3xl font-outfit font-800 text-foreground leading-tight">
+        <h1 className="text-3xl font-outfit font-800 leading-tight" style={{ color: '#1A1A2E' }}>
           Welcome back,<br />{firstName}
         </h1>
-        <p className="text-muted-foreground text-sm mt-1.5">Here's what's happening with your properties today</p>
+        <p className="text-sm mt-1.5" style={{ color: '#6B7280' }}>Here's what's happening with your properties today</p>
       </motion.div>
 
       <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -120,8 +120,8 @@ export default function ClientDashboard() {
             <motion.div key={c.key} variants={item}>
               <Link to={c.to} className="flex items-center justify-between bg-white rounded-2xl border border-border p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">{c.label}</p>
-                  <p className="text-3xl font-outfit font-800 text-foreground">{display}</p>
+                  <p className="text-sm mb-1" style={{ color: '#6B7280' }}>{c.label}</p>
+                  <p className="text-3xl font-outfit font-800" style={{ color: '#1A1A2E' }}>{display}</p>
                 </div>
                 <div className={`w-14 h-14 rounded-2xl ${c.bg} flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-200`}>
                   <c.icon className="w-7 h-7 text-white" />
@@ -134,9 +134,9 @@ export default function ClientDashboard() {
         <motion.div variants={item}>
           <Link to="/payments" className="flex items-center justify-between bg-white rounded-2xl border border-border p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Overdue Rent</p>
-              <p className="text-3xl font-outfit font-800 text-foreground">{overdueCount}</p>
-              {overdueAmount > 0 && <p className="text-xs text-red-500 font-medium mt-0.5">${overdueAmount.toLocaleString()} outstanding</p>}
+              <p className="text-sm mb-1" style={{ color: '#6B7280' }}>Overdue Rent</p>
+              <p className="text-3xl font-outfit font-800" style={{ color: '#1A1A2E' }}>{overdueCount}</p>
+              {overdueAmount > 0 && <p className="text-xs font-medium mt-0.5" style={{ color: '#EF4444' }}>${overdueAmount.toLocaleString()} outstanding</p>}
             </div>
             <div className="w-14 h-14 rounded-2xl bg-red-500 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-200">
               <AlertTriangle className="w-7 h-7 text-white" />
@@ -147,7 +147,7 @@ export default function ClientDashboard() {
 
       {/* Quick Actions */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.3 }}>
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Quick Actions</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wide mb-3" style={{ color: '#6B7280' }}>Quick Actions</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <button
             onClick={() => navigate("/properties", { state: { openAdd: true } })}
@@ -250,11 +250,11 @@ export default function ClientDashboard() {
       <div className="grid lg:grid-cols-2 gap-6">
         <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.35 }} className="bg-white rounded-2xl border border-border p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-foreground">Recent Payments</h2>
-            <Link to="/payments" className="text-xs text-primary hover:underline font-medium">View all</Link>
+            <h2 className="font-semibold" style={{ color: '#1A1A2E' }}>Recent Payments</h2>
+            <Link to="/payments" className="text-xs hover:underline font-medium" style={{ color: '#7C6FCD' }}>View all</Link>
           </div>
           {recentPayments.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">No payments yet</p>
+            <p className="text-sm text-center py-8" style={{ color: '#6B7280' }}>No payments yet</p>
           ) : (
             <div className="space-y-1">
               {recentPayments.map((p, i) => (
@@ -265,13 +265,13 @@ export default function ClientDashboard() {
                       <CheckCircle className="w-4 h-4 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold">${p.amount?.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{p.method?.replace("_"," ")}</p>
+                      <p className="text-sm font-semibold" style={{ color: '#1A1A2E' }}>${p.amount?.toLocaleString()}</p>
+                      <p className="text-xs capitalize" style={{ color: '#6B7280' }}>{p.method?.replace("_"," ")}</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${p.status === "confirmed" ? "bg-emerald-100 text-emerald-700" : p.status === "failed" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"}`}>{p.status}</span>
-                    <p className="text-xs text-muted-foreground mt-0.5">{p.date}</p>
+                    <p className="text-xs mt-0.5" style={{ color: '#6B7280' }}>{p.date}</p>
                   </div>
                 </motion.div>
               ))}
@@ -281,11 +281,11 @@ export default function ClientDashboard() {
 
         <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35, duration: 0.35 }} className="bg-white rounded-2xl border border-border p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-foreground">Open Work Orders</h2>
-            <Link to="/maintenance" className="text-xs text-primary hover:underline font-medium">View all</Link>
+            <h2 className="font-semibold" style={{ color: '#1A1A2E' }}>Open Work Orders</h2>
+            <Link to="/maintenance" className="text-xs hover:underline font-medium" style={{ color: '#7C6FCD' }}>View all</Link>
           </div>
           {openOrders.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">No open work orders 🎉</p>
+            <p className="text-sm text-center py-8" style={{ color: '#6B7280' }}>No open work orders 🎉</p>
           ) : (
             <div className="space-y-1">
               {openOrders.map((o, i) => (

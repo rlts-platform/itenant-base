@@ -72,16 +72,16 @@ export default function RevenueSection({ dateRange }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Revenue</h2>
+      <h2 className="text-xl font-semibold" style={{ color: '#1A1A2E' }}>Revenue</h2>
       
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="w-4 h-4 text-primary" />
-            <span className="text-xs font-semibold text-muted-foreground">This Month</span>
+            <span className="text-xs font-semibold" style={{ color: '#6B7280' }}>This Month</span>
           </div>
-          <p className="text-2xl font-bold">${thisMonth.toLocaleString()}</p>
+          <p className="text-2xl font-bold" style={{ color: '#1A1A2E' }}>${thisMonth.toLocaleString()}</p>
           <p className={`text-xs mt-1 ${pctChange >= 0 ? "text-emerald-600" : "text-red-600"}`}>
             {pctChange >= 0 ? "↑" : "↓"} {Math.abs(pctChange)}% vs last month
           </p>
@@ -90,21 +90,21 @@ export default function RevenueSection({ dateRange }) {
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-primary" />
-            <span className="text-xs font-semibold text-muted-foreground">Projected Next Month</span>
+            <span className="text-xs font-semibold" style={{ color: '#6B7280' }}>Projected Next Month</span>
           </div>
-          <p className="text-2xl font-bold">${nextMonth.toLocaleString()}</p>
+          <p className="text-2xl font-bold" style={{ color: '#1A1A2E' }}>${nextMonth.toLocaleString()}</p>
         </div>
 
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
-          <span className="text-xs font-semibold text-muted-foreground">6-Month Total</span>
-          <p className="text-2xl font-bold mt-2">${data.trendData.reduce((s, d) => s + d.amount, 0).toLocaleString()}</p>
+          <span className="text-xs font-semibold" style={{ color: '#6B7280' }}>6-Month Total</span>
+          <p className="text-2xl font-bold mt-2" style={{ color: '#1A1A2E' }}>${data.trendData.reduce((s, d) => s + d.amount, 0).toLocaleString()}</p>
         </div>
       </div>
 
       {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
-          <h3 className="font-semibold text-sm mb-4">6-Month Trend</h3>
+          <h3 className="font-semibold text-sm mb-4" style={{ color: '#1A1A2E' }}>6-Month Trend</h3>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={data.trendData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(124,111,205,0.1)" />
@@ -117,7 +117,7 @@ export default function RevenueSection({ dateRange }) {
         </div>
 
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
-          <h3 className="font-semibold text-sm mb-4">Revenue by Property</h3>
+          <h3 className="font-semibold text-sm mb-4" style={{ color: '#1A1A2E' }}>Revenue by Property</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={data.breakdownData.slice(0, 6)} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(124,111,205,0.1)" />

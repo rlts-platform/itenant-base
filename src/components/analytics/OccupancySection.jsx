@@ -57,14 +57,14 @@ export default function OccupancySection({ dateRange }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Occupancy</h2>
+      <h2 className="text-xl font-semibold" style={{ color: '#1A1A2E' }}>Occupancy</h2>
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
-          <span className="text-xs font-semibold text-muted-foreground">Portfolio Occupancy Rate</span>
-          <p className="text-3xl font-bold mt-2 text-primary">{data.occupancy}%</p>
-          <p className="text-xs text-muted-foreground mt-1">{data.occupied} of {data.occupied + data.vacant} units occupied</p>
+          <span className="text-xs font-semibold" style={{ color: '#6B7280' }}>Portfolio Occupancy Rate</span>
+          <p className="text-3xl font-bold mt-2" style={{ color: '#7C6FCD' }}>{data.occupancy}%</p>
+          <p className="text-xs mt-1" style={{ color: '#6B7280' }}>{data.occupied} of {data.occupied + data.vacant} units occupied</p>
         </div>
 
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
@@ -80,18 +80,18 @@ export default function OccupancySection({ dateRange }) {
 
       {/* By property */}
       <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
-        <h3 className="font-semibold text-sm mb-3">Occupancy by Property</h3>
+        <h3 className="font-semibold text-sm mb-3" style={{ color: '#1A1A2E' }}>Occupancy by Property</h3>
         <div className="space-y-3">
           {data.byProperty.map(p => (
             <div key={p.name} className="space-y-1">
               <div className="flex justify-between text-xs">
-                <span className="font-medium">{p.name}</span>
-                <span className="text-muted-foreground">{p.occupied}/{p.total} units</span>
+                <span className="font-medium" style={{ color: '#1A1A2E' }}>{p.name}</span>
+                <span style={{ color: '#6B7280' }}>{p.occupied}/{p.total} units</span>
               </div>
               <div className="w-full bg-secondary rounded-full h-2">
                 <div className="bg-primary h-2 rounded-full" style={{ width: `${p.rate}%` }} />
               </div>
-              <span className="text-xs text-primary font-semibold">{p.rate}%</span>
+              <span className="text-xs font-semibold" style={{ color: '#7C6FCD' }}>{p.rate}%</span>
             </div>
           ))}
         </div>
@@ -102,10 +102,10 @@ export default function OccupancySection({ dateRange }) {
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-4 h-4 text-amber-600" />
-            <h3 className="font-semibold text-sm text-amber-900">Units at Risk ({data.unitsAtRisk.length})</h3>
+            <h3 className="font-semibold text-sm" style={{ color: '#92400E' }}>Units at Risk ({data.unitsAtRisk.length})</h3>
           </div>
-          <p className="text-xs text-amber-800 mb-3">Leases expiring within 60 days with no renewal started</p>
-          <div className="space-y-1 text-xs text-amber-900">
+          <p className="text-xs mb-3" style={{ color: '#B45309' }}>Leases expiring within 60 days with no renewal started</p>
+          <div className="space-y-1 text-xs" style={{ color: '#92400E' }}>
             {data.unitsAtRisk.map(l => (
               <div key={l.id}>• Lease ending {l.end_date}</div>
             ))}

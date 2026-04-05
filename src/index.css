@@ -8,6 +8,9 @@
   :root {
     --background: 245 60% 98%;
     --foreground: 240 43% 14%;
+    --text-primary: 240 43% 14%;
+    --text-body: 217 13% 33%;
+    --text-secondary: 217 14% 43%;
     --card: 0 0% 100%;
     --card-foreground: 240 43% 14%;
     --popover: 0 0% 100%;

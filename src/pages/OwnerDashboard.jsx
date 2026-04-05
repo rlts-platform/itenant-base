@@ -88,8 +88,8 @@ export default function OwnerDashboard() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-outfit font-bold">Platform Overview</h1>
-        <p className="text-sm text-muted-foreground mt-1">All clients and revenue at a glance</p>
+        <h1 className="text-2xl font-outfit font-bold" style={{ color: '#1A1A2E' }}>Platform Overview</h1>
+        <p className="text-sm mt-1" style={{ color: '#6B7280' }}>All clients and revenue at a glance</p>
       </div>
 
       {/* KPI Cards */}
@@ -105,15 +105,15 @@ export default function OwnerDashboard() {
             <div className={`w-9 h-9 rounded-lg ${c.bg} flex items-center justify-center mb-3`}>
               <c.icon className={`w-4 h-4 ${c.color}`} />
             </div>
-            <div className="text-2xl font-outfit font-bold">{c.value}</div>
-            <div className="text-xs text-muted-foreground mt-0.5">{c.label}</div>
+            <div className="text-2xl font-outfit font-bold" style={{ color: '#1A1A2E' }}>{c.value}</div>
+            <div className="text-xs mt-0.5" style={{ color: '#6B7280' }}>{c.label}</div>
           </div>
         ))}
       </div>
 
       {/* MRR Trend */}
       <div className="bg-card border border-border rounded-xl p-5">
-        <h2 className="font-semibold mb-4">MRR Trend — Last 12 Months</h2>
+        <h2 className="font-semibold mb-4" style={{ color: '#1A1A2E' }}>MRR Trend — Last 12 Months</h2>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={mrrTrend}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -128,7 +128,7 @@ export default function OwnerDashboard() {
       <div className="grid lg:grid-cols-2 gap-6">
         {/* New Clients Bar */}
         <div className="bg-card border border-border rounded-xl p-5">
-          <h2 className="font-semibold mb-4">New Clients per Month</h2>
+          <h2 className="font-semibold mb-4" style={{ color: '#1A1A2E' }}>New Clients per Month</h2>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={newByMonth}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -142,9 +142,9 @@ export default function OwnerDashboard() {
 
         {/* Plan Distribution Pie */}
         <div className="bg-card border border-border rounded-xl p-5">
-          <h2 className="font-semibold mb-4">Plan Distribution</h2>
+          <h2 className="font-semibold mb-4" style={{ color: '#1A1A2E' }}>Plan Distribution</h2>
           {pieData.length === 0 ? (
-            <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">No active subscriptions</div>
+            <div className="flex items-center justify-center h-48 text-sm" style={{ color: '#6B7280' }}>No active subscriptions</div>
           ) : (
             <div className="flex items-center gap-4">
               <ResponsiveContainer width="55%" height={200}>
@@ -157,7 +157,7 @@ export default function OwnerDashboard() {
               </ResponsiveContainer>
               <div className="space-y-2">
                 {pieData.map(p => (
-                  <div key={p.name} className="flex items-center gap-2 text-sm">
+                  <div key={p.name} className="flex items-center gap-2 text-sm" style={{ color: '#1A1A2E' }}>
                     <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
                     <span>{p.name}</span>
                     <span className="font-semibold ml-1">{p.value}</span>
@@ -171,14 +171,14 @@ export default function OwnerDashboard() {
 
       {/* Platform Analytics */}
       <div className="space-y-4">
-        <h2 className="font-semibold">Platform Analytics</h2>
+        <h2 className="font-semibold" style={{ color: '#1A1A2E' }}>Platform Analytics</h2>
         {(() => {
           // Calculate platform-wide metrics
           const allPayments = accounts.flatMap(a => []);
           return (
             <div className="grid lg:grid-cols-2 gap-4">
               <div className="bg-card border border-border rounded-xl p-5">
-                <h3 className="font-semibold text-sm mb-4">Platform Revenue Trend</h3>
+                <h3 className="font-semibold text-sm mb-4" style={{ color: '#1A1A2E' }}>Platform Revenue Trend</h3>
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={mrrTrend}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -190,9 +190,9 @@ export default function OwnerDashboard() {
                 </ResponsiveContainer>
               </div>
               <div className="bg-card border border-border rounded-xl p-5">
-                <h3 className="font-semibold text-sm mb-4">Total Work Orders ({accounts.length} clients)</h3>
-                <div className="text-3xl font-bold text-primary">{stats.units}</div>
-                <p className="text-xs text-muted-foreground mt-1">Across all client accounts</p>
+                <h3 className="font-semibold text-sm mb-4" style={{ color: '#1A1A2E' }}>Total Work Orders ({accounts.length} clients)</h3>
+                <div className="text-3xl font-bold" style={{ color: '#7C6FCD' }}>{stats.units}</div>
+                <p className="text-xs mt-1" style={{ color: '#6B7280' }}>Across all client accounts</p>
               </div>
             </div>
           );
@@ -202,11 +202,11 @@ export default function OwnerDashboard() {
       {/* Clients Table */}
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-          <h2 className="font-semibold">All Clients</h2>
-          <a href="/owner/clients" className="text-xs text-primary hover:underline font-medium">Manage all →</a>
+          <h2 className="font-semibold" style={{ color: '#1A1A2E' }}>All Clients</h2>
+          <a href="/owner/clients" className="text-xs hover:underline font-medium" style={{ color: '#7C6FCD' }}>Manage all →</a>
         </div>
         {accounts.length === 0 ? (
-          <div className="p-16 text-center"><Users2 className="w-12 h-12 text-muted-foreground mx-auto mb-3" /><p className="text-muted-foreground">No clients yet</p></div>
+          <div className="p-16 text-center"><Users2 className="w-12 h-12 mx-auto mb-3" style={{ color: '#6B7280' }} /><p style={{ color: '#6B7280' }}>No clients yet</p></div>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-secondary/50 text-muted-foreground text-xs">
@@ -215,12 +215,12 @@ export default function OwnerDashboard() {
             <tbody>
               {accounts.slice(0, 8).map((a, i) => (
                 <tr key={a.id} className={i % 2 === 0 ? "bg-card" : "bg-secondary/20"}>
-                  <td className="px-4 py-3 font-medium">{a.company_name}</td>
-                  <td className="px-4 py-3 capitalize">{a.plan_tier || "—"}</td>
+                  <td className="px-4 py-3 font-medium" style={{ color: '#1A1A2E' }}>{a.company_name}</td>
+                  <td className="px-4 py-3 capitalize" style={{ color: '#4B5563' }}>{a.plan_tier || "—"}</td>
                   <td className="px-4 py-3"><Badge variant={statusColor[a.subscription_status] || "secondary"}>{a.subscription_status || "—"}</Badge></td>
-                  <td className="px-4 py-3 font-medium text-emerald-700">{a.mrr ? fmt(a.mrr) : "—"}</td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">{a.owner_email}</td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">{a.created_date ? new Date(a.created_date).toLocaleDateString() : "—"}</td>
+                  <td className="px-4 py-3 font-medium" style={{ color: '#22C55E' }}>{a.mrr ? fmt(a.mrr) : "—"}</td>
+                  <td className="px-4 py-3 text-xs" style={{ color: '#4B5563' }}>{a.owner_email}</td>
+                  <td className="px-4 py-3 text-xs" style={{ color: '#4B5563' }}>{a.created_date ? new Date(a.created_date).toLocaleDateString() : "—"}</td>
                 </tr>
               ))}
             </tbody>

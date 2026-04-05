@@ -54,10 +54,10 @@ export default function AnalyticsPreview() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Analytics Snapshot</h2>
+      <h2 className="text-lg font-semibold" style={{ color: '#1A1A2E' }}>Analytics Snapshot</h2>
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="bg-white border border-border rounded-xl p-4 shadow-sm">
-          <h3 className="text-sm font-semibold mb-3">6-Month Revenue</h3>
+          <h3 className="text-sm font-semibold mb-3" style={{ color: '#1A1A2E' }}>6-Month Revenue</h3>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={data.trendData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(124,111,205,0.1)" />
@@ -70,7 +70,7 @@ export default function AnalyticsPreview() {
         </div>
 
         <div className="bg-white border border-border rounded-xl p-4 shadow-sm">
-          <h3 className="text-sm font-semibold mb-3">Portfolio Occupancy: {data.occupancy}%</h3>
+          <h3 className="text-sm font-semibold mb-3" style={{ color: '#1A1A2E' }}>Portfolio Occupancy: {data.occupancy}%</h3>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie data={pieData} cx="50%" cy="50%" innerRadius={40} outerRadius={60} dataKey="value" label={false}>

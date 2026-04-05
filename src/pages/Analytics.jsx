@@ -12,8 +12,8 @@ export default function Analytics() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-outfit font-bold">Analytics</h1>
-        <p className="text-sm text-muted-foreground mt-1">View detailed insights across your portfolio</p>
+        <h1 className="text-2xl font-outfit font-bold" style={{ color: '#1A1A2E' }}>Analytics</h1>
+        <p className="text-sm mt-1" style={{ color: '#6B7280' }}>View detailed insights across your portfolio</p>
       </div>
 
       {/* Date range filter */}

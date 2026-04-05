@@ -67,7 +67,7 @@ export default function Settings() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6">
-      <div><h1 className="text-2xl font-outfit font-bold">Settings</h1><p className="text-sm text-muted-foreground mt-1">Manage your account, integrations, and preferences</p></div>
+      <div><h1 className="text-2xl font-outfit font-bold" style={{ color: '#1A1A2E' }}>Settings</h1><p className="text-sm mt-1" style={{ color: '#6B7280' }}>Manage your account, integrations, and preferences</p></div>
 
       {/* Tab bar */}
       <div className="flex gap-1 bg-secondary/50 rounded-xl p-1 w-fit flex-wrap">
@@ -75,7 +75,8 @@ export default function Settings() {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.id ? "bg-white shadow text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.id ? "bg-white shadow" : "hover:"}`}
+            style={tab === t.id ? { color: '#1A1A2E' } : { color: '#6B7280' }}
           >
             <t.icon className="w-3.5 h-3.5" /> {t.label}
           </button>
@@ -86,7 +87,7 @@ export default function Settings() {
       {tab === "account" && (
         <div className="space-y-4">
           <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-            <h2 className="font-semibold">Account Info</h2>
+            <h2 className="font-semibold" style={{ color: '#1A1A2E' }}>Account Info</h2>
             <div><Label>Company Name</Label><Input className="mt-1" value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} /></div>
             <div><Label>Plan</Label>
               <Select value={form.plan_tier} onValueChange={v => setForm(f => ({ ...f, plan_tier: v }))}>
@@ -104,15 +105,15 @@ export default function Settings() {
           </div>
 
           <div className="bg-card border border-border rounded-xl p-6 space-y-2">
-           <h2 className="font-semibold">Your Profile</h2>
-           <p className="text-sm text-muted-foreground">Name: {user?.full_name}</p>
-           <p className="text-sm text-muted-foreground">Email: {user?.email}</p>
-           <p className="text-sm text-muted-foreground">Role: {user?.role}</p>
+           <h2 className="font-semibold" style={{ color: '#1A1A2E' }}>Your Profile</h2>
+           <p className="text-sm" style={{ color: '#4B5563' }}>Name: {user?.full_name}</p>
+           <p className="text-sm" style={{ color: '#4B5563' }}>Email: {user?.email}</p>
+           <p className="text-sm" style={{ color: '#4B5563' }}>Role: {user?.role}</p>
           </div>
 
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 space-y-4">
-           <h2 className="font-semibold text-red-900">Danger Zone</h2>
-           <p className="text-sm text-red-800">Permanently delete your account and all associated data. This action cannot be undone.</p>
+           <h2 className="font-semibold" style={{ color: '#7F1D1D' }}>Danger Zone</h2>
+           <p className="text-sm" style={{ color: '#991B1B' }}>Permanently delete your account and all associated data. This action cannot be undone.</p>
            <Button onClick={() => setDeleteDialogOpen(true)} variant="destructive" className="gap-2">
              <Trash2 className="w-4 h-4" /> Delete Account
            </Button>

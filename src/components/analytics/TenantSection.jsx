@@ -58,23 +58,23 @@ export default function TenantSection({ dateRange }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Tenant Performance</h2>
+      <h2 className="text-xl font-semibold" style={{ color: '#1A1A2E' }}>Tenant Performance</h2>
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
-          <span className="text-xs font-semibold text-muted-foreground">On-Time Payment Rate</span>
-          <p className="text-3xl font-bold mt-2 text-primary">{data.onTimeRate}%</p>
+          <span className="text-xs font-semibold" style={{ color: '#6B7280' }}>On-Time Payment Rate</span>
+          <p className="text-3xl font-bold mt-2" style={{ color: '#7C6FCD' }}>{data.onTimeRate}%</p>
         </div>
 
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
-          <span className="text-xs font-semibold text-muted-foreground">Tenant Retention (12mo)</span>
-          <p className="text-3xl font-bold mt-2 text-primary">{data.retentionRate}%</p>
+          <span className="text-xs font-semibold" style={{ color: '#6B7280' }}>Tenant Retention (12mo)</span>
+          <p className="text-3xl font-bold mt-2" style={{ color: '#7C6FCD' }}>{data.retentionRate}%</p>
         </div>
 
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
-          <span className="text-xs font-semibold text-muted-foreground">Repeat Late Payers</span>
-          <p className="text-3xl font-bold mt-2">{data.topLate.length}</p>
+          <span className="text-xs font-semibold" style={{ color: '#6B7280' }}>Repeat Late Payers</span>
+          <p className="text-3xl font-bold mt-2" style={{ color: '#1A1A2E' }}>{data.topLate.length}</p>
         </div>
       </div>
 
@@ -83,9 +83,9 @@ export default function TenantSection({ dateRange }) {
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-4 h-4 text-amber-600" />
-            <h3 className="font-semibold text-sm text-amber-900">Top Late Payers</h3>
+            <h3 className="font-semibold text-sm" style={{ color: '#92400E' }}>Top Late Payers</h3>
           </div>
-          <div className="space-y-2 text-xs text-amber-900">
+          <div className="space-y-2 text-xs" style={{ color: '#92400E' }}>
             {data.topLate.map((t, i) => (
               <div key={i} className="flex justify-between">
                 <span>{t.name}</span>

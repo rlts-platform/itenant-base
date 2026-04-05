@@ -70,28 +70,28 @@ export default function MaintenanceSection({ dateRange }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Maintenance</h2>
+      <h2 className="text-xl font-semibold" style={{ color: '#1A1A2E' }}>Maintenance</h2>
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
             <Wrench className="w-4 h-4 text-primary" />
-            <span className="text-xs font-semibold text-muted-foreground">Total Estimated Cost</span>
+            <span className="text-xs font-semibold" style={{ color: '#6B7280' }}>Total Estimated Cost</span>
           </div>
-          <p className="text-2xl font-bold">${data.totalCost.toLocaleString()}</p>
+          <p className="text-2xl font-bold" style={{ color: '#1A1A2E' }}>${data.totalCost.toLocaleString()}</p>
         </div>
 
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
-          <span className="text-xs font-semibold text-muted-foreground">Avg Resolution Time</span>
-          <p className="text-2xl font-bold mt-2">{data.avgResTime} days</p>
+          <span className="text-xs font-semibold" style={{ color: '#6B7280' }}>Avg Resolution Time</span>
+          <p className="text-2xl font-bold mt-2" style={{ color: '#1A1A2E' }}>{data.avgResTime} days</p>
         </div>
       </div>
 
       {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
-          <h3 className="font-semibold text-sm mb-4">Work Orders by Status</h3>
+          <h3 className="font-semibold text-sm mb-4" style={{ color: '#1A1A2E' }}>Work Orders by Status</h3>
           <div className="flex items-center justify-center">
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -101,7 +101,7 @@ export default function MaintenanceSection({ dateRange }) {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex justify-center gap-4 mt-3 text-xs">
+          <div className="flex justify-center gap-4 mt-3 text-xs" style={{ color: '#1A1A2E' }}>
             {data.statusData.map(d => (
               <div key={d.name} className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full" style={{ background: d.fill }} />
@@ -112,7 +112,7 @@ export default function MaintenanceSection({ dateRange }) {
         </div>
 
         <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
-          <h3 className="font-semibold text-sm mb-4">Maintenance Spend (6 Months)</h3>
+          <h3 className="font-semibold text-sm mb-4" style={{ color: '#1A1A2E' }}>Maintenance Spend (6 Months)</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={data.spendData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(124,111,205,0.1)" />

@@ -85,7 +85,7 @@ export default function Layout() {
       <Link
         to={item.to}
         onClick={() => setMobileOpen(false)}
-        style={active ? { color: '#7C6FCD' } : { color: '#6B7280' }}
+        style={active ? { color: '#7C6FCD' } : { color: '#4B5563' }}
         className={cn(
           "relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
         )}
@@ -98,8 +98,8 @@ export default function Layout() {
             transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
           />
         )}
-        <item.icon className="relative w-4 h-4 shrink-0" style={{ color: active ? '#7C6FCD' : '#6B7280' }} />
-        <span className="relative text-sm font-medium">{item.label}</span>
+        <item.icon className="relative w-4 h-4 shrink-0" style={{ color: active ? '#7C6FCD' : '#4B5563' }} />
+        <span className="relative text-sm font-medium" style={{ color: active ? '#7C6FCD' : '#4B5563' }}>{item.label}</span>
       </Link>
     );
   };
@@ -124,13 +124,13 @@ export default function Layout() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold truncate" style={{ color: '#1A1A2E' }}>{user?.full_name}</p>
-            <p className="text-xs truncate" style={{ color: '#6B7280' }}>{user?.email}</p>
+            <p className="text-xs truncate" style={{ color: '#4B5563' }}>{user?.email}</p>
           </div>
         </div>
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2 rounded-xl w-full transition-all hover:bg-gray-50"
-          style={{ color: '#6B7280' }}
+          style={{ color: '#4B5563' }}
         >
           <LogOut className="w-4 h-4 shrink-0" />
           <span className="text-sm font-medium">Logout</span>

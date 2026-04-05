@@ -106,8 +106,8 @@ export default function Documents() {
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-outfit font-bold">Documents</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <h1 className="text-2xl font-outfit font-bold" style={{ color: '#1A1A2E' }}>Documents</h1>
+            <p className="text-sm mt-0.5" style={{ color: '#6B7280' }}>
               {selectedFolder ? (SUBCATEGORY_LABELS[selectedFolder] || selectedFolder) : "All Documents"} · {filteredDocs.length} files
             </p>
           </div>
@@ -123,7 +123,7 @@ export default function Documents() {
 
         {filteredDocs.length === 0 ? (
           <div className="bg-card border border-border rounded-xl p-16 text-center">
-            <p className="font-semibold text-muted-foreground">No documents in this folder</p>
+            <p className="font-semibold" style={{ color: '#6B7280' }}>No documents in this folder</p>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -165,9 +165,9 @@ export default function Documents() {
                       </Button>
                     </div>
                   </div>
-                  <p className="font-medium text-sm truncate">{d.file_name}</p>
-                  <p className="text-xs text-muted-foreground">{tenantName(d.tenant_id) || propName(d.property_id) || "General"}</p>
-                  {d.body_text && <p className="text-xs text-muted-foreground italic line-clamp-2">{d.body_text.substring(0, 100)}…</p>}
+                  <p className="font-medium text-sm truncate" style={{ color: '#1A1A2E' }}>{d.file_name}</p>
+                  <p className="text-xs" style={{ color: '#6B7280' }}>{tenantName(d.tenant_id) || propName(d.property_id) || "General"}</p>
+                  {d.body_text && <p className="text-xs italic line-clamp-2" style={{ color: '#6B7280' }}>{d.body_text.substring(0, 100)}…</p>}
                 </div>
               );
             })}
