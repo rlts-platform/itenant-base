@@ -82,5 +82,16 @@
   }
   input, textarea, select {
     color-scheme: light;
+    border: 1px solid #D1C8F5 !important;
+    background-color: #fff !important;
+    color: #1A1A2E !important;
+  }
+  input::placeholder, textarea::placeholder {
+    color: #9CA3AF !important;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: #7C6FCD !important;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(124,111,205,0.15) !important;
   }
 }

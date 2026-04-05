@@ -139,7 +139,12 @@ export default function Layout() {
   const pageKey = location.pathname;
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#F4F3FF' }}>
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#F4F3FF', position: 'relative' }}>
+      {/* Purple blur blobs — both sides, fixed behind all content */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -150, left: -150, width: 600, height: 600, borderRadius: '50%', background: 'rgba(124,111,205,0.18)', filter: 'blur(100px)' }} />
+        <div style={{ position: 'absolute', bottom: -150, right: -150, width: 600, height: 600, borderRadius: '50%', background: 'rgba(124,111,205,0.18)', filter: 'blur(100px)' }} />
+      </div>
       {/* Desktop Sidebar */}
       <div className="hidden md:flex shrink-0 w-60">
         <SidebarContent />

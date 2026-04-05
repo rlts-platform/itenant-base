@@ -86,10 +86,11 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route path="/landing" element={<LandingPage />} />
-        <Route path="/" element={<ClientDashboard />} />
+  <Routes>
+    {/* Standalone public routes — no sidebar */}
+    <Route path="/landing" element={<LandingPage />} />
+    <Route element={<Layout />}>
+      <Route path="/" element={<ClientDashboard />} />
         <Route path="/properties" element={<Properties />} />
         <Route path="/units" element={<Units />} />
         <Route path="/tenants" element={<Tenants />} />

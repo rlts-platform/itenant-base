@@ -39,10 +39,10 @@ export default function LandingPage() {
   return (
     <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#F4F3FF", color: "#1A1A2E", overflowX: "hidden" }}>
 
-      {/* Background blobs */}
+      {/* Background blobs — both sides */}
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: -120, left: -120, width: 500, height: 500, borderRadius: "50%", background: "rgba(124,111,205,0.12)", filter: "blur(80px)" }} />
-        <div style={{ position: "absolute", bottom: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: "rgba(124,111,205,0.10)", filter: "blur(80px)" }} />
+        <div style={{ position: "absolute", top: -150, left: -150, width: 600, height: 600, borderRadius: "50%", background: "rgba(124,111,205,0.18)", filter: "blur(100px)" }} />
+        <div style={{ position: "absolute", bottom: -150, right: -150, width: 600, height: 600, borderRadius: "50%", background: "rgba(124,111,205,0.18)", filter: "blur(100px)" }} />
       </div>
 
       {/* Header */}
@@ -67,17 +67,17 @@ export default function LandingPage() {
       <section style={{ position: "relative", minHeight: 620, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
         {/* Hero bg image */}
         <div style={{ position: "absolute", inset: 0, backgroundImage: `url(${HERO_IMAGE})`, backgroundSize: "cover", backgroundPosition: "center", zIndex: 0 }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(244,243,255,0.82) 0%, rgba(244,243,255,0.93) 100%)", zIndex: 1 }} />
+        <div style={{ position: "absolute", inset: 0, background: "rgba(13,15,20,0.85)", zIndex: 1 }} />
 
         <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "80px 24px 60px", maxWidth: 720 }}>
           {/* Badge */}
-          <div style={{ display: "inline-block", marginBottom: 20, padding: "5px 16px", borderRadius: 999, background: "rgba(124,111,205,0.08)", border: "1px solid rgba(124,111,205,0.4)", color: "#7C6FCD", fontWeight: 600, fontSize: 13 }}>
+          <div style={{ display: "inline-block", marginBottom: 20, padding: "5px 16px", borderRadius: 999, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", fontWeight: 600, fontSize: 13 }}>
             • Smarter Property Management
           </div>
-          <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", fontWeight: 800, letterSpacing: "-1.5px", color: "#1A1A2E", lineHeight: 1.12, margin: "0 0 18px" }}>
+          <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", fontWeight: 800, letterSpacing: "-1.5px", color: "#fff", lineHeight: 1.12, margin: "0 0 18px" }}>
             Property Management.<br />Simplified.
           </h1>
-          <p style={{ fontSize: 18, color: "#6B7280", marginBottom: 36, lineHeight: 1.7 }}>
+          <p style={{ fontSize: 18, color: "rgba(255,255,255,0.75)", marginBottom: 36, lineHeight: 1.7 }}>
             The all-in-one platform for landlords, property managers, and tenants.<br />Automate the boring. Focus on what matters.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
@@ -90,7 +90,7 @@ export default function LandingPage() {
           </div>
           <div style={{ display: "flex", gap: 24, justifyContent: "center", marginTop: 24, flexWrap: "wrap" }}>
             {["No credit card required", "14-day free trial", "Cancel anytime"].map(t => (
-              <span key={t} style={{ fontSize: 13, color: "#6B7280", display: "flex", alignItems: "center", gap: 6 }}>
+              <span key={t} style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", gap: 6 }}>
                 <CheckCircle2 size={14} color="#22C55E" /> {t}
               </span>
             ))}
@@ -98,21 +98,22 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Feature tiles */}
+      {/* Feature tiles — single horizontal row */}
       <section style={{ background: "#F4F3FF", padding: "48px 40px" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 20 }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", gap: 16, justifyContent: "center", flexWrap: "nowrap", overflowX: "auto" }}>
           {TILES.map((tile, i) => (
             <div key={i} style={{
               background: "#fff", border: "1px solid rgba(124,111,205,0.18)", borderRadius: 16,
-              padding: "24px 20px", textAlign: "center",
+              padding: "20px 16px", textAlign: "center",
               boxShadow: "0 2px 16px rgba(124,111,205,0.08)",
               transform: `perspective(800px) rotateY(${i % 2 === 0 ? -3 : 3}deg) rotateX(2deg)`,
               transition: "transform 0.2s",
+              flex: "0 0 170px", width: 170,
             }}>
               <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(124,111,205,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
                 <tile.icon size={22} color="#7C6FCD" />
               </div>
-              <p style={{ fontWeight: 700, fontSize: 14, color: "#1A1A2E" }}>{tile.label}</p>
+              <p style={{ fontWeight: 700, fontSize: 13, color: "#1A1A2E" }}>{tile.label}</p>
             </div>
           ))}
         </div>
