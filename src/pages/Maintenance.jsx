@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Plus, Wrench, AlertTriangle, Pencil, Trash2, ShoppingCart, Loader2, Flame, History, Calendar, List } from "lucide-react";
+import { Plus, Wrench, AlertTriangle, Pencil, Trash2, ShoppingCart, Loader2, Flame, History, Calendar, List, Grid3x3 } from "lucide-react";
 import ActivityLogHistory from "../components/ActivityLogHistory";
 import FindSuppliesPanel from "../components/vendors/FindSuppliesPanel";
 import CalendarView from "../components/maintenance/CalendarView";
+import KanbanBoard from "../components/maintenance/KanbanBoard";
 import ScheduleRepairSection from "../components/maintenance/ScheduleRepairSection";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -28,7 +29,7 @@ export default function Maintenance() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [filter, setFilter] = useState("all");
-  const [viewMode, setViewMode] = useState("list"); // 'list' or 'calendar'
+  const [viewMode, setViewMode] = useState("list"); // 'list', 'calendar', or 'kanban'
   const [selectedDate, setSelectedDate] = useState(null);
   const [conflictWarning, setConflictWarning] = useState(false);
   const [form, setForm] = useState({ summary: "", category: "plumbing", urgency: "normal", status: "new", tenant_id: "", unit_id: "", property_id: "", permission_to_enter: false, cost: "", scheduled_date: "", time_window: "morning", assigned_vendor_id: "", entry_instructions: "", notify_tenant: true });
@@ -142,6 +143,7 @@ Normal: cosmetic, minor repairs.`,
         <div className="flex gap-2">
           <div className="flex gap-1 bg-secondary/50 rounded-lg p-1">
             <button onClick={() => { setViewMode("list"); setSelectedDate(null); }} className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === "list" ? "bg-white shadow" : "hover:bg-white/50"}` }><List className="w-4 h-4" />List</button>
+            <button onClick={() => setViewMode("kanban")} className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === "kanban" ? "bg-white shadow" : "hover:bg-white/50"}` }><Grid3x3 className="w-4 h-4" />Board</button>
             <button onClick={() => setViewMode("calendar")} className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === "calendar" ? "bg-white shadow" : "hover:bg-white/50"}` }><Calendar className="w-4 h-4" />Calendar</button>
           </div>
           <Button variant="outline" onClick={() => openSupplies()} className="gap-2"><ShoppingCart className="w-4 h-4" />Find Supplies</Button>
@@ -172,7 +174,18 @@ Normal: cosmetic, minor repairs.`,
         </div>
       )}
 
-      {viewMode === "calendar" ? (
+      {viewMode === "kanban" ? (
+        <KanbanBoard
+          workOrders={orders}
+          tenants={tenants}
+          vendors={vendors}
+          properties={properties}
+          units={units}
+          filters={{}}
+          onWorkOrdersChange={load}
+          onOpenForm={openAdd}
+        />
+      ) : viewMode === "calendar" ? (
         <CalendarView orders={orders} onSelectOrder={openEdit} onDateSelect={d => { setViewMode("list"); setSelectedDate(d); }} />
       ) : filtered.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-16 text-center">

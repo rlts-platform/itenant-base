@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Wrench, Plus, AlertTriangle, Clock, CheckCircle, X, Upload, Loader2 } from "lucide-react";
+import { Wrench, Plus, AlertTriangle, Clock, CheckCircle, X, Upload, Loader2, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -129,28 +129,58 @@ Normal: cosmetic, minor repairs, slow drains.`,
           <Button onClick={() => setOpen(true)} className="mt-4 gap-2"><Plus className="w-4 h-4" />Submit Request</Button>
         </div>
       ) : (
-        <div className="space-y-3">
-          {orders.map(o => {
-            const s = statusConfig[o.status] || statusConfig.new;
-            const Icon = s.icon;
-            return (
-              <div key={o.id} className="bg-card border border-border rounded-xl p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelected(o)}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm">{o.summary}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5 capitalize">{o.category} · Submitted {new Date(o.created_date).toLocaleDateString()}</p>
-                    {o.scheduled_date && <p className="text-xs text-primary font-medium mt-1">📅 Scheduled: {new Date(o.scheduled_date).toLocaleDateString()} ({o.time_window?.replace('_', ' ')})</p>}
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${urgencyColor[o.urgency]}`}>{o.urgency}</span>
-                    <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${s.color}`}><Icon className="w-3 h-3" />{s.label}</span>
-                    {o.vendor_confirmed && <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-100 text-green-700">✓ Vendor Confirmed</span>}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <div className="space-y-4">
+           {orders.map(o => {
+             const s = statusConfig[o.status] || statusConfig.new;
+             const Icon = s.icon;
+             const daysUnassigned = o.status === "new" && Math.floor((Date.now() - new Date(o.created_date).getTime()) / (1000 * 60 * 60 * 24)) > 3 && !o.assigned_vendor_id;
+
+             return (
+               <div key={o.id} className="bg-card border border-border rounded-xl p-4 cursor-pointer hover:shadow-md transition-shadow">
+                 {/* Progress Tracker */}
+                 <div className="mb-3">
+                   <div className="flex gap-2 mb-2">
+                     {["Submitted", "Assigned", "Scheduled", "Completed"].map((step, i) => {
+                       const stepStatuses = ["new", "in_progress", "scheduled", "closed"];
+                       const isActive = stepStatuses.indexOf(o.status) >= i;
+                       const isCompleted = stepStatuses.indexOf(o.status) > i;
+                       return (
+                         <div key={i} className="flex-1">
+                           <div className={`h-2 rounded-full transition-colors ${
+                             isCompleted ? "bg-primary" : isActive ? "bg-primary" : "bg-gray-300"
+                           }`} />
+                           <p className="text-xs font-medium text-gray-600 mt-1 text-center">{step}</p>
+                         </div>
+                       );
+                     })}
+                   </div>
+                 </div>
+
+                 {/* Main content */}
+                 <div className="flex items-start justify-between gap-3 mb-2" onClick={() => setSelected(o)}>
+                   <div className="flex-1 min-w-0">
+                     <p className="font-semibold text-sm">{o.summary}</p>
+                     <p className="text-xs text-muted-foreground mt-0.5 capitalize">{o.category} · Submitted {new Date(o.created_date).toLocaleDateString()}</p>
+                     {o.scheduled_date && <p className="text-xs text-primary font-medium mt-1">📅 Scheduled: {new Date(o.scheduled_date).toLocaleDateString()} ({o.time_window?.replace('_', ' ')})</p>}
+                   </div>
+                   <div className="flex items-center gap-2 shrink-0">
+                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${urgencyColor[o.urgency]}`}>{o.urgency}</span>
+                     <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${s.color}`}><Icon className="w-3 h-3" />{s.label}</span>
+                     {o.vendor_confirmed && <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-green-100 text-green-700">✓ Confirmed</span>}
+                   </div>
+                 </div>
+
+                 {/* Awaiting assignment warning */}
+                 {daysUnassigned && (
+                   <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 rounded px-2.5 py-1.5 text-xs mt-2">
+                     <Clock className="w-3 h-3 shrink-0" />
+                     <span>Awaiting assignment</span>
+                   </div>
+                 )}
+               </div>
+             );
+           })}
+         </div>
       )}
 
       {/* Submit Dialog */}
