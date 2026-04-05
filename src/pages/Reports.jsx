@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { FileBarChart2, DollarSign, Home, Wrench, AlertCircle, Calculator, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ReportModal from "../components/reports/ReportModal";
+import MonthlyReportScheduler from "../components/reports/MonthlyReportScheduler";
 
 const REPORT_TYPES = [
   { id: "rent_roll", title: "Rent Roll", icon: FileBarChart2, color: "bg-blue-100 text-blue-600", description: "All units with tenant names, rent amounts, payment status, and lease dates." },
@@ -30,32 +31,37 @@ export default function Reports() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-outfit font-bold">Reports</h1>
-        <p className="text-sm text-muted-foreground mt-1">Generate, download, and analyze reports for your portfolio</p>
+        <h1 className="text-2xl font-outfit font-bold" style={{ color: '#1A1A2E' }}>Reports</h1>
+        <p className="text-sm mt-1" style={{ color: '#6B7280' }}>Generate, download, and analyze reports for your portfolio</p>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {REPORT_TYPES.map(rt => (
-          <div key={rt.id} className="bg-card border border-border rounded-xl p-5 flex flex-col gap-4 hover:shadow-md transition-shadow">
-            <div className="flex items-start gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${rt.color}`}>
-                <rt.icon className="w-5 h-5" />
+      <MonthlyReportScheduler />
+
+      <div>
+        <h2 className="text-base font-bold mb-3" style={{ color: '#1A1A2E' }}>On-Demand Reports</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {REPORT_TYPES.map(rt => (
+            <div key={rt.id} className="bg-card border border-border rounded-xl p-5 flex flex-col gap-4 hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${rt.color}`}>
+                  <rt.icon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm">{rt.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">{rt.description}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-sm">{rt.title}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{rt.description}</p>
-              </div>
+              <Button
+                className="w-full gap-2"
+                disabled={loading === rt.id}
+                onClick={() => generate(rt.id)}
+              >
+                {loading === rt.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <rt.icon className="w-4 h-4" />}
+                {loading === rt.id ? "Generating…" : "Generate Report"}
+              </Button>
             </div>
-            <Button
-              className="w-full gap-2"
-              disabled={loading === rt.id}
-              onClick={() => generate(rt.id)}
-            >
-              {loading === rt.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <rt.icon className="w-4 h-4" />}
-              {loading === rt.id ? "Generating…" : "Generate Report"}
-            </Button>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       <ReportModal report={report} onClose={() => setReport(null)} />
