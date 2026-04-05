@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
+import useIsMobile from "@/hooks/useIsMobile";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import Logo from "./Logo";
@@ -54,6 +55,7 @@ export default function Layout() {
   const [teamMember, setTeamMember] = useState(null);
   const { user } = useAuth();
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const handleLogout = async () => {
     await base44.auth.logout();
