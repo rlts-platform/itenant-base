@@ -10,6 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Link } from "react-router-dom";
 import PerPropertyTab from "../components/financials/PerPropertyTab";
 import TaxEstimatorTab from "../components/financials/TaxEstimatorTab";
+import ProfitLossReport from "../components/financials/ProfitLossReport";
+import CashFlowReport from "../components/financials/CashFlowReport";
+import IncomeByPropertyReport from "../components/financials/IncomeByPropertyReport";
 import { useAccount } from "../hooks/useAccount";
 import { usePermissions } from "../hooks/usePermissions";
 import ViewOnlyBanner from "../components/ViewOnlyBanner";
@@ -82,6 +85,7 @@ export default function Financials() {
   const [tenants, setTenants] = useState([]);
   const [units, setUnits] = useState([]);
   const [paymentFilter, setPaymentFilter] = useState({ property: "", tenant: "", status: "" });
+  const [reportType, setReportType] = useState("pl");
 
   useEffect(() => {
     if (!accountId) return;
@@ -294,8 +298,36 @@ export default function Financials() {
       )}
 
       {tab === "reports" && (
-        <div className="text-center py-12 text-muted-foreground">
-          Reports tab content coming soon
+        <div className="space-y-6">
+          <div className="flex gap-2 border-b border-border">
+            <button
+              onClick={() => setReportType("pl")}
+              className={`px-4 py-3 font-medium text-sm border-b-2 ${
+                reportType === "pl" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Profit & Loss
+            </button>
+            <button
+              onClick={() => setReportType("cf")}
+              className={`px-4 py-3 font-medium text-sm border-b-2 ${
+                reportType === "cf" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Cash Flow
+            </button>
+            <button
+              onClick={() => setReportType("ip")}
+              className={`px-4 py-3 font-medium text-sm border-b-2 ${
+                reportType === "ip" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Income by Property
+            </button>
+          </div>
+          {reportType === "pl" && <ProfitLossReport payments={payments} workOrders={workOrders} properties={properties} />}
+          {reportType === "cf" && <CashFlowReport payments={payments} workOrders={workOrders} properties={properties} />}
+          {reportType === "ip" && <IncomeByPropertyReport payments={payments} workOrders={workOrders} properties={properties} />}
         </div>
       )}
 
