@@ -1,0 +1,53 @@
+{
+  "name": "TrustAccount",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "security_deposit",
+        "prepaid_rent",
+        "owner_reserve"
+      ]
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "unit_id": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "date_received": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "held",
+        "released",
+        "forfeited"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "type",
+    "amount",
+    "date_received",
+    "account_id"
+  ]
+}

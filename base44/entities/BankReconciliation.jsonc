@@ -1,0 +1,51 @@
+{
+  "name": "BankReconciliation",
+  "type": "object",
+  "properties": {
+    "reconciliation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "bank_balance": {
+      "type": "number"
+    },
+    "book_balance": {
+      "type": "number"
+    },
+    "trust_balance": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "balanced",
+        "discrepancy"
+      ]
+    },
+    "difference_amount": {
+      "type": "number"
+    },
+    "uncleared_transactions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "reconciled_by": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reconciliation_date",
+    "bank_balance",
+    "book_balance",
+    "trust_balance",
+    "account_id"
+  ]
+}

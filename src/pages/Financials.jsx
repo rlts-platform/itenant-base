@@ -15,6 +15,7 @@ import CashFlowReport from "../components/financials/CashFlowReport";
 import IncomeByPropertyReport from "../components/financials/IncomeByPropertyReport";
 import AIForecastTab from "../components/financials/AIForecastTab";
 import BudgetsTab from "../components/financials/BudgetsTab";
+import BankingTab from "../components/financials/BankingTab";
 import { useAccount } from "../hooks/useAccount";
 import { usePermissions } from "../hooks/usePermissions";
 import ViewOnlyBanner from "../components/ViewOnlyBanner";
@@ -466,11 +467,7 @@ export default function Financials() {
         </div>
       )}
 
-      {tab === "banking" && (
-        <div className="text-center py-12 text-muted-foreground">
-          Banking tab content coming soon
-        </div>
-      )}
+      {tab === "banking" && <BankingTab accountId={accountId} properties={properties} tenants={tenants} />}
 
       {tab === "taxes" && <TaxEstimatorTab accountId={accountId} properties={properties} payments={payments} workOrders={workOrders} vendors={vendors} />}
 
