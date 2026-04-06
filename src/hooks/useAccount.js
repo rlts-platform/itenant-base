@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 
-const VALID_ROLES = ['platform_owner', 'client', 'team_member', 'tenant'];
+const VALID_ROLES = ['platform_owner', 'client', 'team_member', 'tenant', 'admin'];
 
 export function useAccount() {
   const { user } = useAuth();
