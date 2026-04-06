@@ -48,22 +48,71 @@ export default function Maintenance() {
     const text = `${summary} ${description || ""}`.trim();
     if (!text) return null;
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `Analyze this maintenance request: "${text}"
+      prompt: `You are a property maintenance triage expert. Analyze the following tenant maintenance request and classify it accurately.
 
-Return urgency (one of: normal, urgent, emergency) and category (one of: plumbing, electrical, hvac, appliance, pest, structural, other).
-Emergency keywords: fire, flood, gas leak, no heat, sewage, security breach.
-Urgent: active leaks, broken locks, no hot water, broken AC.
-Normal: cosmetic, minor repairs.`,
+Request: "${text}"
+
+CLASSIFICATION RULES:
+
+EMERGENCY (is_emergency: true, urgency: "emergency") — Immediate risk to life, safety, or major property damage:
+- Fire, smoke, or burning smell
+- Active gas leak or gas smell
+- Sewage backup or overflow into living area
+- Major flooding or burst pipe with water actively flowing
+- Complete loss of heat when outdoor temp is below 50°F
+- Electrical sparking, burning smell from outlets, exposed live wires
+- Carbon monoxide alarm going off
+- Broken exterior door/lock (security compromise)
+- Elevator entrapment
+- Roof collapse or structural failure
+
+URGENT (urgency: "urgent") — Significant discomfort or damage risk within 24–48 hours:
+- Active slow leak (dripping, minor water damage)
+- No hot water
+- AC completely out in summer heat
+- Broken toilet (only one in unit)
+- Clogged drain backing up
+- Broken window (weather/security exposure)
+- Pest infestation (roaches, rodents actively seen)
+- Refrigerator not cooling
+- Heating not working (above 50°F outside)
+
+NORMAL (urgency: "normal") — Non-urgent, can be scheduled within days or weeks:
+- Cosmetic damage (scuffs, paint, small holes)
+- Minor drips that are not worsening
+- Slow drain with no backup
+- Appliance running but not optimally
+- Light bulb replacement
+- Door doesn't close smoothly
+- Minor pest prevention
+
+CATEGORY — pick the single best match:
+- plumbing: leaks, drains, toilets, water heater, sewage, pipes
+- electrical: outlets, wiring, panel, lights, switches
+- hvac: heating, cooling, AC, furnace, thermostat, vents
+- appliance: refrigerator, stove, dishwasher, washer, dryer
+- pest: insects, rodents, bugs
+- structural: walls, roof, ceiling, floors, foundation, windows, doors
+- other: anything that doesn't fit the above
+
+Respond with the most conservative (safest) urgency level when in doubt. A near-emergency should be classified as emergency rather than urgent.`,
       response_json_schema: {
         type: "object",
         properties: {
           urgency: { type: "string" },
           category: { type: "string" },
-          is_emergency: { type: "boolean" }
+          is_emergency: { type: "boolean" },
+          triage_reason: { type: "string" }
         }
       }
     });
     return result;
+  };
+
+  // Auto-select best matching vendor by category
+  const findBestVendor = (category, vendorList) => {
+    const match = vendorList.find(v => v.category === category);
+    return match?.id || null;
   };
 
   const openSupplies = (summary = "") => { setSuppliesPrefill(summary); setSuppliesOpen(true); };
@@ -124,6 +173,11 @@ Normal: cosmetic, minor repairs.`,
         data.urgency = triage.urgency || data.urgency;
         data.category = triage.category || data.category;
         data.ai_emergency = triage.is_emergency || false;
+        // Auto-assign vendor based on category if none selected
+        if (!data.assigned_vendor_id) {
+          const autoVendor = findBestVendor(data.category, vendors);
+          if (autoVendor) data.assigned_vendor_id = autoVendor;
+        }
       }
       const created = await base44.entities.WorkOrder.create({ ...data, account_id: accountId });
       await base44.entities.ActivityLog.create({

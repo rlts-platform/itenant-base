@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import ModalWrapper from "@/components/ModalWrapper";
@@ -39,6 +39,7 @@ export default function TenantMaintenance() {
   const [photoUrls, setPhotoUrls] = useState([]);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [triaging, setTriaging] = useState(false);
+  const [triageResult, setTriageResult] = useState(null);
 
   const handlePhotoUpload = async (e) => {
     const files = Array.from(e.target.files);
@@ -53,12 +54,45 @@ export default function TenantMaintenance() {
     const text = `${summary} ${description}`.trim();
     if (!text) return null;
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `Analyze this maintenance request and classify it. Text: "${text}"
+      prompt: `You are a property maintenance triage expert. Analyze the following tenant maintenance request and classify it accurately.
 
-Return urgency (one of: normal, urgent, emergency) and category (one of: plumbing, electrical, hvac, appliance, pest, structural, other).
-Emergency examples: fire, flood, gas leak, no heat in winter, sewage backup, security breach, major electrical failure.
-Urgent: active leaks, broken locks, no hot water, broken AC in summer.
-Normal: cosmetic, minor repairs, slow drains.`,
+Request: "${text}"
+
+CLASSIFICATION RULES:
+
+EMERGENCY (is_emergency: true, urgency: "emergency") — Immediate risk to life, safety, or major property damage:
+- Fire, smoke, or burning smell
+- Active gas leak or gas smell
+- Sewage backup or overflow into living area
+- Major flooding or burst pipe with water actively flowing
+- Complete loss of heat when outdoor temp is below 50°F
+- Electrical sparking, burning smell from outlets, exposed live wires
+- Carbon monoxide alarm going off
+- Broken exterior door/lock (security compromise)
+- Roof collapse or structural failure
+
+URGENT (urgency: "urgent") — Significant discomfort or damage risk within 24–48 hours:
+- Active slow leak (dripping, minor water damage)
+- No hot water
+- AC completely out in summer heat
+- Broken toilet (only one in unit)
+- Clogged drain backing up
+- Broken window (weather/security exposure)
+- Pest infestation (roaches, rodents actively seen)
+- Refrigerator not cooling
+- Heating not working (above 50°F outside)
+
+NORMAL (urgency: "normal") — Non-urgent, can be scheduled within days or weeks:
+- Cosmetic damage (scuffs, paint, small holes)
+- Minor drips that are not worsening
+- Slow drain with no backup
+- Light bulb replacement
+- Door doesn't close smoothly
+- Minor pest prevention
+
+CATEGORY: plumbing, electrical, hvac, appliance, pest, structural, or other.
+
+Respond with the most conservative (safest) urgency level when in doubt.`,
       response_json_schema: {
         type: "object",
         properties: {
@@ -81,8 +115,29 @@ Normal: cosmetic, minor repairs, slow drains.`,
         setOrders(wo.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
       }
       setLoading(false);
+      return t;
     }
-    load();
+
+    let unsubscribe;
+    load().then(t => {
+      if (!t) return;
+      // Real-time subscription for status updates on this tenant's work orders
+      unsubscribe = base44.entities.WorkOrder.subscribe((event) => {
+        if (event.data?.tenant_id !== t.id) return;
+        setOrders(prev => {
+          if (event.type === "create") {
+            return [event.data, ...prev];
+          } else if (event.type === "update") {
+            return prev.map(o => o.id === event.id ? event.data : o);
+          } else if (event.type === "delete") {
+            return prev.filter(o => o.id !== event.id);
+          }
+          return prev;
+        });
+      });
+    });
+
+    return () => { if (unsubscribe) unsubscribe(); };
   }, [user]);
 
   const submit = async () => {
@@ -91,6 +146,7 @@ Normal: cosmetic, minor repairs, slow drains.`,
     // AI triage
     const triage = await runAITriage(form.summary, form.description);
     setTriaging(false);
+    if (triage) setTriageResult(triage);
     const urgency = triage?.urgency || form.urgency;
     const category = triage?.category || form.category;
     const created = await base44.entities.WorkOrder.create({
@@ -107,9 +163,8 @@ Normal: cosmetic, minor repairs, slow drains.`,
     setOpen(false);
     setForm({ summary: "", category: "plumbing", urgency: "normal", description: "" });
     setPhotoUrls([]);
-    const wo = await base44.entities.WorkOrder.filter({ tenant_id: tenant?.id });
-    setOrders(wo.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
     setSubmitting(false);
+    // Real-time subscription will auto-update orders list
   };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
@@ -119,10 +174,38 @@ Normal: cosmetic, minor repairs, slow drains.`,
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-outfit font-700">Maintenance Requests</h1>
-          <p className="text-sm text-muted-foreground mt-1">Submit and track maintenance issues</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-sm text-muted-foreground">Submit and track maintenance issues</p>
+            <span className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />Live
+            </span>
+          </div>
         </div>
         <Button onClick={() => setOpen(true)} className="gap-2"><Plus className="w-4 h-4" />New Request</Button>
       </div>
+
+      {/* Triage result banner */}
+      {triageResult && (
+        <div className={`flex items-start gap-3 px-4 py-3 rounded-xl border text-sm ${
+          triageResult.is_emergency ? "bg-red-50 border-red-200 text-red-700" :
+          triageResult.urgency === "urgent" ? "bg-orange-50 border-orange-200 text-orange-700" :
+          "bg-emerald-50 border-emerald-200 text-emerald-700"
+        }`}>
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="font-semibold">
+              {triageResult.is_emergency ? "🚨 Emergency detected" :
+               triageResult.urgency === "urgent" ? "⚠️ Urgent request submitted" :
+               "✓ Request submitted"}
+            </p>
+            <p className="text-xs mt-0.5 opacity-80">
+              Classified as <strong>{triageResult.urgency}</strong> · Category: <strong>{triageResult.category}</strong>.
+              {triageResult.is_emergency ? " Your property manager has been alerted immediately." : " Your property manager will review this soon."}
+            </p>
+          </div>
+          <button onClick={() => setTriageResult(null)} className="text-xs underline opacity-70 hover:opacity-100 shrink-0">Dismiss</button>
+        </div>
+      )}
 
       {orders.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-12 text-center">
