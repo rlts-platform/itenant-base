@@ -56,6 +56,9 @@
     "next_billing_date": {
       "type": "string",
       "format": "date"
+    },
+    "logo_url": {
+      "type": "string"
     }
   },
   "required": [

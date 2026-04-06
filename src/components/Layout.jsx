@@ -54,6 +54,7 @@ const ownerNav = [
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [teamRole, setTeamRole] = useState(null);
+  const [accountLogo, setAccountLogo] = useState(null);
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -70,6 +71,27 @@ export default function Layout() {
         if (records[0]) setTeamRole(records[0].team_role);
       });
     }
+  }, [user]);
+
+  useEffect(() => {
+    const isClientOrTeam = user?.role === 'client' || user?.role === 'team_member';
+    if (!isClientOrTeam) return;
+    const fetchLogo = async () => {
+      let accounts;
+      if (user.role === 'client') {
+        accounts = await base44.entities.Account.filter({ owner_email: user.email });
+      } else {
+        const appUsers = await base44.entities.AppUser.filter({ user_email: user.email });
+        if (appUsers[0]?.account_id) {
+          accounts = await base44.entities.Account.filter({ id: appUsers[0].account_id });
+        }
+      }
+      if (accounts?.[0]?.logo_url) setAccountLogo(accounts[0].logo_url);
+    };
+    fetchLogo();
+    const handler = (e) => setAccountLogo(e.detail.logo_url || null);
+    window.addEventListener('accountLogoUpdated', handler);
+    return () => window.removeEventListener('accountLogoUpdated', handler);
   }, [user]);
 
   const role = user?.role || "user";
@@ -125,11 +147,21 @@ export default function Layout() {
   const SidebarContent = () => (
     <div className="flex flex-col h-full border-r" style={{ backgroundColor: '#FFFFFF', borderColor: 'rgba(124,111,205,0.15)' }}>
       <div className="px-5 py-5">
-        <Logo variant="horizontal" size="md" onClick={() => {
-          if (user?.role === 'platform_owner') window.location.href = '/owner';
-          else if (user?.role === 'tenant') window.location.href = '/tenant';
-          else window.location.href = '/';
-        }} />
+        {accountLogo ? (
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => {
+            if (user?.role === 'platform_owner') window.location.href = '/owner';
+            else if (user?.role === 'tenant') window.location.href = '/tenant';
+            else window.location.href = '/';
+          }}>
+            <img src={accountLogo} alt="Logo" className="h-8 w-8 rounded-full object-cover" />
+          </div>
+        ) : (
+          <Logo variant="horizontal" size="md" onClick={() => {
+            if (user?.role === 'platform_owner') window.location.href = '/owner';
+            else if (user?.role === 'tenant') window.location.href = '/tenant';
+            else window.location.href = '/';
+          }} />
+        )}
       </div>
 
       <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
@@ -141,9 +173,13 @@ export default function Layout() {
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 cursor-pointer hover:bg-secondary/60 transition-colors"
           onClick={() => { navigate('/settings?tab=account'); setMobileOpen(false); }}
         >
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ backgroundColor: '#7C6FCD' }}>
-            {user?.full_name?.[0] || "U"}
-          </div>
+          {accountLogo ? (
+            <img src={accountLogo} alt="avatar" className="w-8 h-8 rounded-full object-cover shrink-0" />
+          ) : (
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ backgroundColor: '#7C6FCD' }}>
+              {user?.full_name?.[0] || "U"}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold truncate" style={{ color: '#1A1A2E' }}>{user?.full_name}</p>
             <p className="text-xs truncate" style={{ color: '#4B5563' }}>{user?.email}</p>

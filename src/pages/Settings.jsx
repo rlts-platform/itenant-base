@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Plug, Bell, CreditCard, User, Trash2 } from "lucide-react";
+import { Save, Plug, Bell, CreditCard, User, Trash2, Upload } from "lucide-react";
 import { useAccount } from "../hooks/useAccount";
 import { usePermissions } from "../hooks/usePermissions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -30,7 +30,7 @@ export default function Settings() {
   const isTenant = role === 'tenant';
   usePermissions('settings'); // redirects non-manager team members
   const [account, setAccount] = useState(null);
-  const [form, setForm] = useState({ company_name: "", plan_tier: "starter", subscription_status: "active" });
+  const [form, setForm] = useState({ company_name: "", plan_tier: "starter", subscription_status: "active", logo_url: "" });
   const [originalPlan, setOriginalPlan] = useState("starter");
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -39,13 +39,14 @@ export default function Settings() {
   const [tab, setTab] = useState("account");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
 
   const load = async () => {
     const accounts = await base44.entities.Account.filter({ owner_email: user?.email });
     if (accounts[0]) {
       setAccount(accounts[0]);
       const planTier = accounts[0].plan_tier || "starter";
-      setForm({ company_name: accounts[0].company_name || "", plan_tier: planTier, subscription_status: accounts[0].subscription_status || "active" });
+      setForm({ company_name: accounts[0].company_name || "", plan_tier: planTier, subscription_status: accounts[0].subscription_status || "active", logo_url: accounts[0].logo_url || "" });
       setOriginalPlan(planTier);
     }
     setLoading(false);
@@ -94,12 +95,26 @@ export default function Settings() {
     }
 
     // No plan change — normal save
-    if (account) await base44.entities.Account.update(account.id, { ...form, owner_email: user?.email });
-    else { const a = await base44.entities.Account.create({ ...form, owner_email: user?.email }); setAccount(a); }
+    if (account) {
+      await base44.entities.Account.update(account.id, { ...form, owner_email: user?.email });
+    } else {
+      const a = await base44.entities.Account.create({ ...form, owner_email: user?.email });
+      setAccount(a);
+    }
+    window.dispatchEvent(new CustomEvent('accountLogoUpdated', { detail: { logo_url: form.logo_url } }));
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
     await load();
     setSaving(false);
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setLogoUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setForm(f => ({ ...f, logo_url: file_url }));
+    setLogoUploading(false);
   };
 
   const handleDeleteAccount = async () => {
@@ -151,6 +166,27 @@ export default function Settings() {
           )}
           <div className="bg-card border border-border rounded-xl p-6 space-y-4">
             <h2 className="font-semibold" style={{ color: '#1A1A2E' }}>Account Info</h2>
+            <div>
+              <Label>Company Logo</Label>
+              <div className="mt-2 flex items-center gap-4">
+                {form.logo_url ? (
+                  <img src={form.logo_url} alt="Logo" className="w-16 h-16 rounded-full object-cover border-2 border-border" />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border-2 border-dashed border-border">
+                    <Upload className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                )}
+                <label className="cursor-pointer">
+                  <div className="px-4 py-2 rounded-lg border border-input bg-white text-sm font-medium hover:bg-secondary transition-colors" style={{ color: '#1A1A2E' }}>
+                    {logoUploading ? 'Uploading...' : form.logo_url ? 'Change Logo' : 'Upload Logo'}
+                  </div>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={logoUploading} />
+                </label>
+                {form.logo_url && (
+                  <button onClick={() => setForm(f => ({ ...f, logo_url: '' }))} className="text-sm text-red-500 hover:underline">Remove</button>
+                )}
+              </div>
+            </div>
             <div><Label>Company Name</Label><Input className="mt-1" value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} /></div>
             {!isTenant && (
               <div><Label>Plan</Label>
