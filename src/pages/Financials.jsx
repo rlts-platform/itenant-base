@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { DollarSign, TrendingUp, TrendingDown, Upload, Plus } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, Upload, Plus, Download } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +75,13 @@ export default function Financials() {
   const [customName, setCustomName] = useState("");
   const [customColor, setCustomColor] = useState("#7C6FCD");
   const [saving, setSaving] = useState(false);
+  const [invoices, setInvoices] = useState([]);
+  const [recurring, setRecurring] = useState([]);
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+  const [recurringModalOpen, setRecurringModalOpen] = useState(false);
+  const [tenants, setTenants] = useState([]);
+  const [units, setUnits] = useState([]);
+  const [paymentFilter, setPaymentFilter] = useState({ property: "", tenant: "", status: "" });
 
   useEffect(() => {
     if (!accountId) return;
@@ -82,7 +89,16 @@ export default function Financials() {
       base44.entities.Payment.filter({ status: "confirmed", account_id: accountId }),
       base44.entities.WorkOrder.filter({ account_id: accountId }),
       base44.entities.Property.filter({ account_id: accountId }),
-    ]).then(([p, wo, props]) => { setPayments(p); setWorkOrders(wo); setProperties(props); setLoading(false); });
+      base44.entities.Tenant.filter({ account_id: accountId }),
+      base44.entities.Unit.filter({ account_id: accountId }),
+    ]).then(([p, wo, props, tenants, units]) => {
+      setPayments(p);
+      setWorkOrders(wo);
+      setProperties(props);
+      setTenants(tenants);
+      setUnits(units);
+      setLoading(false);
+    });
   }, [accountId]);
 
   const totalRevenue = payments.reduce((s, p) => s + (p.amount || 0), 0);
@@ -110,7 +126,6 @@ export default function Financials() {
   const handleAddCustomCategory = async () => {
     if (!customName.trim()) return;
     setSaving(true);
-    // Save to account custom categories (simplified - can be extended to persist)
     setSaving(false);
     setCustomModalOpen(false);
     setCustomName("");
@@ -278,9 +293,58 @@ export default function Financials() {
         </div>
       )}
 
-      {tab === "invoices" && (
+      {tab === "reports" && (
         <div className="text-center py-12 text-muted-foreground">
-          Invoices tab content coming soon
+          Reports tab content coming soon
+        </div>
+      )}
+
+      {tab === "invoices" && (
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button className="gap-2" onClick={() => setInvoiceModalOpen(true)}>
+              <Plus className="w-4 h-4" /> Create Invoice
+            </Button>
+          </div>
+          <div className="bg-white border border-border rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/50 border-b border-border">
+                <tr>
+                  <th className="text-left px-4 py-3 font-medium">Invoice #</th>
+                  <th className="text-left px-4 py-3 font-medium">Recipient</th>
+                  <th className="text-left px-4 py-3 font-medium">Property</th>
+                  <th className="text-right px-4 py-3 font-medium">Amount</th>
+                  <th className="text-left px-4 py-3 font-medium">Due Date</th>
+                  <th className="text-left px-4 py-3 font-medium">Status</th>
+                  <th className="text-right px-4 py-3 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoices.length === 0 ? (
+                  <tr><td colSpan="7" className="text-center py-8 text-muted-foreground">No invoices yet</td></tr>
+                ) : (
+                  invoices.map(inv => (
+                    <tr key={inv.id} className="border-b border-border hover:bg-secondary/30">
+                      <td className="px-4 py-3 font-mono text-xs">{inv.number || "—"}</td>
+                      <td className="px-4 py-3">{inv.recipient || "—"}</td>
+                      <td className="px-4 py-3">{inv.property_id || "—"}</td>
+                      <td className="text-right px-4 py-3 font-semibold">${(inv.amount || 0).toLocaleString()}</td>
+                      <td className="px-4 py-3">{inv.due_date || "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                          inv.status === "Paid" ? "bg-emerald-100 text-emerald-700" :
+                          inv.status === "Overdue" ? "bg-red-100 text-red-700" :
+                          inv.status === "Sent" ? "bg-blue-100 text-blue-700" :
+                          "bg-gray-100 text-gray-700"
+                        }`}>{inv.status || "Draft"}</span>
+                      </td>
+                      <td className="text-right px-4 py-3 text-xs space-x-1">View | Send | Download | Mark Paid | Delete</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -291,14 +355,129 @@ export default function Financials() {
       )}
 
       {tab === "recurring" && (
-        <div className="text-center py-12 text-muted-foreground">
-          Recurring tab content coming soon
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button className="gap-2" onClick={() => setRecurringModalOpen(true)}>
+              <Plus className="w-4 h-4" /> Add Recurring Entry
+            </Button>
+          </div>
+          <div className="bg-white border border-border rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/50 border-b border-border">
+                <tr>
+                  <th className="text-left px-4 py-3 font-medium">Name</th>
+                  <th className="text-left px-4 py-3 font-medium">Type</th>
+                  <th className="text-left px-4 py-3 font-medium">Category</th>
+                  <th className="text-right px-4 py-3 font-medium">Amount</th>
+                  <th className="text-left px-4 py-3 font-medium">Frequency</th>
+                  <th className="text-left px-4 py-3 font-medium">Next Date</th>
+                  <th className="text-left px-4 py-3 font-medium">Property</th>
+                  <th className="text-center px-4 py-3 font-medium">Active</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recurring.length === 0 ? (
+                  <tr><td colSpan="8" className="text-center py-8 text-muted-foreground">No recurring entries yet</td></tr>
+                ) : (
+                  recurring.map(rec => (
+                    <tr key={rec.id} className="border-b border-border hover:bg-secondary/30">
+                      <td className="px-4 py-3 font-medium">{rec.name || "—"}</td>
+                      <td className="px-4 py-3 text-xs">{rec.type || "—"}</td>
+                      <td className="px-4 py-3 text-xs">{rec.category || "—"}</td>
+                      <td className="text-right px-4 py-3 font-semibold">${(rec.amount || 0).toLocaleString()}</td>
+                      <td className="px-4 py-3">{rec.frequency || "—"}</td>
+                      <td className="px-4 py-3">{rec.next_date || "—"}</td>
+                      <td className="px-4 py-3">{rec.property_id || "All"}</td>
+                      <td className="text-center px-4 py-3">
+                        <input type="checkbox" defaultChecked={rec.active !== false} className="rounded" />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {tab === "payments" && (
-        <div className="text-center py-12 text-muted-foreground">
-          Payments tab content coming soon
+        <div className="space-y-4">
+          <div className="flex gap-2 flex-wrap">
+            <Select value={paymentFilter.property} onValueChange={(v) => setPaymentFilter(f => ({ ...f, property: v }))}>
+              <SelectTrigger className="w-40"><SelectValue placeholder="Filter by Property" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={null}>All Properties</SelectItem>
+                {properties.map(p => <SelectItem key={p.id} value={p.id}>{p.nickname || p.address}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={paymentFilter.tenant} onValueChange={(v) => setPaymentFilter(f => ({ ...f, tenant: v }))}>
+              <SelectTrigger className="w-40"><SelectValue placeholder="Filter by Tenant" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={null}>All Tenants</SelectItem>
+                {tenants.map(t => <SelectItem key={t.id} value={t.id}>{t.first_name} {t.last_name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={paymentFilter.status} onValueChange={(v) => setPaymentFilter(f => ({ ...f, status: v }))}>
+              <SelectTrigger className="w-40"><SelectValue placeholder="Filter by Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={null}>All Statuses</SelectItem>
+                <SelectItem value="confirmed">Paid</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="failed">Failed</SelectItem>
+                <SelectItem value="refunded">Refunded</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="gap-2 ml-auto">
+              <Download className="w-4 h-4" /> Export CSV
+            </Button>
+          </div>
+          <div className="bg-white border border-border rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/50 border-b border-border">
+                <tr>
+                  <th className="text-left px-4 py-3 font-medium">Tenant</th>
+                  <th className="text-left px-4 py-3 font-medium">Property / Unit</th>
+                  <th className="text-right px-4 py-3 font-medium">Amount</th>
+                  <th className="text-left px-4 py-3 font-medium">Type</th>
+                  <th className="text-left px-4 py-3 font-medium">Payment Method</th>
+                  <th className="text-left px-4 py-3 font-medium">Date</th>
+                  <th className="text-left px-4 py-3 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.length === 0 ? (
+                  <tr><td colSpan="7" className="text-center py-8 text-muted-foreground">No payments yet</td></tr>
+                ) : (
+                  payments.map(pay => {
+                    const tenant = tenants.find(t => t.id === pay.tenant_id);
+                    const unit = units.find(u => u.id === pay.unit_id);
+                    const prop = properties.find(p => p.id === unit?.property_id);
+                    if (paymentFilter.property && unit?.property_id !== paymentFilter.property) return null;
+                    if (paymentFilter.tenant && pay.tenant_id !== paymentFilter.tenant) return null;
+                    if (paymentFilter.status && pay.status !== paymentFilter.status) return null;
+                    return (
+                      <tr key={pay.id} className="border-b border-border hover:bg-secondary/30">
+                        <td className="px-4 py-3">{tenant ? `${tenant.first_name} ${tenant.last_name}` : "—"}</td>
+                        <td className="px-4 py-3">{prop?.nickname || prop?.address || "—"} / {unit?.unit_number || "—"}</td>
+                        <td className="text-right px-4 py-3 font-semibold">${(pay.amount || 0).toLocaleString()}</td>
+                        <td className="px-4 py-3 text-xs">Rent</td>
+                        <td className="px-4 py-3 text-xs">{pay.method || "Manual"}</td>
+                        <td className="px-4 py-3">{pay.date || "—"}</td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                            pay.status === "confirmed" ? "bg-emerald-100 text-emerald-700" :
+                            pay.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                            pay.status === "failed" ? "bg-red-100 text-red-700" :
+                            "bg-gray-100 text-gray-700"
+                          }`}>{pay.status === "confirmed" ? "Paid" : pay.status || "Pending"}</span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -370,6 +549,142 @@ export default function Financials() {
             <Button onClick={handleAddCustomCategory} disabled={saving || !customName.trim()}>
               {saving ? "Saving..." : "Add Category"}
             </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* Create Invoice Modal */}
+    <Dialog open={invoiceModalOpen} onOpenChange={setInvoiceModalOpen}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Create Invoice</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Recipient</Label>
+              <Select>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Select tenant or vendor" /></SelectTrigger>
+                <SelectContent>
+                  {tenants.map(t => <SelectItem key={t.id} value={t.id}>{t.first_name} {t.last_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Property</Label>
+              <Select>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Select property" /></SelectTrigger>
+                <SelectContent>
+                  {properties.map(p => <SelectItem key={p.id} value={p.id}>{p.nickname || p.address}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Amount</Label>
+              <Input placeholder="0.00" type="number" className="mt-1" />
+            </div>
+            <div>
+              <Label>Due Date</Label>
+              <Input type="date" className="mt-1" />
+            </div>
+          </div>
+          <div>
+            <Label>Description</Label>
+            <Input placeholder="Invoice description" className="mt-1" />
+          </div>
+          <div>
+            <Label>Line Items</Label>
+            <Button variant="outline" className="w-full mt-1 gap-2"><Plus className="w-3 h-3" /> Add Line Item</Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <input type="checkbox" id="tax" className="rounded" />
+            <Label htmlFor="tax" className="mb-0">Include Tax</Label>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setInvoiceModalOpen(false)}>Cancel</Button>
+            <Button>Create Invoice</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* Add Recurring Entry Modal */}
+    <Dialog open={recurringModalOpen} onOpenChange={setRecurringModalOpen}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Add Recurring Entry</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label>Name</Label>
+            <Input placeholder="e.g., Monthly Rent Collection" className="mt-1" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Type</Label>
+              <Select>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="income">Income</SelectItem>
+                  <SelectItem value="expense">Expense</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Category</Label>
+              <Select>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Select category" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rent">Rent Income</SelectItem>
+                  <SelectItem value="repairs">Repairs & Maintenance</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Amount</Label>
+              <Input placeholder="0.00" type="number" className="mt-1" />
+            </div>
+            <div>
+              <Label>Frequency</Label>
+              <Select>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Select frequency" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="annual">Annual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Start Date</Label>
+              <Input type="date" className="mt-1" />
+            </div>
+            <div>
+              <Label>Property</Label>
+              <Select>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Select property" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Properties</SelectItem>
+                  {properties.map(p => <SelectItem key={p.id} value={p.id}>{p.nickname || p.address}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div>
+            <Label>Notes</Label>
+            <Input placeholder="Optional notes" className="mt-1" />
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setRecurringModalOpen(false)}>Cancel</Button>
+            <Button>Add Entry</Button>
           </div>
         </div>
       </DialogContent>
