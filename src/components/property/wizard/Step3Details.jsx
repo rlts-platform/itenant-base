@@ -47,7 +47,7 @@ export default function Step3Details({ data, onChange }) {
       {/* Parking */}
       <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: 16 }}>
         <Label className="font-semibold mb-3 block" style={LABEL_STYLE}>Parking</Label>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3">
           <div>
             <Label className="mb-1 block" style={LABEL_STYLE}>Parking Type</Label>
             {sel("parking_type", [
@@ -73,7 +73,7 @@ export default function Step3Details({ data, onChange }) {
       {/* Utilities */}
       <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: 16 }}>
         <Label className="font-semibold mb-3 block" style={LABEL_STYLE}>Utilities Included in Rent</Label>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-2">
           {UTILITIES.map(u => (
             <Toggle key={u} label={u} checked={(data.utilities_included || []).includes(u)} onChange={() => toggleUtility(u)} />
           ))}
@@ -107,7 +107,7 @@ export default function Step3Details({ data, onChange }) {
           ))}
         </div>
         {data.has_hoa === "yes" && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3">
             <div><Label className="mb-1 block" style={LABEL_STYLE}>HOA Name</Label>{inp("HOA name", "hoa_name")}</div>
             <div><Label className="mb-1 block" style={LABEL_STYLE}>Monthly Fee ($)</Label>{inp("150", "hoa_monthly_fee", "number")}</div>
             <div className="col-span-2"><Label className="mb-1 block" style={LABEL_STYLE}>Contact Info</Label>{inp("Email or phone", "hoa_contact")}</div>

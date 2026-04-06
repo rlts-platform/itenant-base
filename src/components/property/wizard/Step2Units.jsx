@@ -21,7 +21,7 @@ function UnitForm({ unit, index, onChange, onRemove, showRemove }) {
         <span className="text-sm font-semibold text-white">Unit {index + 1}</span>
         {showRemove && <button onClick={() => onRemove(index)} className="text-red-400 hover:text-red-300"><Trash2 size={14} /></button>}
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3">
         <div><Label className="mb-1 block" style={LABEL_STYLE}>Unit # / Name</Label>{inp("e.g. 1A", "unit_number")}</div>
         <div><Label className="mb-1 block" style={LABEL_STYLE}>Floor (optional)</Label>{inp("e.g. 2", "floor")}</div>
         <div><Label className="mb-1 block" style={LABEL_STYLE}>Bedrooms</Label>{inp("2", "bedrooms", "number")}</div>

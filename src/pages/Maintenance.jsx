@@ -313,7 +313,7 @@ Respond with the most conservative (safest) urgency level when in doubt. A near-
           <div className="space-y-4 max-h-[70vh] overflow-y-auto">
             {triaging && <div className="flex items-center gap-2 text-sm text-primary"><Loader2 className="w-4 h-4 animate-spin" />AI is triaging this request…</div>}
             <div><Label>Summary</Label><Textarea className="mt-1" value={form.summary} onChange={e => setForm(f => ({ ...f, summary: e.target.value }))} /></div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3">
               <div><Label>Category</Label>
                 <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>

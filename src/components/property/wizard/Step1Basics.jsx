@@ -25,7 +25,7 @@ export default function Step1Basics({ data, onChange }) {
           <Label className="mb-1 block" style={LABEL_STYLE}>Street Address *</Label>
           <Input placeholder="123 Main St" value={data.street || ""} onChange={e => set("street", e.target.value)} style={FIELD_STYLE} />
         </div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 min-[480px]:grid-cols-3 gap-3">
           <div className="col-span-1">
             <Label className="mb-1 block" style={LABEL_STYLE}>City *</Label>
             <Input placeholder="Chicago" value={data.city || ""} onChange={e => set("city", e.target.value)} style={FIELD_STYLE} />
@@ -39,7 +39,7 @@ export default function Step1Basics({ data, onChange }) {
             <Input placeholder="60601" value={data.zip || ""} onChange={e => set("zip", e.target.value)} style={FIELD_STYLE} />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3">
           <div>
             <Label className="mb-1 block" style={LABEL_STYLE}>Property Type *</Label>
             <Select value={data.type || ""} onValueChange={v => set("type", v)}>
@@ -56,7 +56,7 @@ export default function Step1Basics({ data, onChange }) {
             <Input placeholder="1998" value={data.year_built || ""} onChange={e => set("year_built", e.target.value)} style={FIELD_STYLE} />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3">
           <div>
             <Label className="mb-1 block" style={LABEL_STYLE}>Neighborhood / Complex <span style={{ color: "#9CA3AF", fontWeight: 400 }}>(optional)</span></Label>
             <Input placeholder="e.g. Kings Court" value={data.neighborhood || ""} onChange={e => set("neighborhood", e.target.value)} style={FIELD_STYLE} />
