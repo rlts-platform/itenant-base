@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { ClipboardList, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import GetFirstApplicationCard from "../components/GetFirstApplicationCard";
 import ShareApplicationLink from "../components/ShareApplicationLink";
 import ApplicationDetail from "./ApplicationDetail";
 
@@ -39,15 +40,13 @@ export default function Applications() {
       </div>
 
       {apps.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl p-12 text-center space-y-6">
-          <div>
+        <div className="space-y-6">
+          <div className="bg-card border border-border rounded-xl p-12 text-center">
             <ClipboardList className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
             <p className="font-semibold">No applications yet</p>
             <p className="text-sm text-muted-foreground mt-1">Share your property application link to start receiving applications.</p>
           </div>
-          <div className="flex justify-center">
-            <ShareApplicationLink propertyId={properties[0]?.id} propertyName={properties[0]?.nickname || properties[0]?.address} />
-          </div>
+          <GetFirstApplicationCard propertyId={properties[0]?.id} propertyName={properties[0]?.nickname || properties[0]?.address} />
         </div>
       ) : (
         <>
