@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Users2, ArrowLeft, Save, Loader2 } from "lucide-react";
+import { Users2, ArrowLeft, Save, Loader2, Trash2, UserCheck, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,15 +17,21 @@ function ClientDetail({ account, onBack, onSaved }) {
   const [units, setUnits] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [docs, setDocs] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [notes, setNotes] = useState(account.notes || "");
   const [plan, setPlan] = useState(account.plan_tier || "starter");
   const [status, setStatus] = useState(account.subscription_status || "active");
   const [saving, setSaving] = useState(false);
+  const [removingId, setRemovingId] = useState(null);
+
+  const loadTeamMembers = async () => {
+    const members = await base44.entities.TeamMember.filter({ account_id: account.id }, "created_date");
+    setTeamMembers(members);
+  };
 
   useEffect(() => {
-    // Load stats for this account
     Promise.all([
-      base44.entities.Unit.list(),
+      base44.entities.Unit.filter({ account_id: account.id }),
       base44.entities.Tenant.filter({ account_id: account.id }),
       base44.entities.Document.filter({ account_id: account.id }),
     ]).then(([u, t, d]) => {
@@ -33,7 +39,23 @@ function ClientDetail({ account, onBack, onSaved }) {
       setTenants(t);
       setDocs(d);
     });
+    loadTeamMembers();
   }, [account.id]);
+
+  const removeTeamMember = async (member) => {
+    if (!window.confirm(`Remove ${member.name} (${member.email}) from this account? This cannot be undone.`)) return;
+    setRemovingId(member.id);
+    // Remove TeamMember record and unlink their AppUser
+    await base44.entities.TeamMember.delete(member.id);
+    const appUsers = await base44.entities.AppUser.filter({ user_email: member.email });
+    if (appUsers.length > 0) {
+      await base44.entities.AppUser.update(appUsers[0].id, { account_id: null, role: "client", team_role: null });
+    }
+    setRemovingId(null);
+    loadTeamMembers();
+  };
+
+  const tmSupportId = (index) => `${account.client_id} / TM-${index + 1}`;
 
   const save = async () => {
     setSaving(true);
@@ -127,6 +149,64 @@ function ClientDetail({ account, onBack, onSaved }) {
             onChange={e => setNotes(e.target.value)}
           />
           <p className="text-xs text-muted-foreground">Only visible to platform owner.</p>
+        </div>
+      </div>
+
+      {/* Team Members */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <UserCheck className="w-4 h-4 text-primary" />
+            <h2 className="font-semibold">Team Members ({teamMembers.length})</h2>
+          </div>
+          <p className="text-xs text-muted-foreground">Support ID format: {account.client_id} / TM-N</p>
+        </div>
+        {teamMembers.length === 0 ? (
+          <div className="px-5 py-8 text-center text-sm text-muted-foreground">No team members on this account</div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-secondary/50 text-muted-foreground text-xs">
+              <tr>
+                {["Support ID", "Name", "Email", "Role", "Date Added", ""].map(h => (
+                  <th key={h} className="text-left px-4 py-3 font-medium">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {teamMembers.map((m, i) => (
+                <tr key={m.id} className={i % 2 === 0 ? "bg-card" : "bg-secondary/20"}>
+                  <td className="px-4 py-3">
+                    <code className="text-xs font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                      {tmSupportId(i)}
+                    </code>
+                  </td>
+                  <td className="px-4 py-3 font-medium">{m.name}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs">{m.email}</td>
+                  <td className="px-4 py-3">
+                    <span className="capitalize text-xs bg-secondary px-2 py-0.5 rounded-full">{m.team_role?.replace("_", " ") || "—"}</span>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">
+                    {m.created_date ? new Date(m.created_date).toLocaleDateString() : "—"}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => removeTeamMember(m)}
+                      disabled={removingId === m.id}
+                      className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 disabled:opacity-50"
+                      title="Remove team member"
+                    >
+                      {removingId === m.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        <div className="px-5 py-3 bg-amber-50 border-t border-amber-100 flex items-start gap-2">
+          <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-700">Removing a team member immediately revokes their access. This action is for support and security purposes only.</p>
         </div>
       </div>
     </div>
