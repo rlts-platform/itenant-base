@@ -14,6 +14,7 @@ import ProfitLossReport from "../components/financials/ProfitLossReport";
 import CashFlowReport from "../components/financials/CashFlowReport";
 import IncomeByPropertyReport from "../components/financials/IncomeByPropertyReport";
 import AIForecastTab from "../components/financials/AIForecastTab";
+import BudgetsTab from "../components/financials/BudgetsTab";
 import { useAccount } from "../hooks/useAccount";
 import { usePermissions } from "../hooks/usePermissions";
 import ViewOnlyBanner from "../components/ViewOnlyBanner";
@@ -333,11 +334,7 @@ export default function Financials() {
         </div>
       )}
 
-      {tab === "budgets" && (
-        <div className="text-center py-12 text-muted-foreground">
-          Budgets tab content coming soon
-        </div>
-      )}
+      {tab === "budgets" && <BudgetsTab accountId={accountId} properties={properties} payments={payments} workOrders={workOrders} />}
 
       {tab === "recurring" && (
         <div className="space-y-4">

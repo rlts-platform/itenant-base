@@ -1,0 +1,45 @@
+{
+  "name": "Budget",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "annual"
+      ]
+    },
+    "year_month": {
+      "type": "string"
+    },
+    "categories": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "alert_threshold": {
+      "type": "number",
+      "default": 80
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "account_id",
+    "period",
+    "categories"
+  ]
+}
