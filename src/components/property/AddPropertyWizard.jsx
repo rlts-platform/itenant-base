@@ -115,16 +115,16 @@ export default function AddPropertyWizard({ open, onClose, onSaved, accountId })
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col" style={{ background: "#16191F", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20 }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col" style={{ background: "#FFFFFF", border: "1.5px solid #D1C8F5", borderRadius: 20 }}>
         <DialogHeader>
-          <DialogTitle className="text-white">Add Property</DialogTitle>
+          <DialogTitle style={{ color: '#1A1A2E' }}>Add Property</DialogTitle>
           {/* Progress */}
           <div className="flex items-center gap-1 mt-3">
             {STEPS.map((s, i) => (
               <div key={i} className="flex items-center gap-1 flex-1">
                 <div style={{
                   height: 4, borderRadius: 999, flex: 1,
-                  background: i <= step ? "#7C6FCD" : "rgba(255,255,255,0.1)",
+                  background: i <= step ? "#7C6FCD" : "#E9E6FF",
                   transition: "background 0.2s",
                 }} />
               </div>
@@ -137,9 +137,9 @@ export default function AddPropertyWizard({ open, onClose, onSaved, accountId })
           {stepContent[step]}
         </div>
 
-        <div className="flex justify-between pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+        <div className="flex justify-between pt-4 border-t" style={{ borderColor: "#E9E6FF" }}>
           <Button variant="ghost" onClick={step === 0 ? handleClose : () => setStep(s => s - 1)}
-            style={{ color: "#9CA3AF", borderRadius: 999 }}>
+            style={{ color: "#6B7280", borderRadius: 999 }}>
             <ChevronLeft size={16} className="mr-1" />
             {step === 0 ? "Cancel" : "Back"}
           </Button>

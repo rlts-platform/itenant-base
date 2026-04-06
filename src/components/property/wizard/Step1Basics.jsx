@@ -16,7 +16,7 @@ export default function Step1Basics({ data, onChange }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-bold text-white mb-1">Property Basics</h2>
+        <h2 className="text-lg font-bold mb-1" style={{ color: '#1A1A2E' }}>Property Basics</h2>
         <p className="text-sm" style={{ color: "#9CA3AF" }}>Enter the core details about your property.</p>
       </div>
 
