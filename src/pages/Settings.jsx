@@ -23,7 +23,11 @@ const ALL_TABS = [
 
 export default function Settings() {
   const { user } = useAuth();
-  const isTeamMember = user?.role === 'team_member';
+  const role = user?.role;
+  const isTeamMember = role === 'team_member';
+  const isPlatformOwner = role === 'platform_owner' || role === 'admin';
+  const isClient = role === 'client';
+  const isTenant = role === 'tenant';
   usePermissions('settings'); // redirects non-manager team members
   const [account, setAccount] = useState(null);
   const [form, setForm] = useState({ company_name: "", plan_tier: "starter", subscription_status: "active" });
@@ -102,17 +106,27 @@ export default function Settings() {
           <div className="bg-card border border-border rounded-xl p-6 space-y-4">
             <h2 className="font-semibold" style={{ color: '#1A1A2E' }}>Account Info</h2>
             <div><Label>Company Name</Label><Input className="mt-1" value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} /></div>
-            <div><Label>Plan</Label>
-              <Select value={form.plan_tier} onValueChange={v => setForm(f => ({ ...f, plan_tier: v }))}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>{["starter","growth","pro","enterprise"].map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
+            {!isTenant && (
+              <div><Label>Plan</Label>
+                {(isPlatformOwner || isClient) ? (
+                  <Select value={form.plan_tier} onValueChange={v => setForm(f => ({ ...f, plan_tier: v }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>{["starter","growth","pro","enterprise"].map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+                  </Select>
+                ) : (
+                  <div className="mt-1 h-11 px-3 flex items-center rounded-md border border-input bg-muted/40 text-sm capitalize">{form.plan_tier}</div>
+                )}
+              </div>
+            )}
             <div><Label>Subscription Status</Label>
-              <Select value={form.subscription_status} onValueChange={v => setForm(f => ({ ...f, subscription_status: v }))}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>{["active","trialing","past_due","canceled"].map(s => <SelectItem key={s} value={s}>{s.replace("_"," ")}</SelectItem>)}</SelectContent>
-              </Select>
+              {isPlatformOwner ? (
+                <Select value={form.subscription_status} onValueChange={v => setForm(f => ({ ...f, subscription_status: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>{["active","trialing","past_due","canceled"].map(s => <SelectItem key={s} value={s}>{s.replace("_"," ")}</SelectItem>)}</SelectContent>
+                </Select>
+              ) : (
+                <div className="mt-1 h-11 px-3 flex items-center rounded-md border border-input bg-muted/40 text-sm capitalize">{form.subscription_status?.replace("_"," ")}</div>
+              )}
             </div>
             <Button onClick={save} className="gap-2"><Save className="w-4 h-4" />{saved ? "Saved!" : "Save Changes"}</Button>
           </div>
