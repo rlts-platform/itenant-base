@@ -9,28 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 
-const ROLES = [
-  { value: "admin", label: "Admin" },
-  { value: "manager", label: "Manager" },
-  { value: "maintenance", label: "Maintenance" },
-  { value: "leasing_agent", label: "Leasing Agent" },
-  { value: "accountant", label: "Accountant" },
+const TEAM_ROLES = [
+  { value: "manager", label: "Manager", desc: "Full access to all data, cannot change billing" },
+  { value: "maintenance", label: "Maintenance", desc: "Work orders and vendors only" },
+  { value: "leasing", label: "Leasing Agent", desc: "Properties, units, tenants, leases, applications" },
+  { value: "accountant", label: "Accountant", desc: "Payments, financials, and documents only" },
+  { value: "readonly", label: "Read Only", desc: "Can view everything but cannot create or edit" },
 ];
-
-const PERMISSIONS = [
-  { key: "view_properties", label: "View all properties" },
-  { key: "edit_property_info", label: "Edit property info" },
-  { key: "create_work_orders", label: "Create/edit work orders" },
-  { key: "view_financials", label: "View financial data" },
-  { key: "record_payments", label: "Record payments" },
-  { key: "manage_tenants", label: "Manage tenants" },
-  { key: "generate_documents", label: "Generate documents" },
-  { key: "access_messages", label: "Access messages" },
-  { key: "manage_vendors", label: "Manage vendors" },
-  { key: "manage_automations", label: "Manage automations" },
-];
-
-const DEFAULT_PERMISSIONS = Object.fromEntries(PERMISSIONS.map(p => [p.key, false]));
 
 export default function Team() {
   const { user } = useAuth();
@@ -38,7 +23,7 @@ export default function Team() {
   const [account, setAccount] = useState(null);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ name: "", email: "", role: "manager", permissions: { ...DEFAULT_PERMISSIONS } });
+  const [form, setForm] = useState({ name: "", email: "", team_role: "manager" });
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(null);
 
@@ -57,33 +42,27 @@ export default function Team() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ name: "", email: "", role: "manager", permissions: { ...DEFAULT_PERMISSIONS } });
+    setForm({ name: "", email: "", team_role: "manager" });
     setOpen(true);
   };
 
   const openEdit = (m) => {
     setEditing(m);
-    setForm({ name: m.name, email: m.email, role: m.role, permissions: { ...DEFAULT_PERMISSIONS, ...(m.permissions || {}) } });
+    setForm({ name: m.name, email: m.email, team_role: m.team_role || "manager" });
     setOpen(true);
-  };
-
-  const togglePermission = (key) => {
-    setForm(f => ({ ...f, permissions: { ...f.permissions, [key]: !f.permissions[key] } }));
   };
 
   const save = async () => {
     if (editing) {
-      await base44.entities.TeamMember.update(editing.id, { name: form.name, email: form.email, role: form.role, permissions: form.permissions });
+      await base44.entities.TeamMember.update(editing.id, { name: form.name, team_role: form.team_role });
     } else {
       const created = await base44.entities.TeamMember.create({
         name: form.name,
         email: form.email,
-        role: form.role,
-        permissions: form.permissions,
+        team_role: form.team_role,
         status: 'invited',
         account_id: account?.id || ''
       });
-      // Send invite email
       await base44.functions.invoke('inviteTeamMember', { team_member_id: created.id });
     }
     setOpen(false);
@@ -101,7 +80,7 @@ export default function Team() {
     setSending(null);
   };
 
-  const roleLabel = (r) => ROLES.find(x => x.value === r)?.label || r;
+  const roleLabel = (r) => TEAM_ROLES.find(x => x.value === r)?.label || r;
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -147,7 +126,7 @@ export default function Team() {
                   <td className="px-5 py-3 font-medium">{m.name}</td>
                   <td className="px-5 py-3 text-muted-foreground text-xs">{m.email}</td>
                   <td className="px-5 py-3">
-                    <span className="capitalize text-xs bg-secondary px-2 py-0.5 rounded-full">{roleLabel(m.role)}</span>
+                    <span className="capitalize text-xs bg-secondary px-2 py-0.5 rounded-full">{roleLabel(m.team_role)}</span>
                   </td>
                   <td className="px-5 py-3">
                     {m.status === 'active'
@@ -155,11 +134,7 @@ export default function Team() {
                       : <Badge className="bg-yellow-100 text-yellow-700 border-0 text-xs">Invited</Badge>
                     }
                   </td>
-                  <td className="px-5 py-3">
-                    <span className="text-xs text-muted-foreground">
-                      {Object.values(m.permissions || {}).filter(Boolean).length} / {PERMISSIONS.length} enabled
-                    </span>
-                  </td>
+
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-1 justify-end">
                       {m.status === 'invited' && (
@@ -199,32 +174,25 @@ export default function Team() {
               </div>
             </div>
             <div>
-              <Label>Role</Label>
-              <Select value={form.role} onValueChange={v => setForm(f => ({ ...f, role: v }))}>
+              <Label>Team Role</Label>
+              <Select value={form.team_role} onValueChange={v => setForm(f => ({ ...f, team_role: v }))}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>{ROLES.map(r => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}</SelectContent>
+                <SelectContent>
+                  {TEAM_ROLES.map(r => (
+                    <SelectItem key={r.value} value={r.value}>
+                      <div>
+                        <span className="font-medium">{r.label}</span>
+                        <span className="text-xs text-muted-foreground ml-2">{r.desc}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
-            </div>
-            <div>
-              <Label className="mb-2 block">Permissions</Label>
-              <div className="border border-border rounded-xl divide-y divide-border">
-                {PERMISSIONS.map(p => (
-                  <label key={p.key} className="flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-secondary/40 transition-colors">
-                    <span className="text-sm">{p.label}</span>
-                    <input
-                      type="checkbox"
-                      checked={!!form.permissions[p.key]}
-                      onChange={() => togglePermission(p.key)}
-                      className="rounded accent-primary w-4 h-4"
-                    />
-                  </label>
-                ))}
-              </div>
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={save} disabled={!form.name || !form.email}>
+            <Button onClick={save} disabled={!form.name || (!editing && !form.email)}>
               {editing ? "Save Changes" : "Send Invite"}
             </Button>
           </div>

@@ -41,6 +41,7 @@ import OwnerClients from './pages/OwnerClients';
 import ApplyPage from './pages/ApplyPage';
 import Applications from './pages/Applications';
 import ApplicationDetail from './pages/ApplicationDetail';
+import TeamInvitePage from './pages/TeamInvitePage';
 import LandingPage from './pages/LandingPage';
 import SignaturePage from './pages/SignaturePage';
 import Analytics from './pages/Analytics';
@@ -153,6 +154,7 @@ const AuthenticatedApp = () => {
     {/* Standalone public routes — no sidebar */}
     <Route path="/landing" element={<LandingPage />} />
     <Route path="/sign/:token" element={<SignaturePage />} />
+    <Route path="/team-invite/:token" element={<TeamInvitePage />} />
     <Route path="/onboarding" element={<Onboarding />} />
     <Route element={<Layout />}>
       <Route path="/" element={<ClientDashboard />} />

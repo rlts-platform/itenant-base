@@ -19,10 +19,10 @@ Deno.serve(async (req) => {
     await base44.asServiceRole.entities.TeamMember.update(team_member_id, {
       invite_token: token,
       invite_expires_at: expires_at,
-      status: 'invited'
+      status: 'invited',
     });
 
-    const appUrl = req.headers.get('origin') || 'https://app.itenant.com';
+    const appUrl = req.headers.get('origin') || 'https://app.base44.com';
     const inviteLink = `${appUrl}/team-invite/${token}`;
 
     await base44.asServiceRole.integrations.Core.SendEmail({
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
         <div style="font-family: Inter, sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 24px;">
           <h2 style="margin-bottom: 8px;">You've been invited to iTenant</h2>
           <p style="color: #555;">Hi ${member.name},</p>
-          <p style="color: #555;">You've been invited to join as a <strong>${member.role.replace('_', ' ')}</strong> on the property management team.</p>
+          <p style="color: #555;">You've been invited to join as a <strong>${(member.team_role || member.role || '').replace('_', ' ')}</strong> on the property management team.</p>
           <a href="${inviteLink}" style="display:inline-block;margin-top:24px;padding:12px 28px;background:#4f6ef7;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">
             Accept Invitation
           </a>

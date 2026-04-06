@@ -8,14 +8,14 @@
     "email": {
       "type": "string"
     },
-    "role": {
+    "team_role": {
       "type": "string",
       "enum": [
-        "admin",
         "manager",
         "maintenance",
-        "leasing_agent",
-        "accountant"
+        "leasing",
+        "accountant",
+        "readonly"
       ]
     },
     "status": {
@@ -24,41 +24,6 @@
         "invited",
         "active"
       ]
-    },
-    "permissions": {
-      "type": "object",
-      "properties": {
-        "view_properties": {
-          "type": "boolean"
-        },
-        "edit_property_info": {
-          "type": "boolean"
-        },
-        "create_work_orders": {
-          "type": "boolean"
-        },
-        "view_financials": {
-          "type": "boolean"
-        },
-        "record_payments": {
-          "type": "boolean"
-        },
-        "manage_tenants": {
-          "type": "boolean"
-        },
-        "generate_documents": {
-          "type": "boolean"
-        },
-        "access_messages": {
-          "type": "boolean"
-        },
-        "manage_vendors": {
-          "type": "boolean"
-        },
-        "manage_automations": {
-          "type": "boolean"
-        }
-      }
     },
     "invite_token": {
       "type": "string"
@@ -77,7 +42,7 @@
   "required": [
     "name",
     "email",
-    "role",
+    "team_role",
     "account_id"
   ]
 }

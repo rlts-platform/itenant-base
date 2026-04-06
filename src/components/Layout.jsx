@@ -52,7 +52,7 @@ const ownerNav = [
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [teamMember, setTeamMember] = useState(null);
+  const [teamRole, setTeamRole] = useState(null);
   const { user } = useAuth();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -64,18 +64,31 @@ export default function Layout() {
 
   useEffect(() => {
     if (user?.role === 'team_member') {
-      base44.entities.TeamMember.filter({ email: user.email }).then(members => {
-        if (members[0]) setTeamMember(members[0]);
+      base44.entities.AppUser.filter({ user_email: user.email }).then(records => {
+        if (records[0]) setTeamRole(records[0].team_role);
       });
     }
   }, [user]);
 
   const role = user?.role || "user";
-  const permissions = teamMember?.permissions || {};
   const isTeamMember = role === 'team_member';
 
+  const TEAM_ROLE_NAV = {
+    manager: null, // all items
+    maintenance: ["/", "/maintenance", "/vendors"],
+    leasing: ["/", "/properties", "/units", "/tenants", "/applications", "/leases", "/messages"],
+    accountant: ["/", "/payments", "/financials", "/documents"],
+    readonly: null, // all items
+  };
+
+  const allowedPaths = isTeamMember && teamRole ? TEAM_ROLE_NAV[teamRole] : null;
   const filteredClientNav = isTeamMember
-    ? clientNav.filter(item => !item.permission || permissions[item.permission])
+    ? clientNav.filter(item => {
+        // always hide Team and Settings for team members
+        if (item.to === "/team" || item.to === "/settings") return false;
+        if (!allowedPaths) return true;
+        return allowedPaths.includes(item.to);
+      })
     : clientNav;
 
   const nav = role === "platform_owner" ? ownerNav

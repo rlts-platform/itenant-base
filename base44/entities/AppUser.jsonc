@@ -10,7 +10,18 @@
       "enum": [
         "client",
         "tenant",
-        "platform_owner"
+        "platform_owner",
+        "team_member"
+      ]
+    },
+    "team_role": {
+      "type": "string",
+      "enum": [
+        "manager",
+        "maintenance",
+        "leasing",
+        "accountant",
+        "readonly"
       ]
     },
     "onboarding_complete": {

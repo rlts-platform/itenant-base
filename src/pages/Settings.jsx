@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Save, Plug, Bell, CreditCard, User, Trash2 } from "lucide-react";
+import { useAccount } from "../hooks/useAccount";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import IntegrationsTab from "../components/settings/IntegrationsTab";
 import NotificationsTab from "../components/settings/NotificationsTab";
 import BillingTab from "../components/settings/BillingTab";
 
-const TABS = [
+const ALL_TABS = [
   { id: "account",       label: "Account",       icon: User },
   { id: "integrations",  label: "Integrations",  icon: Plug },
   { id: "notifications", label: "Notifications", icon: Bell },
@@ -21,6 +22,7 @@ const TABS = [
 
 export default function Settings() {
   const { user } = useAuth();
+  const isTeamMember = user?.role === 'team_member';
   const [account, setAccount] = useState(null);
   const [form, setForm] = useState({ company_name: "", plan_tier: "starter", subscription_status: "active" });
   const [saved, setSaved] = useState(false);
@@ -72,7 +74,7 @@ export default function Settings() {
 
       {/* Tab bar */}
       <div className="flex gap-1 bg-secondary/50 rounded-xl p-1 w-fit flex-wrap">
-        {TABS.map(t => (
+        {ALL_TABS.filter(t => !isTeamMember || (t.id !== 'billing' && t.id !== 'integrations')).map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
@@ -136,8 +138,8 @@ export default function Settings() {
              <Trash2 className="w-4 h-4" /> Delete Account
            </Button>
           </div>
-          </div>
-          )}
+        </div>
+      )}
 
       {tab === "integrations" && account && (
         <IntegrationsTab account={account} onSaved={load} />
