@@ -13,6 +13,7 @@ import TaxEstimatorTab from "../components/financials/TaxEstimatorTab";
 import ProfitLossReport from "../components/financials/ProfitLossReport";
 import CashFlowReport from "../components/financials/CashFlowReport";
 import IncomeByPropertyReport from "../components/financials/IncomeByPropertyReport";
+import AIForecastTab from "../components/financials/AIForecastTab";
 import { useAccount } from "../hooks/useAccount";
 import { usePermissions } from "../hooks/usePermissions";
 import ViewOnlyBanner from "../components/ViewOnlyBanner";
@@ -247,55 +248,7 @@ export default function Financials() {
         </div>
       )}
 
-      {tab === "forecast" && (
-        <div className="text-center py-12 text-muted-foreground">
-          AI Forecast tab content coming soon
-        </div>
-      )}
-
-      {tab === "categories" && (
-        <div className="space-y-6">
-          <div className="grid lg:grid-cols-2 gap-6">
-            {/* Income Categories */}
-            <div className="space-y-4">
-              <div>
-                <h2 className="font-semibold mb-4" style={{ color: '#1A1A2E' }}>Income Categories</h2>
-                <div className="space-y-3">
-                  {INCOME_CATEGORIES.map(cat => (
-                    <CategoryCard key={cat.name} category={cat} monthAmount={0} ytdAmount={0} />
-                  ))}
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                className="w-full gap-2 mt-4"
-                onClick={() => { setCustomType("income"); setCustomModalOpen(true); }}
-              >
-                <Plus className="w-4 h-4" /> Add Custom Income Category
-              </Button>
-            </div>
-
-            {/* Expense Categories */}
-            <div className="space-y-4">
-              <div>
-                <h2 className="font-semibold mb-4" style={{ color: '#1A1A2E' }}>Expense Categories</h2>
-                <div className="space-y-3">
-                  {EXPENSE_CATEGORIES.map(cat => (
-                    <CategoryCard key={cat.name} category={cat} monthAmount={0} ytdAmount={0} />
-                  ))}
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                className="w-full gap-2 mt-4"
-                onClick={() => { setCustomType("expense"); setCustomModalOpen(true); }}
-              >
-                <Plus className="w-4 h-4" /> Add Custom Expense Category
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {tab === "forecast" && <AIForecastTab accountId={accountId} />}
 
       {tab === "reports" && (
         <div className="space-y-6">
