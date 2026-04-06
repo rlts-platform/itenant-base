@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Plug, Bell, CreditCard, User, Trash2, Upload, Copy, Check } from "lucide-react";
+import { Save, Plug, Bell, CreditCard, User, Trash2, Upload, Copy, Check, Download } from "lucide-react";
+import JSZip from 'jszip';
 import { useAccount } from "../hooks/useAccount";
 import { usePermissions } from "../hooks/usePermissions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -41,6 +42,8 @@ export default function Settings() {
   const [deleting, setDeleting] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const generateClientId = (id) => {
     if (!id) return null;
@@ -142,6 +145,58 @@ export default function Settings() {
     } catch (error) {
       alert("Error deleting account. Please try again.");
       setDeleting(false);
+    }
+  };
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const [properties, units, tenants, leases, payments, teamMembers, documents] = await Promise.all([
+        base44.entities.Property.filter({ account_id: account?.id || "" }),
+        base44.entities.Unit.filter({ account_id: account?.id || "" }),
+        base44.entities.Tenant.filter({ account_id: account?.id || "" }),
+        base44.entities.Lease.filter({ account_id: account?.id || "" }),
+        base44.entities.Payment.filter({ account_id: account?.id || "" }),
+        base44.entities.TeamMember.filter({ account_id: account?.id || "" }),
+        base44.entities.Document.filter({ account_id: account?.id || "" }),
+      ]);
+
+      const toCsv = (data) => {
+        if (!data || data.length === 0) return "";
+        const keys = Object.keys(data[0]);
+        const headers = keys.join(",");
+        const rows = data.map(row => keys.map(k => {
+          const v = row[k];
+          if (v === null || v === undefined) return "";
+          if (typeof v === "object") return `"${JSON.stringify(v).replace(/"/g, '""')}"` ;
+          return `"${String(v).replace(/"/g, '""')}"` ;
+        }).join(","));
+        return [headers, ...rows].join("\n");
+      };
+
+      const zip = new JSZip();
+      zip.file("Properties.csv", toCsv(properties));
+      zip.file("Units.csv", toCsv(units));
+      zip.file("Tenants.csv", toCsv(tenants));
+      zip.file("Leases.csv", toCsv(leases));
+      zip.file("Payments.csv", toCsv(payments));
+      zip.file("Team.csv", toCsv(teamMembers));
+      zip.file("Documents_List.csv", toCsv(documents));
+
+      const blob = await zip.generateAsync({ type: "blob" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `iTenant-Export-${new Date().toISOString().split('T')[0]}.zip`;
+      a.click();
+
+      setExporting(false);
+      setExportOpen(false);
+      const { toast } = await import('sonner');
+      toast.success("Your account export is downloading.");
+    } catch (error) {
+      console.error("Export error:", error);
+      alert("Error exporting account data. Please try again.");
+      setExporting(false);
     }
   };
 
@@ -262,9 +317,14 @@ export default function Settings() {
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 space-y-4">
            <h2 className="font-semibold" style={{ color: '#7F1D1D' }}>Danger Zone</h2>
            <p className="text-sm" style={{ color: '#991B1B' }}>Permanently delete your account and all associated data. This action cannot be undone.</p>
-           <Button onClick={() => setDeleteDialogOpen(true)} variant="destructive" className="gap-2">
-             <Trash2 className="w-4 h-4" /> Delete Account
-           </Button>
+           <div className="flex gap-2">
+             <Button onClick={() => setExportOpen(true)} variant="outline" className="gap-2 flex-1" style={{ color: '#7C6FCD', borderColor: '#7C6FCD' }}>
+               <Download className="w-4 h-4" /> Export Account Data
+             </Button>
+             <Button onClick={() => setDeleteDialogOpen(true)} variant="destructive" className="gap-2 flex-1">
+               <Trash2 className="w-4 h-4" /> Delete Account
+             </Button>
+           </div>
           </div>
         </div>
       )}
@@ -286,6 +346,22 @@ export default function Settings() {
       {tab === "billing" && (
         <BillingTab account={account} />
       )}
+
+      {/* Export Account Data Dialog */}
+      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Your Account Data</DialogTitle>
+            <DialogDescription>We'll prepare a full export of your account. This includes your properties, units, tenants, leases, payments, documents, and team. Your download will begin shortly.</DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setExportOpen(false)}>Cancel</Button>
+            <Button onClick={handleExport} disabled={exporting}>
+              {exporting ? "Exporting..." : "Export Now"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Account Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
