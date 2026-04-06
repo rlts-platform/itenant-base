@@ -118,6 +118,15 @@ export default function Settings() {
            <p className="text-sm" style={{ color: '#4B5563' }}>Name: {user?.full_name || "(Not set - add your name above)"}</p>
            <p className="text-sm" style={{ color: '#4B5563' }}>Email: {user?.email}</p>
            <p className="text-sm" style={{ color: '#4B5563' }}>Role: {user?.role}</p>
+           {account?.client_id && (
+             <div className="mt-3 pt-3 border-t border-border">
+               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Your Client ID</p>
+               <div className="flex items-center gap-2">
+                 <code className="text-sm font-mono font-bold px-3 py-1.5 bg-primary/10 text-primary rounded-lg select-all">{account.client_id}</code>
+                 <span className="text-xs text-muted-foreground">Reference this when contacting support</span>
+               </div>
+             </div>
+           )}
           </div>
 
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 space-y-4">

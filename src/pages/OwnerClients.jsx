@@ -70,6 +70,7 @@ function ClientDetail({ account, onBack, onSaved }) {
         <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="font-semibold mb-3">Account Info</h2>
           <Row label="Business Name" value={account.company_name} />
+          <Row label="Client ID" value={<code className="font-mono font-bold text-primary">{account.client_id || "—"}</code>} />
           <Row label="Owner Email" value={account.owner_email} />
           <Row label="Signup Date" value={account.created_date ? new Date(account.created_date).toLocaleDateString() : null} />
           <Row label="Plan Tier" value={<span className="capitalize">{account.plan_tier}</span>} />
@@ -136,6 +137,7 @@ export default function OwnerClients() {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
+  const [search, setSearch] = useState("");
 
   const load = async () => {
     const a = await base44.entities.Account.list("-created_date");
@@ -155,9 +157,18 @@ export default function OwnerClients() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-outfit font-bold">Clients</h1>
-        <p className="text-sm text-muted-foreground mt-1">{accounts.length} client accounts</p>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-outfit font-bold">Clients</h1>
+          <p className="text-sm text-muted-foreground mt-1">{accounts.length} client accounts</p>
+        </div>
+        <input
+          type="text"
+          placeholder="Search by Client ID or company…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="text-sm border border-input rounded-lg px-3 py-2 bg-background w-64 focus:outline-none focus:ring-1 focus:ring-ring"
+        />
       </div>
 
       {accounts.length === 0 ? (
@@ -169,15 +180,18 @@ export default function OwnerClients() {
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-secondary/50 text-muted-foreground text-xs">
-              <tr>{["Company","Plan","Status","MRR","Owner Email","Joined",""].map(h => <th key={h} className="text-left px-4 py-3 font-medium">{h}</th>)}</tr>
+              <tr>{["Client ID","Company","Plan","Status","MRR","Owner Email","Joined",""].map(h => <th key={h} className="text-left px-4 py-3 font-medium">{h}</th>)}</tr>
             </thead>
             <tbody>
-              {accounts.map((a, i) => (
+              {accounts
+                .filter(a => !search || a.client_id?.toLowerCase().includes(search.toLowerCase()) || a.company_name?.toLowerCase().includes(search.toLowerCase()))
+                .map((a, i) => (
                 <tr
                   key={a.id}
                   onClick={() => setSelected(a)}
                   className={`${i % 2 === 0 ? "bg-card" : "bg-secondary/20"} cursor-pointer hover:bg-secondary/40 transition-colors`}
                 >
+                  <td className="px-4 py-3"><code className="text-xs font-mono font-bold text-primary">{a.client_id || "—"}</code></td>
                   <td className="px-4 py-3 font-medium">{a.company_name}</td>
                   <td className="px-4 py-3 capitalize">{a.plan_tier || "—"}</td>
                   <td className="px-4 py-3"><Badge variant={STATUS_COLOR[a.subscription_status] || "secondary"}>{a.subscription_status || "—"}</Badge></td>

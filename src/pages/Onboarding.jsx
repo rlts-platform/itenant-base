@@ -12,6 +12,17 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ full_name: "", business_name: "", role: "" });
 
+  const generateClientId = async () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const suffix = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+      const candidate = `ITNT-${suffix}`;
+      const existing = await base44.entities.Account.filter({ client_id: candidate });
+      if (existing.length === 0) return candidate;
+    }
+    return `ITNT-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+  };
+
   const handleNext = async () => {
     if (step === 1) {
       if (!form.full_name || !form.business_name) return;
@@ -21,9 +32,11 @@ export default function Onboarding() {
       setLoading(true);
       try {
         const user = await base44.auth.me();
+        const client_id = await generateClientId();
         const account = await base44.entities.Account.create({
           company_name: form.business_name,
           owner_email: user.email,
+          client_id,
         });
 
         // Create or update app_users record
