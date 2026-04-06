@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import useIsMobile from "@/hooks/useIsMobile";
@@ -56,6 +56,7 @@ export default function Layout() {
   const [teamRole, setTeamRole] = useState(null);
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   const handleLogout = async () => {
@@ -136,7 +137,10 @@ export default function Layout() {
       </nav>
 
       <div className="p-3 border-t" style={{ borderColor: 'rgba(124,111,205,0.15)' }}>
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1">
+        <div
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 cursor-pointer hover:bg-secondary/60 transition-colors"
+          onClick={() => { navigate('/settings?tab=account'); setMobileOpen(false); }}
+        >
           <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ backgroundColor: '#7C6FCD' }}>
             {user?.full_name?.[0] || "U"}
           </div>
