@@ -86,6 +86,7 @@ export default function Financials() {
   const [recurringModalOpen, setRecurringModalOpen] = useState(false);
   const [tenants, setTenants] = useState([]);
   const [units, setUnits] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [paymentFilter, setPaymentFilter] = useState({ property: "", tenant: "", status: "" });
   const [reportType, setReportType] = useState("pl");
 
@@ -97,12 +98,14 @@ export default function Financials() {
       base44.entities.Property.filter({ account_id: accountId }),
       base44.entities.Tenant.filter({ account_id: accountId }),
       base44.entities.Unit.filter({ account_id: accountId }),
-    ]).then(([p, wo, props, tenants, units]) => {
+      base44.entities.Vendor.filter({ account_id: accountId }),
+    ]).then(([p, wo, props, tenants, units, v]) => {
       setPayments(p);
       setWorkOrders(wo);
       setProperties(props);
       setTenants(tenants);
       setUnits(units);
+      setVendors(v);
       setLoading(false);
     });
   }, [accountId]);
@@ -469,7 +472,7 @@ export default function Financials() {
         </div>
       )}
 
-      {tab === "taxes" && <TaxEstimatorTab />}
+      {tab === "taxes" && <TaxEstimatorTab accountId={accountId} properties={properties} payments={payments} workOrders={workOrders} vendors={vendors} />}
 
       {tab === "all" && (
         <div className="text-center py-12 text-muted-foreground">
