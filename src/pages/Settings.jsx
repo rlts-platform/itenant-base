@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Plug, Bell, CreditCard, User, Trash2, Upload } from "lucide-react";
+import { Save, Plug, Bell, CreditCard, User, Trash2, Upload, Copy, Check } from "lucide-react";
 import { useAccount } from "../hooks/useAccount";
 import { usePermissions } from "../hooks/usePermissions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -40,6 +40,18 @@ export default function Settings() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
+
+  const generateClientId = (id) => {
+    if (!id) return null;
+    return "ITNT-" + id.replace(/-/g, "").slice(0, 6).toUpperCase();
+  };
+
+  const handleCopyClientId = (id) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
+  };
 
   const load = async () => {
     const accounts = await base44.entities.Account.filter({ owner_email: user?.email });
@@ -190,11 +202,16 @@ export default function Settings() {
             <div><Label>Company Name</Label><Input className="mt-1" value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} /></div>
             {!isTenant && (
               <div><Label>Plan</Label>
-                {(isPlatformOwner || isClient) ? (
+                {isPlatformOwner ? (
                   <Select value={form.plan_tier} onValueChange={v => setForm(f => ({ ...f, plan_tier: v }))}>
                     <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                     <SelectContent>{["starter","growth","pro","enterprise"].map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
                   </Select>
+                ) : isClient ? (
+                  <div className="flex items-center gap-3 mt-1">
+                    <div className="flex-1 h-11 px-3 flex items-center rounded-md border border-input bg-muted/40 text-sm capitalize cursor-not-allowed select-none" style={{ color: '#1A1A2E' }}>{form.plan_tier}</div>
+                    <button onClick={() => setTab("billing")} className="px-4 py-2 rounded-lg text-sm font-semibold text-white shrink-0" style={{ backgroundColor: '#7C6FCD', border: 'none', cursor: 'pointer', minHeight: 44 }}>Upgrade Plan</button>
+                  </div>
                 ) : (
                   <div className="mt-1 h-11 px-3 flex items-center rounded-md border border-input bg-muted/40 text-sm capitalize">{form.plan_tier}</div>
                 )}
@@ -225,15 +242,21 @@ export default function Settings() {
            <p className="text-sm" style={{ color: '#4B5563' }}>Name: {user?.full_name || "(Not set - add your name above)"}</p>
            <p className="text-sm" style={{ color: '#4B5563' }}>Email: {user?.email}</p>
            <p className="text-sm" style={{ color: '#4B5563' }}>Role: {user?.role}</p>
-           {account?.client_id && (
-             <div className="mt-3 pt-3 border-t border-border">
-               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Your Client ID</p>
-               <div className="flex items-center gap-2">
-                 <code className="text-sm font-mono font-bold px-3 py-1.5 bg-primary/10 text-primary rounded-lg select-all">{account.client_id}</code>
-                 <span className="text-xs text-muted-foreground">Reference this when contacting support</span>
+           {account?.id && (() => {
+             const clientId = generateClientId(account.id);
+             return (
+               <div className="mt-3 pt-3 border-t border-border">
+                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Client ID</p>
+                 <div className="flex items-center gap-2">
+                   <div className="flex-1 h-11 px-3 flex items-center rounded-md border text-sm font-mono font-bold select-all" style={{ backgroundColor: '#F3F4F6', borderColor: '#D1D5DB', color: '#1A1A2E', cursor: 'default', userSelect: 'all' }} tabIndex={-1}>{clientId}</div>
+                   <button onClick={() => handleCopyClientId(clientId)} className="flex items-center justify-center h-11 w-11 rounded-md border transition-colors" style={{ backgroundColor: '#F3F4F6', borderColor: '#D1D5DB', cursor: 'pointer' }} title="Copy Client ID">
+                     {copiedId ? <Check className="w-4 h-4" style={{ color: '#22C55E' }} /> : <Copy className="w-4 h-4" style={{ color: '#6B7280' }} />}
+                   </button>
+                 </div>
+                 <p className="text-xs text-muted-foreground mt-1">Reference this when contacting support</p>
                </div>
-             </div>
-           )}
+             );
+           })()}
           </div>
 
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 space-y-4">
