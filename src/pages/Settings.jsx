@@ -16,9 +16,9 @@ import BillingTab from "../components/settings/BillingTab";
 
 const ALL_TABS = [
   { id: "account",       label: "Account",       icon: User },
-  { id: "integrations",  label: "Add-ons",  icon: Plug },
-  { id: "notifications", label: "Notifications", icon: Bell },
   { id: "billing",       label: "Billing",       icon: CreditCard },
+  { id: "integrations",  label: "Add-ons",       icon: Plug },
+  { id: "notifications", label: "Notifications", icon: Bell },
 ];
 
 export default function Settings() {
