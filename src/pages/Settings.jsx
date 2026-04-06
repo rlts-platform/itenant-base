@@ -16,7 +16,7 @@ import BillingTab from "../components/settings/BillingTab";
 
 const ALL_TABS = [
   { id: "account",       label: "Account",       icon: User },
-  { id: "integrations",  label: "Integrations",  icon: Plug },
+  { id: "integrations",  label: "Add-ons",  icon: Plug },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "billing",       label: "Billing",       icon: CreditCard },
 ];
@@ -270,7 +270,7 @@ export default function Settings() {
       )}
 
       {tab === "integrations" && account && (
-        <IntegrationsTab account={account} onSaved={load} />
+        <IntegrationsTab account={account} onSaved={load} role={role} />
       )}
       {tab === "integrations" && !account && (
         <div className="bg-card border border-border rounded-xl p-10 text-center text-sm text-muted-foreground">Save your account info first to configure integrations.</div>

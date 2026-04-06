@@ -30,7 +30,7 @@ function IntegrationCard({ title, description, logo, children }) {
   );
 }
 
-export default function IntegrationsTab({ account, onSaved }) {
+export default function IntegrationsTab({ account, onSaved, role }) {
   const [twilio, setTwilio] = useState({
     sid: account?.twilio_sid || "",
     token: account?.twilio_token || "",
@@ -66,6 +66,57 @@ export default function IntegrationsTab({ account, onSaved }) {
 
   const twilioConnected = !!(account?.twilio_sid && account?.twilio_token && account?.twilio_phone);
   const resendConnected = !!account?.resend_key;
+
+  // Client-facing clean Add-ons view
+  if (role !== 'platform_owner') {
+    return (
+      <div className="space-y-4">
+        <IntegrationCard
+          title="Text Messaging"
+          description="Automatically text your tenants rent reminders, maintenance updates, and late payment notices"
+          logo={twilioConnected ? <ConnectedBadge /> : <span className="text-xs bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded-full">$9/mo</span>}
+        >
+          <p className="text-sm text-muted-foreground">
+            {twilioConnected
+              ? "Text messaging is active. Your tenants will receive SMS alerts automatically."
+              : "Add text messaging to keep your tenants informed instantly. Contact support to activate."}
+          </p>
+        </IntegrationCard>
+
+        <IntegrationCard
+          title="Email Notifications"
+          description="Send branded emails to tenants for receipts, reminders, and updates"
+          logo={resendConnected ? <ConnectedBadge /> : <span className="text-xs bg-emerald-100 text-emerald-700 font-semibold px-2 py-0.5 rounded-full">Included</span>}
+        >
+          <p className="text-sm text-muted-foreground">
+            {resendConnected
+              ? "Email notifications are active and sending to your tenants."
+              : "Email notifications are available on your plan. Contact support to configure."}
+          </p>
+        </IntegrationCard>
+
+        <IntegrationCard
+          title="QuickBooks"
+          description="Sync payments and expenses automatically with your accounting software"
+          logo={<ComingSoon />}
+        >
+          <Button variant="outline" size="sm" disabled className="gap-1.5">
+            <Clock className="w-3.5 h-3.5" /> Coming Soon
+          </Button>
+        </IntegrationCard>
+
+        <IntegrationCard
+          title="Calendar Sync"
+          description="Sync lease dates, renewals, and reminders to your calendar"
+          logo={<ComingSoon />}
+        >
+          <Button variant="outline" size="sm" disabled className="gap-1.5">
+            <Clock className="w-3.5 h-3.5" /> Coming Soon
+          </Button>
+        </IntegrationCard>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

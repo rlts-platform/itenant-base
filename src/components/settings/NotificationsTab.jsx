@@ -60,7 +60,7 @@ export default function NotificationsTab({ account, onSaved }) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium">SMS Notifications</p>
-            <p className="text-xs text-muted-foreground">Receive notifications via SMS (requires Twilio)</p>
+            <p className="text-xs text-muted-foreground">Get instant text alerts for rent payments, maintenance updates, and lease activity</p>
           </div>
           <Switch checked={prefs.sms_enabled} onCheckedChange={v => setGlobal("sms_enabled", v)} />
         </div>
