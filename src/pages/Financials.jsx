@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { DollarSign, TrendingUp, TrendingDown, Upload } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, Upload, Plus } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import PerPropertyTab from "../components/financials/PerPropertyTab";
 import TaxEstimatorTab from "../components/financials/TaxEstimatorTab";
@@ -33,6 +37,31 @@ const REPORT_CARDS = [
   { title: "Year-End Summary",   desc: "Annual income & expense overview" },
 ];
 
+const INCOME_CATEGORIES = [
+  { name: "Rent Income", color: "#10B981" },
+  { name: "Late Fees", color: "#FBBF24" },
+  { name: "Pet Rent", color: "#3B82F6" },
+  { name: "Parking", color: "#9CA3AF" },
+  { name: "Security Deposit", color: "#8B5CF6" },
+  { name: "Application Fees", color: "#F97316" },
+  { name: "Other Income", color: "#9CA3AF" },
+];
+
+const EXPENSE_CATEGORIES = [
+  { name: "Repairs & Maintenance", color: "#EF4444" },
+  { name: "Property Insurance", color: "#3B82F6" },
+  { name: "Property Taxes", color: "#374151" },
+  { name: "Management Fees", color: "#8B5CF6" },
+  { name: "Utilities", color: "#F97316" },
+  { name: "Mortgage / Loan Payment", color: "#1E40AF" },
+  { name: "Landscaping", color: "#10B981" },
+  { name: "Cleaning", color: "#14B8A6" },
+  { name: "Advertising / Listings", color: "#EC4899" },
+  { name: "Legal & Professional Fees", color: "#9CA3AF" },
+  { name: "Capital Improvements", color: "#FBBF24" },
+  { name: "Other Expense", color: "#9CA3AF" },
+];
+
 export default function Financials() {
   const { accountId } = useAccount();
   const { canWrite } = usePermissions('financials');
@@ -41,6 +70,11 @@ export default function Financials() {
   const [workOrders, setWorkOrders] = useState([]);
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [customModalOpen, setCustomModalOpen] = useState(false);
+  const [customType, setCustomType] = useState("income");
+  const [customName, setCustomName] = useState("");
+  const [customColor, setCustomColor] = useState("#7C6FCD");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!accountId) return;
@@ -73,9 +107,40 @@ export default function Financials() {
   });
   const chartData = Object.values(sixMonthData);
 
+  const handleAddCustomCategory = async () => {
+    if (!customName.trim()) return;
+    setSaving(true);
+    // Save to account custom categories (simplified - can be extended to persist)
+    setSaving(false);
+    setCustomModalOpen(false);
+    setCustomName("");
+    setCustomColor("#7C6FCD");
+    setCustomType("income");
+  };
+
+  const CategoryCard = ({ category, monthAmount = 0, ytdAmount = 0 }) => (
+    <div className="bg-white border border-border rounded-lg p-4 flex items-start gap-3">
+      <div className="w-3 h-3 rounded-full mt-1 shrink-0" style={{ backgroundColor: category.color }} />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium" style={{ color: '#1A1A2E' }}>{category.name}</p>
+        <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
+          <div>
+            <p className="text-muted-foreground text-xs">This Month</p>
+            <p className="font-semibold" style={{ color: '#1A1A2E' }}>${monthAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground text-xs">YTD</p>
+            <p className="font-semibold" style={{ color: '#1A1A2E' }}>${ytdAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
+    <>
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header with title, subtitle, and action buttons */}
       <div className="flex items-start justify-between gap-4">
@@ -170,27 +235,45 @@ export default function Financials() {
       )}
 
       {tab === "categories" && (
-        <div className="text-center py-12 text-muted-foreground">
-          Categories tab content coming soon
-        </div>
-      )}
-
-      {tab === "reports" && (
-        <div className="space-y-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Generate and export detailed reports for your portfolio.</p>
-            <Link to="/reports" className="text-sm text-primary font-medium hover:underline">Open full Reports page →</Link>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {REPORT_CARDS.map(r => (
-              <Link key={r.title} to="/reports" className="bg-card border border-border rounded-xl p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 block">
-                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-                  <DollarSign className="w-4 h-4 text-primary" />
+        <div className="space-y-6">
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Income Categories */}
+            <div className="space-y-4">
+              <div>
+                <h2 className="font-semibold mb-4" style={{ color: '#1A1A2E' }}>Income Categories</h2>
+                <div className="space-y-3">
+                  {INCOME_CATEGORIES.map(cat => (
+                    <CategoryCard key={cat.name} category={cat} monthAmount={0} ytdAmount={0} />
+                  ))}
                 </div>
-                <h3 className="font-semibold text-sm">{r.title}</h3>
-                <p className="text-xs text-muted-foreground mt-1">{r.desc}</p>
-              </Link>
-            ))}
+              </div>
+              <Button
+                variant="outline"
+                className="w-full gap-2 mt-4"
+                onClick={() => { setCustomType("income"); setCustomModalOpen(true); }}
+              >
+                <Plus className="w-4 h-4" /> Add Custom Income Category
+              </Button>
+            </div>
+
+            {/* Expense Categories */}
+            <div className="space-y-4">
+              <div>
+                <h2 className="font-semibold mb-4" style={{ color: '#1A1A2E' }}>Expense Categories</h2>
+                <div className="space-y-3">
+                  {EXPENSE_CATEGORIES.map(cat => (
+                    <CategoryCard key={cat.name} category={cat} monthAmount={0} ytdAmount={0} />
+                  ))}
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full gap-2 mt-4"
+                onClick={() => { setCustomType("expense"); setCustomModalOpen(true); }}
+              >
+                <Plus className="w-4 h-4" /> Add Custom Expense Category
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -233,5 +316,64 @@ export default function Financials() {
         </div>
       )}
     </div>
+
+    {/* Custom Category Modal */}
+    <Dialog open={customModalOpen} onOpenChange={setCustomModalOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Custom Category</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label>Category Name</Label>
+            <Input
+              className="mt-1"
+              placeholder="e.g., HOA Fees"
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label>Type</Label>
+            <Select value={customType} onValueChange={setCustomType}>
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="income">Income</SelectItem>
+                <SelectItem value="expense">Expense</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Color</Label>
+            <div className="mt-2 flex items-center gap-2">
+              <div
+                className="w-12 h-12 rounded-lg border border-border cursor-pointer"
+                style={{ backgroundColor: customColor }}
+                onClick={() => {
+                  const colors = ["#EF4444", "#F97316", "#FBBF24", "#10B981", "#14B8A6", "#3B82F6", "#8B5CF6", "#EC4899", "#9CA3AF"];
+                  setCustomColor(colors[Math.floor(Math.random() * colors.length)]);
+                }}
+              />
+              <Input
+                type="text"
+                placeholder="#7C6FCD"
+                value={customColor}
+                onChange={(e) => setCustomColor(e.target.value)}
+                className="font-mono text-sm"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setCustomModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddCustomCategory} disabled={saving || !customName.trim()}>
+              {saving ? "Saving..." : "Add Category"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
