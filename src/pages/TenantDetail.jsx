@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, Save, Send, Clock, CheckCircle, Mail, Phone, User, Loader2, ZoomIn } from "lucide-react";
+import { ArrowLeft, Save, Send, Clock, CheckCircle, Mail, Phone, User, Loader2, ZoomIn, RefreshCw, AlertTriangle } from "lucide-react";
+import LeaseGenerator from "../components/LeaseGenerator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ export default function TenantDetail({ tenantId, onBack }) {
   const [infoForm, setInfoForm] = useState({});
   const [notes, setNotes] = useState("");
   const [proofPhoto, setProofPhoto] = useState(null);
+  const [showRenewModal, setShowRenewModal] = useState(false);
 
   const load = async () => {
     const [tenantArr, units, properties, leases, payments, orders, invites, docs] = await Promise.all([
@@ -130,6 +132,26 @@ export default function TenantDetail({ tenantId, onBack }) {
 
       {/* 2. Unit & Lease Summary */}
       <Section title="Current Unit & Lease">
+        {(() => {
+          if (!activeLease?.end_date) return null;
+          const daysUntil = Math.ceil((new Date(activeLease.end_date) - new Date()) / (1000 * 60 * 60 * 24));
+          if (daysUntil > 60) return null;
+          const isUrgent = daysUntil <= 30;
+          return (
+            <div className={`flex items-start gap-3 rounded-lg p-3 mb-1 ${isUrgent ? "bg-red-50 border border-red-200" : "bg-amber-50 border border-amber-200"}`}>
+              <AlertTriangle className={`w-4 h-4 mt-0.5 shrink-0 ${isUrgent ? "text-red-600" : "text-amber-600"}`} />
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-semibold ${isUrgent ? "text-red-700" : "text-amber-700"}`}>
+                  {daysUntil <= 0 ? "Lease has expired" : `Lease expires in ${daysUntil} day${daysUntil === 1 ? "" : "s"}`}
+                </p>
+                <p className={`text-xs mt-0.5 ${isUrgent ? "text-red-600" : "text-amber-600"}`}>Generate a renewal agreement to keep this tenant.</p>
+              </div>
+              <Button size="sm" className="gap-1.5 shrink-0" onClick={() => setShowRenewModal(true)}>
+                <RefreshCw className="w-3.5 h-3.5" />Renew Lease
+              </Button>
+            </div>
+          );
+        })()}
         {!unit && !activeLease ? (
           <p className="text-sm text-muted-foreground">No unit or lease assigned.</p>
         ) : (
@@ -261,6 +283,22 @@ export default function TenantDetail({ tenantId, onBack }) {
           </Button>
         </div>
       </Section>
+
+      {/* Lease Renewal Generator */}
+      <LeaseGenerator
+        open={showRenewModal}
+        onClose={() => setShowRenewModal(false)}
+        onSaved={() => { setShowRenewModal(false); load(); }}
+        renewData={activeLease ? {
+          id: activeLease.id,
+          tenant_id: activeLease.tenant_id,
+          unit_id: activeLease.unit_id,
+          start_date: activeLease.end_date, // renewal starts when old one ends
+          end_date: "",
+          rent_amount: activeLease.rent_amount,
+          deposit_amount: activeLease.deposit_amount,
+        } : null}
+      />
 
       {/* Proof photo lightbox */}
       <Dialog open={!!proofPhoto} onOpenChange={() => setProofPhoto(null)}>
