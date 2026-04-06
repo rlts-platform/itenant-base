@@ -100,6 +100,7 @@ Normal: cosmetic, minor repairs, slow drains.`,
       urgency,
       ai_emergency: triage?.is_emergency || false,
       tenant_id: tenant?.id,
+      account_id: tenant?.account_id,
       photo_urls: photoUrls,
       status: "new",
     });

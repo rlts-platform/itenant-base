@@ -22,19 +22,17 @@ export default function TenantDashboard() {
       const t = tenants[0];
       setTenant(t);
       if (t) {
-        const [leases, wo, pays, accounts, broadcasts] = await Promise.all([
+        const [leases, wo, pays, accountsRes, broadcasts] = await Promise.all([
           base44.entities.Lease.filter({ tenant_id: t.id }),
           base44.entities.WorkOrder.filter({ tenant_id: t.id }),
           base44.entities.Payment.filter({ tenant_id: t.id }),
-          base44.entities.Account.list(),
-          base44.entities.Broadcast.list(),
+          t.account_id ? base44.entities.Account.filter({ id: t.account_id }) : Promise.resolve([]),
+          t.account_id ? base44.entities.Broadcast.filter({ account_id: t.account_id }) : Promise.resolve([]),
         ]);
         setLease(leases.find(l => l.status === "active") || leases[0] || null);
         setOrders(wo.filter(w => w.status !== "closed").slice(0, 3));
         setPayments(pays.slice(0, 3));
-        
-        // Get emergency alerts for this tenant
-        const account = accounts.find(a => a.id === t.account_id);
+        const account = accountsRes[0];
         if (account) {
           const alerts = broadcasts.filter(b =>
             b.type === "emergency_alert" &&

@@ -32,7 +32,10 @@ export default function TenantDocuments() {
       const t = tenants[0];
       setTenant(t);
       if (t) {
-        const allDocs = await base44.entities.Document.list("-created_date");
+        // Fetch only docs explicitly shared with this tenant — scoped to their account
+        const allDocs = t.account_id
+          ? await base44.entities.Document.filter({ account_id: t.account_id }, "-created_date")
+          : [];
         const shared = allDocs.filter(d => d.shared_with?.includes(t.id));
         setDocs(shared);
         if (shared.length > 0) {

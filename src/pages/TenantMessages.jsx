@@ -130,6 +130,7 @@ export default function TenantMessages() {
       to_user: toUser,
       read: false,
       attachments: cleanAttachments,
+      account_id: tenant?.account_id,
     });
     setNewMsg("");
     setAttachments([]);
