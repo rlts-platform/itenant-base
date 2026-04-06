@@ -30,7 +30,7 @@ export default function Step3Details({ data, onChange }) {
   );
   const sel = (field, options, placeholder) => (
     <Select value={data[field] || ""} onValueChange={v => set(field, v)}>
-      <SelectTrigger style={FIELD_STYLE}>
+      <SelectTrigger style={FIELD_STYLE} className="!bg-white">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>{options.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>

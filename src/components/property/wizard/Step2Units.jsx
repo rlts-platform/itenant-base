@@ -33,7 +33,7 @@ function UnitForm({ unit, index, onChange, onRemove, showRemove }) {
         <div className="col-span-2">
           <Label className="mb-1 block" style={LABEL_STYLE}>Status</Label>
           <Select value={unit.status || "vacant"} onValueChange={v => set("status", v)}>
-            <SelectTrigger style={FIELD_STYLE}>
+            <SelectTrigger style={FIELD_STYLE} className="!bg-white">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

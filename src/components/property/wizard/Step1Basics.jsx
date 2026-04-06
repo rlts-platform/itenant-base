@@ -43,7 +43,7 @@ export default function Step1Basics({ data, onChange }) {
           <div>
             <Label className="mb-1 block" style={LABEL_STYLE}>Property Type *</Label>
             <Select value={data.type || ""} onValueChange={v => set("type", v)}>
-              <SelectTrigger style={FIELD_STYLE}>
+              <SelectTrigger style={FIELD_STYLE} className="!bg-white">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
