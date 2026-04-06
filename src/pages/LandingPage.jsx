@@ -77,10 +77,10 @@ export default function LandingPage() {
           <div style={{ display: "inline-block", marginBottom: 20, padding: "5px 16px", borderRadius: 999, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", fontWeight: 600, fontSize: 13 }}>
             • Smarter Property Management
           </div>
-          <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", fontWeight: 800, letterSpacing: "-1.5px", color: "#fff", lineHeight: 1.12, margin: "0 0 18px" }}>
+          <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", fontWeight: 800, letterSpacing: "-1.5px", color: "#FFFFFF", lineHeight: 1.12, margin: "0 0 18px", textShadow: "0 2px 8px rgba(0,0,0,0.45)" }}>
             Property Management.<br />Simplified.
           </h1>
-          <p style={{ fontSize: 18, color: "rgba(255,255,255,0.75)", marginBottom: 36, lineHeight: 1.7 }}>
+          <p style={{ fontSize: 18, color: "rgba(255,255,255,0.92)", marginBottom: 36, lineHeight: 1.7, textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>
             The all-in-one platform for landlords, property managers, and tenants.<br />Automate the boring. Focus on what matters.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
@@ -93,7 +93,7 @@ export default function LandingPage() {
           </div>
           <div style={{ display: "flex", gap: 24, justifyContent: "center", marginTop: 24, flexWrap: "wrap" }}>
             {["No credit card required", "14-day free trial", "Cancel anytime"].map(t => (
-              <span key={t} style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", gap: 6 }}>
+              <span key={t} style={{ fontSize: 13, color: "rgba(255,255,255,0.92)", display: "flex", alignItems: "center", gap: 6 }}>
                 <CheckCircle2 size={14} color="#22C55E" /> {t}
               </span>
             ))}
