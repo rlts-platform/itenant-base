@@ -45,6 +45,7 @@ import TeamInvitePage from './pages/TeamInvitePage';
 import LandingPage from './pages/LandingPage';
 import SignaturePage from './pages/SignaturePage';
 import Analytics from './pages/Analytics';
+import RecurringTasks from './pages/RecurringTasks';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -183,6 +184,7 @@ const AuthenticatedApp = () => {
         <Route path="/assistant" element={<Assistant />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/analytics" element={<Analytics />} />
+        <Route path="/recurring-tasks" element={<RecurringTasks />} />
         <Route path="/owner/revenue" element={<OwnerRevenue />} />
         <Route path="/owner/clients" element={<OwnerClients />} />
         <Route path="/applications" element={<Applications />} />

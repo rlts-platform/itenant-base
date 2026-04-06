@@ -1,0 +1,73 @@
+{
+  "name": "RecurringTask",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "plumbing",
+        "electrical",
+        "hvac",
+        "appliance",
+        "pest",
+        "structural",
+        "other"
+      ]
+    },
+    "urgency": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "urgent",
+        "emergency"
+      ],
+      "default": "normal"
+    },
+    "frequency_value": {
+      "type": "number"
+    },
+    "frequency_unit": {
+      "type": "string",
+      "enum": [
+        "days",
+        "weeks",
+        "months",
+        "years"
+      ]
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_generated_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "assigned_vendor_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "frequency_value",
+    "frequency_unit",
+    "account_id"
+  ]
+}
