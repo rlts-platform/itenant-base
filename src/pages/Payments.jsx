@@ -23,7 +23,7 @@ const METHODS = ["check", "money_order", "cash", "zelle"];
 
 export default function Payments() {
   const { user } = useAuth();
-  const { accountId } = useAccount();
+  const { accountId, accountLoading } = useAccount();
   const { canWrite } = usePermissions('payments');
   const [payments, setPayments] = useState([]);
   const [properties, setProperties] = useState([]);
@@ -50,7 +50,10 @@ export default function Payments() {
     ]);
     setPayments(p); setTenants(t); setProperties(pr); setUnits(u); setLoading(false);
   };
-  useEffect(() => { if (accountId) load(); }, [accountId]);
+  useEffect(() => {
+    if (accountId) load();
+    else if (!accountLoading) setLoading(false);
+  }, [accountId, accountLoading]);
 
   const openAdd = () => { setEditing(null); setForm(emptyForm); setOpen(true); };
   const openEdit = (p) => {
@@ -288,7 +291,7 @@ export default function Payments() {
                 <label className="mt-1 flex items-center gap-2 cursor-pointer border border-dashed border-border rounded-lg px-4 py-2.5 hover:bg-secondary/50 transition-colors">
                   <Upload className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">{uploading1 ? "Uploading…" : form.proof_image_url ? "✓ Uploaded" : "Upload proof"}</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleFile(1)()} disabled={!!form.proof_image_url} />
+                  <input type="file" accept="image/*" className="hidden" onChange={handleFile(1)} disabled={!!form.proof_image_url} />
                 </label>
                 {form.proof_upload_date && <p className="text-xs text-muted-foreground mt-1">Funds documented: {new Date(form.proof_upload_date).toLocaleString()}</p>}
               </div>
@@ -312,7 +315,7 @@ export default function Payments() {
                   <label className="mt-1 flex items-center gap-2 cursor-pointer border border-dashed border-border rounded-lg px-4 py-2.5 hover:bg-secondary/50 transition-colors">
                     <Upload className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">{uploading2 ? "Uploading…" : form.split_proof_url_2 ? "✓ Uploaded" : "Upload proof"}</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={handleFile(2)()} disabled={!!form.split_proof_url_2} />
+                    <input type="file" accept="image/*" className="hidden" onChange={handleFile(2)} disabled={!!form.split_proof_url_2} />
                   </label>
                   {form.split_proof_upload_date_2 && <p className="text-xs text-muted-foreground mt-1">Funds documented: {new Date(form.split_proof_upload_date_2).toLocaleString()}</p>}
                 </div>
