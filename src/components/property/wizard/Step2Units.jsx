@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Copy } from "lucide-react";
 
 const EMPTY_UNIT = { unit_number: "", floor: "", bedrooms: "", bathrooms: "", sqft: "", rent_amount: "", deposit_amount: "", pet_deposit: "", status: "vacant" };
+const FIELD_STYLE = { background: "#FFFFFF", border: "1.5px solid #7C6FCD", borderRadius: 8, color: "#1A1A2E" };
+const LABEL_STYLE = { color: "#1A1A2E", fontWeight: 600, fontSize: 13 };
 
 function UnitForm({ unit, index, onChange, onRemove, showRemove }) {
   const set = (f, v) => onChange(index, { ...unit, [f]: v });
   const inp = (placeholder, field, type = "text") => (
     <Input type={type} placeholder={placeholder} value={unit[field] || ""} onChange={e => set(field, e.target.value)}
-      style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff" }} />
+      style={FIELD_STYLE} />
   );
   return (
     <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "16px" }}>
@@ -20,18 +22,18 @@ function UnitForm({ unit, index, onChange, onRemove, showRemove }) {
         {showRemove && <button onClick={() => onRemove(index)} className="text-red-400 hover:text-red-300"><Trash2 size={14} /></button>}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs mb-1 block" style={{ color: "#9CA3AF" }}>Unit # / Name</Label>{inp("e.g. 1A", "unit_number")}</div>
-        <div><Label className="text-xs mb-1 block" style={{ color: "#9CA3AF" }}>Floor (optional)</Label>{inp("e.g. 2", "floor")}</div>
-        <div><Label className="text-xs mb-1 block" style={{ color: "#9CA3AF" }}>Bedrooms</Label>{inp("2", "bedrooms", "number")}</div>
-        <div><Label className="text-xs mb-1 block" style={{ color: "#9CA3AF" }}>Bathrooms</Label>{inp("1", "bathrooms", "number")}</div>
-        <div><Label className="text-xs mb-1 block" style={{ color: "#9CA3AF" }}>Sq Ft</Label>{inp("850", "sqft", "number")}</div>
-        <div><Label className="text-xs mb-1 block" style={{ color: "#9CA3AF" }}>Monthly Rent ($)</Label>{inp("1200", "rent_amount", "number")}</div>
-        <div><Label className="text-xs mb-1 block" style={{ color: "#9CA3AF" }}>Security Deposit ($)</Label>{inp("1200", "deposit_amount", "number")}</div>
-        <div><Label className="text-xs mb-1 block" style={{ color: "#9CA3AF" }}>Pet Deposit ($, optional)</Label>{inp("250", "pet_deposit", "number")}</div>
+        <div><Label className="mb-1 block" style={LABEL_STYLE}>Unit # / Name</Label>{inp("e.g. 1A", "unit_number")}</div>
+        <div><Label className="mb-1 block" style={LABEL_STYLE}>Floor (optional)</Label>{inp("e.g. 2", "floor")}</div>
+        <div><Label className="mb-1 block" style={LABEL_STYLE}>Bedrooms</Label>{inp("2", "bedrooms", "number")}</div>
+        <div><Label className="mb-1 block" style={LABEL_STYLE}>Bathrooms</Label>{inp("1", "bathrooms", "number")}</div>
+        <div><Label className="mb-1 block" style={LABEL_STYLE}>Sq Ft</Label>{inp("850", "sqft", "number")}</div>
+        <div><Label className="mb-1 block" style={LABEL_STYLE}>Monthly Rent ($)</Label>{inp("1200", "rent_amount", "number")}</div>
+        <div><Label className="mb-1 block" style={LABEL_STYLE}>Security Deposit ($)</Label>{inp("1200", "deposit_amount", "number")}</div>
+        <div><Label className="mb-1 block" style={LABEL_STYLE}>Pet Deposit ($, optional)</Label>{inp("250", "pet_deposit", "number")}</div>
         <div className="col-span-2">
-          <Label className="text-xs mb-1 block" style={{ color: "#9CA3AF" }}>Status</Label>
+          <Label className="mb-1 block" style={LABEL_STYLE}>Status</Label>
           <Select value={unit.status || "vacant"} onValueChange={v => set("status", v)}>
-            <SelectTrigger style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff" }}>
+            <SelectTrigger style={FIELD_STYLE}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -87,9 +89,9 @@ export default function Step2Units({ data, onChange }) {
       </div>
 
       <div>
-        <Label className="text-white mb-1 block">How many units does this property have?</Label>
+        <Label className="mb-1 block" style={LABEL_STYLE}>How many units does this property have?</Label>
         <Input type="number" min={1} value={data.unit_count || 1} onChange={e => setCount(e.target.value)}
-          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff", width: 120 }} />
+          style={{ ...FIELD_STYLE, width: 120 }} />
       </div>
 
       {unitCount > 1 && (
