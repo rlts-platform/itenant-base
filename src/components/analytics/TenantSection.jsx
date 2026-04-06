@@ -5,56 +5,62 @@ import { AlertTriangle } from "lucide-react";
 export default function TenantSection({ dateRange }) {
   const [data, setData] = useState({ onTimeRate: 0, topLate: [], retentionRate: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const [payments, leases, tenants] = await Promise.all([
-        base44.entities.Payment.list(),
-        base44.entities.Lease.list(),
-        base44.entities.Tenant.list(),
-      ]);
+      setError(false);
+      try {
+        const [rawPayments, rawLeases, rawTenants] = await Promise.all([
+          base44.entities.Payment.list(),
+          base44.entities.Lease.list(),
+          base44.entities.Tenant.list(),
+        ]);
+        const payments = rawPayments || [];
+        const leases = rawLeases || [];
+        const tenants = rawTenants || [];
 
-      // On-time payment rate
-      const filtered = payments.filter(p => p.date >= dateRange.startDate && p.date <= dateRange.endDate && p.status === "confirmed");
-      let onTime = 0;
-      filtered.forEach(p => {
-        const lease = leases.find(l => l.tenant_id === p.tenant_id);
-        if (lease && p.date <= lease.end_date) onTime++;
-      });
-      const onTimeRate = filtered.length > 0 ? Math.round((onTime / filtered.length) * 100) : 0;
+        const filtered = payments.filter(p => p.date >= dateRange.startDate && p.date <= dateRange.endDate && p.status === "confirmed");
+        let onTime = 0;
+        filtered.forEach(p => {
+          const lease = leases.find(l => l.tenant_id === p.tenant_id);
+          if (lease && p.date <= lease.end_date) onTime++;
+        });
+        const onTimeRate = filtered.length > 0 ? Math.round((onTime / filtered.length) * 100) : 0;
 
-      // Top late payers
-      const tenantLateMap = {};
-      payments.filter(p => p.status === "confirmed").forEach(p => {
-        const lease = leases.find(l => l.tenant_id === p.tenant_id);
-        if (lease && p.date > lease.end_date) {
-          if (!tenantLateMap[p.tenant_id]) {
-            const t = tenants.find(tt => tt.id === p.tenant_id);
-            tenantLateMap[p.tenant_id] = { name: t ? `${t.first_name} ${t.last_name}` : "Unknown", count: 0 };
+        const tenantLateMap = {};
+        payments.filter(p => p.status === "confirmed").forEach(p => {
+          const lease = leases.find(l => l.tenant_id === p.tenant_id);
+          if (lease && p.date > lease.end_date) {
+            if (!tenantLateMap[p.tenant_id]) {
+              const t = tenants.find(tt => tt.id === p.tenant_id);
+              tenantLateMap[p.tenant_id] = { name: t ? `${t.first_name} ${t.last_name}` : "Unknown", count: 0 };
+            }
+            tenantLateMap[p.tenant_id].count++;
           }
-          tenantLateMap[p.tenant_id].count++;
-        }
-      });
-      const topLate = Object.values(tenantLateMap).sort((a, b) => b.count - a.count).slice(0, 5);
+        });
+        const topLate = Object.values(tenantLateMap).sort((a, b) => b.count - a.count).slice(0, 5);
 
-      // Retention rate (last 12 months)
-      const year = new Date().getFullYear();
-      const month = new Date().getMonth();
-      const oneYearAgo = `${year - 1}-${String(month + 1).padStart(2, "0")}`;
-      const expiredLeases = leases.filter(l => l.status === "expired" && l.end_date >= oneYearAgo);
-      const renewedLeases = expiredLeases.filter(el => {
-        return leases.find(nl => nl.status === "active" && nl.tenant_id === el.tenant_id && nl.start_date > el.end_date);
-      });
-      const retentionRate = expiredLeases.length > 0 ? Math.round((renewedLeases.length / expiredLeases.length) * 100) : 0;
+        const now = new Date();
+        const oneYearAgo = `${now.getFullYear() - 1}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+        const expiredLeases = leases.filter(l => l.status === "expired" && l.end_date >= oneYearAgo);
+        const renewedLeases = expiredLeases.filter(el => leases.find(nl => nl.status === "active" && nl.tenant_id === el.tenant_id && nl.start_date > el.end_date));
+        const retentionRate = expiredLeases.length > 0 ? Math.round((renewedLeases.length / expiredLeases.length) * 100) : 0;
 
-      setData({ onTimeRate, topLate, retentionRate });
-      setLoading(false);
+        setData({ onTimeRate, topLate, retentionRate });
+      } catch (err) {
+        console.error("TenantSection load error:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [dateRange]);
 
-  if (loading) return <div className="text-center text-muted-foreground">Loading...</div>;
+  if (loading) return <div className="text-center text-muted-foreground py-8">Loading...</div>;
+  if (error) return <div className="text-center text-muted-foreground py-8">Tenant data unavailable.</div>;
 
   return (
     <div className="space-y-4">

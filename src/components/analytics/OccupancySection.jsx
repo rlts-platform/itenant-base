@@ -6,49 +6,55 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 export default function OccupancySection({ dateRange }) {
   const [data, setData] = useState({ occupancy: 0, occupied: 0, vacant: 0, byProperty: [], unitsAtRisk: [] });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const [units, properties, leases] = await Promise.all([
-        base44.entities.Unit.list(),
-        base44.entities.Property.list(),
-        base44.entities.Lease.list(),
-      ]);
+      setError(false);
+      try {
+        const [units, properties, leases] = await Promise.all([
+          base44.entities.Unit.list(),
+          base44.entities.Property.list(),
+          base44.entities.Lease.list(),
+        ]);
 
-      const occupied = units.filter(u => u.status === "occupied").length;
-      const vacant = units.filter(u => u.status === "vacant").length;
-      const total = units.length;
-      const occupancy = total > 0 ? Math.round((occupied / total) * 100) : 0;
+        const safeUnits = units || [];
+        const safeProperties = properties || [];
+        const safeLeases = leases || [];
 
-      // By property
-      const propMap = {};
-      properties.forEach(p => {
-        propMap[p.id] = { name: p.nickname || p.address, occupied: 0, total: 0 };
-      });
-      units.forEach(u => {
-        if (propMap[u.property_id]) {
-          propMap[u.property_id].total++;
-          if (u.status === "occupied") propMap[u.property_id].occupied++;
-        }
-      });
-      const byProperty = Object.values(propMap).map(p => ({
-        ...p,
-        rate: p.total > 0 ? Math.round((p.occupied / p.total) * 100) : 0,
-      }));
+        const occupied = safeUnits.filter(u => u.status === "occupied").length;
+        const vacant = safeUnits.filter(u => u.status === "vacant").length;
+        const total = safeUnits.length;
+        const occupancy = total > 0 ? Math.round((occupied / total) * 100) : 0;
 
-      // Units at risk: leases expiring in 60 days with no renewal
-      const now = new Date();
-      const sixtyDaysOut = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-      const atRisk = leases.filter(l => l.status === "active" && l.end_date <= sixtyDaysOut);
+        const propMap = {};
+        safeProperties.forEach(p => { propMap[p.id] = { name: p.nickname || p.address, occupied: 0, total: 0 }; });
+        safeUnits.forEach(u => {
+          if (propMap[u.property_id]) {
+            propMap[u.property_id].total++;
+            if (u.status === "occupied") propMap[u.property_id].occupied++;
+          }
+        });
+        const byProperty = Object.values(propMap).map(p => ({ ...p, rate: p.total > 0 ? Math.round((p.occupied / p.total) * 100) : 0 }));
 
-      setData({ occupancy, occupied, vacant, byProperty, unitsAtRisk: atRisk.slice(0, 5) });
-      setLoading(false);
+        const now = new Date();
+        const sixtyDaysOut = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+        const atRisk = safeLeases.filter(l => l.status === "active" && l.end_date <= sixtyDaysOut);
+
+        setData({ occupancy, occupied, vacant, byProperty, unitsAtRisk: atRisk.slice(0, 5) });
+      } catch (err) {
+        console.error("OccupancySection load error:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [dateRange]);
 
-  if (loading) return <div className="text-center text-muted-foreground">Loading...</div>;
+  if (loading) return <div className="text-center text-muted-foreground py-8">Loading...</div>;
+  if (error) return <div className="text-center text-muted-foreground py-8">Occupancy data unavailable.</div>;
 
   const pieData = [
     { name: "Occupied", value: data.occupied, fill: "#7C6FCD" },

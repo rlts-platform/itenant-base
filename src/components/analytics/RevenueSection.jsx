@@ -6,67 +6,68 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 export default function RevenueSection({ dateRange }) {
   const [data, setData] = useState({ trendData: [], breakdownData: [], thisMonth: 0, lastMonth: 0, nextMonth: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const [payments, leases, properties] = await Promise.all([
-        base44.entities.Payment.list(),
-        base44.entities.Lease.list(),
-        base44.entities.Property.list(),
-      ]);
+      setError(false);
+      try {
+        const [payments, leases, properties] = await Promise.all([
+          base44.entities.Payment.list(),
+          base44.entities.Lease.list(),
+          base44.entities.Property.list(),
+        ]);
 
-      const confirmedPayments = payments.filter(p => p.status === "confirmed" && p.date >= dateRange.startDate && p.date <= dateRange.endDate);
-      
-      // 6-month trend
-      const trendMap = {};
-      for (let i = 5; i >= 0; i--) {
-        const d = new Date();
-        d.setMonth(d.getMonth() - i);
-        const monthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-        trendMap[monthStr] = 0;
-      }
-      confirmedPayments.forEach(p => {
-        const m = p.date?.slice(0, 7);
-        if (m && trendMap.hasOwnProperty(m)) trendMap[m] += p.amount || 0;
-      });
-      const trendData = Object.entries(trendMap).map(([m, amt]) => ({
-        month: m.slice(5),
-        amount: amt,
-      }));
-
-      // Revenue by property
-      const propMap = {};
-      confirmedPayments.forEach(p => {
-        const lease = leases.find(l => l.id === p.tenant_id || leases.find(ll => ll.tenant_id === p.tenant_id));
-        if (lease) {
-          const prop = properties.find(pr => pr.id === lease.unit_id || "");
-          if (prop) {
-            if (!propMap[prop.id]) propMap[prop.id] = { name: prop.nickname || prop.address, amount: 0 };
-            propMap[prop.id].amount += p.amount || 0;
-          }
+        const confirmedPayments = (payments || []).filter(p => p.status === "confirmed" && p.date >= dateRange.startDate && p.date <= dateRange.endDate);
+        
+        const trendMap = {};
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date();
+          d.setMonth(d.getMonth() - i);
+          const monthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+          trendMap[monthStr] = 0;
         }
-      });
-      const breakdownData = Object.values(propMap).sort((a, b) => b.amount - a.amount);
+        confirmedPayments.forEach(p => {
+          const m = p.date?.slice(0, 7);
+          if (m && trendMap.hasOwnProperty(m)) trendMap[m] += p.amount || 0;
+        });
+        const trendData = Object.entries(trendMap).map(([m, amt]) => ({ month: m.slice(5), amount: amt }));
 
-      // This month vs last month
-      const now = new Date();
-      const thisMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-      const lastMonthStr = (() => { const d = new Date(); d.setMonth(d.getMonth() - 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; })();
-      const thisMonth = confirmedPayments.filter(p => p.date?.startsWith(thisMonthStr)).reduce((s, p) => s + (p.amount || 0), 0);
-      const lastMonth = confirmedPayments.filter(p => p.date?.startsWith(lastMonthStr)).reduce((s, p) => s + (p.amount || 0), 0);
+        const propMap = {};
+        confirmedPayments.forEach(p => {
+          const lease = (leases || []).find(l => l.id === p.tenant_id || (leases || []).find(ll => ll.tenant_id === p.tenant_id));
+          if (lease) {
+            const prop = (properties || []).find(pr => pr.id === lease.unit_id || "");
+            if (prop) {
+              if (!propMap[prop.id]) propMap[prop.id] = { name: prop.nickname || prop.address, amount: 0 };
+              propMap[prop.id].amount += p.amount || 0;
+            }
+          }
+        });
+        const breakdownData = Object.values(propMap).sort((a, b) => b.amount - a.amount);
 
-      // Projected next month: sum of active lease rent
-      const activeLeases = leases.filter(l => l.status === "active");
-      const nextMonth = activeLeases.reduce((s, l) => s + (l.rent_amount || 0), 0);
+        const now = new Date();
+        const thisMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+        const lastMonthStr = (() => { const d = new Date(); d.setMonth(d.getMonth() - 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; })();
+        const thisMonth = confirmedPayments.filter(p => p.date?.startsWith(thisMonthStr)).reduce((s, p) => s + (p.amount || 0), 0);
+        const lastMonth = confirmedPayments.filter(p => p.date?.startsWith(lastMonthStr)).reduce((s, p) => s + (p.amount || 0), 0);
+        const activeLeases = (leases || []).filter(l => l.status === "active");
+        const nextMonth = activeLeases.reduce((s, l) => s + (l.rent_amount || 0), 0);
 
-      setData({ trendData, breakdownData, thisMonth, lastMonth, nextMonth });
-      setLoading(false);
+        setData({ trendData, breakdownData, thisMonth, lastMonth, nextMonth });
+      } catch (err) {
+        console.error("RevenueSection load error:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [dateRange]);
 
-  if (loading) return <div className="text-center text-muted-foreground">Loading...</div>;
+  if (loading) return <div className="text-center text-muted-foreground py-8">Loading...</div>;
+  if (error) return <div className="text-center text-muted-foreground py-8">Revenue data unavailable.</div>;
 
   const pctChange = lastMonth ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : 0;
 
