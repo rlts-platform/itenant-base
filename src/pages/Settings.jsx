@@ -31,7 +31,10 @@ export default function Settings() {
   usePermissions('settings'); // redirects non-manager team members
   const [account, setAccount] = useState(null);
   const [form, setForm] = useState({ company_name: "", plan_tier: "starter", subscription_status: "active" });
+  const [originalPlan, setOriginalPlan] = useState("starter");
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [planMessage, setPlanMessage] = useState(null); // { type: 'success'|'error', text }
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("account");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -41,7 +44,9 @@ export default function Settings() {
     const accounts = await base44.entities.Account.filter({ owner_email: user?.email });
     if (accounts[0]) {
       setAccount(accounts[0]);
-      setForm({ company_name: accounts[0].company_name || "", plan_tier: accounts[0].plan_tier || "starter", subscription_status: accounts[0].subscription_status || "active" });
+      const planTier = accounts[0].plan_tier || "starter";
+      setForm({ company_name: accounts[0].company_name || "", plan_tier: planTier, subscription_status: accounts[0].subscription_status || "active" });
+      setOriginalPlan(planTier);
     }
     setLoading(false);
   };
@@ -49,11 +54,52 @@ export default function Settings() {
   useEffect(() => { load(); }, [user]);
 
   const save = async () => {
+    setSaving(true);
+    setPlanMessage(null);
+    const planChanged = isClient && form.plan_tier !== originalPlan;
+
+    if (planChanged && account) {
+      // Trigger billing flow for plan change
+      let res;
+      try {
+        res = await base44.functions.invoke('changePlan', { account_id: account.id, new_plan: form.plan_tier });
+      } catch (err) {
+        setSaving(false);
+        setPlanMessage({ type: 'error', text: 'Payment failed. Your plan has not been changed. Please update your payment method.' });
+        setForm(f => ({ ...f, plan_tier: originalPlan }));
+        return;
+      }
+      const data = res.data;
+      if (data.error === 'no_payment_method') {
+        setSaving(false);
+        setPlanMessage({ type: 'error', text: 'Please add a payment method in the Billing tab before changing your plan.' });
+        setForm(f => ({ ...f, plan_tier: originalPlan }));
+        return;
+      }
+      if (data.error === 'payment_failed' || !data.success) {
+        setSaving(false);
+        setPlanMessage({ type: 'error', text: 'Payment failed. Your plan has not been changed. Please update your payment method.' });
+        setForm(f => ({ ...f, plan_tier: originalPlan }));
+        return;
+      }
+      // Success — show confirmation
+      const dateStr = new Date(data.next_billing_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      const chargeText = data.prorated_amount > 0 ? `A pro-rated charge of $${data.prorated_amount.toFixed(2)} has been applied to your card on file.` : 'No charge was applied (plan downgrade or equal price).';
+      setPlanMessage({ type: 'success', text: `Your plan has been updated. ${chargeText} Your next billing date is ${dateStr}.` });
+      // Also save other fields
+      await base44.entities.Account.update(account.id, { company_name: form.company_name, subscription_status: form.subscription_status, owner_email: user?.email });
+      await load();
+      setSaving(false);
+      return;
+    }
+
+    // No plan change — normal save
     if (account) await base44.entities.Account.update(account.id, { ...form, owner_email: user?.email });
     else { const a = await base44.entities.Account.create({ ...form, owner_email: user?.email }); setAccount(a); }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
-    load();
+    await load();
+    setSaving(false);
   };
 
   const handleDeleteAccount = async () => {
@@ -128,7 +174,14 @@ export default function Settings() {
                 <div className="mt-1 h-11 px-3 flex items-center rounded-md border border-input bg-muted/40 text-sm capitalize">{form.subscription_status?.replace("_"," ")}</div>
               )}
             </div>
-            <Button onClick={save} className="gap-2"><Save className="w-4 h-4" />{saved ? "Saved!" : "Save Changes"}</Button>
+            {planMessage && (
+              <div className={`rounded-xl px-4 py-3 text-sm ${
+                planMessage.type === 'success' ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' : 'bg-red-50 border border-red-200 text-red-800'
+              }`}>
+                {planMessage.text}
+              </div>
+            )}
+            <Button onClick={save} disabled={saving} className="gap-2"><Save className="w-4 h-4" />{saving ? "Saving..." : saved ? "Saved!" : "Save Changes"}</Button>
           </div>
 
           <div className="bg-card border border-border rounded-xl p-6 space-y-2">

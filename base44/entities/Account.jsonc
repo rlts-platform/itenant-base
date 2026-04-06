@@ -49,6 +49,13 @@
     },
     "notification_prefs": {
       "type": "string"
+    },
+    "stripe_customer_id": {
+      "type": "string"
+    },
+    "next_billing_date": {
+      "type": "string",
+      "format": "date"
     }
   },
   "required": [
