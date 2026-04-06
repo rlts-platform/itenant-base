@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Save, Plug, Bell, CreditCard, User, Trash2 } from "lucide-react";
 import { useAccount } from "../hooks/useAccount";
+import { usePermissions } from "../hooks/usePermissions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import IntegrationsTab from "../components/settings/IntegrationsTab";
 import NotificationsTab from "../components/settings/NotificationsTab";
@@ -23,6 +24,7 @@ const ALL_TABS = [
 export default function Settings() {
   const { user } = useAuth();
   const isTeamMember = user?.role === 'team_member';
+  usePermissions('settings'); // redirects non-manager team members
   const [account, setAccount] = useState(null);
   const [form, setForm] = useState({ company_name: "", plan_tier: "starter", subscription_status: "active" });
   const [saved, setSaved] = useState(false);

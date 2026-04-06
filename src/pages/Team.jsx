@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import { usePermissions } from "../hooks/usePermissions";
 import { Plus, Users2, Pencil, Trash2, Send, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -19,6 +20,7 @@ const TEAM_ROLES = [
 
 export default function Team() {
   const { user } = useAuth();
+  const { canAccess } = usePermissions('team');
   const [members, setMembers] = useState([]);
   const [account, setAccount] = useState(null);
   const [open, setOpen] = useState(false);

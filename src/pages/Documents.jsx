@@ -12,6 +12,8 @@ import DeleteGuardDialog from "../components/documents/DeleteGuardDialog";
 import DocGeneratorModal from "../components/documents/DocGeneratorModal";
 import SignatureRequestModal from "../components/documents/SignatureRequestModal";
 import { useAccount } from "../hooks/useAccount";
+import { usePermissions } from "../hooks/usePermissions";
+import ViewOnlyBanner from "../components/ViewOnlyBanner";
 
 // Flat list of all subcategory options for the dropdown
 const ALL_SUBCATEGORIES = FOLDER_TREE.flatMap(f =>
@@ -20,6 +22,7 @@ const ALL_SUBCATEGORIES = FOLDER_TREE.flatMap(f =>
 
 export default function Documents() {
   const { accountId } = useAccount();
+  const { canWrite } = usePermissions('documents');
   const [docs, setDocs] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [properties, setProperties] = useState([]);
@@ -115,12 +118,13 @@ export default function Documents() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setGenOpen(true)} className="gap-2">
+            {!canWrite && <ViewOnlyBanner />}
+            {canWrite && <Button variant="outline" onClick={() => setGenOpen(true)} className="gap-2">
               <Sparkles className="w-4 h-4 text-primary" /> Generate
-            </Button>
-            <Button onClick={() => { setForm({ file_name: "", subcategory: "other", tenant_id: "", property_id: "" }); setFileUrl(""); setOpen(true); }} className="gap-2">
+            </Button>}
+            {canWrite && <Button onClick={() => { setForm({ file_name: "", subcategory: "other", tenant_id: "", property_id: "" }); setFileUrl(""); setOpen(true); }} className="gap-2">
               <Plus className="w-4 h-4" /> Upload
-            </Button>
+            </Button>}
           </div>
         </div>
 
@@ -158,14 +162,14 @@ export default function Documents() {
                           <Button variant="ghost" size="icon" className="h-7 w-7"><ExternalLink className="w-3 h-3" /></Button>
                         </a>
                       )}
-                      {d.signature_status !== "signed" && (
+                      {canWrite && d.signature_status !== "signed" && (
                         <Button variant="ghost" size="icon" className="h-7 w-7" title="Request e-signature" onClick={() => setSignDoc(d)}>
                           <PenLine className="w-3 h-3" style={{ color: '#7C6FCD' }} />
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => requestDelete(d)}>
+                      {canWrite && <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => requestDelete(d)}>
                         <Trash2 className="w-3 h-3" />
-                      </Button>
+                      </Button>}
                     </div>
                   </div>
                   <p className="font-medium text-sm truncate" style={{ color: '#1A1A2E' }}>{d.file_name}</p>

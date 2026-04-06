@@ -16,6 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useAccount } from "../hooks/useAccount";
+import { usePermissions } from "../hooks/usePermissions";
+import ViewOnlyBanner from "../components/ViewOnlyBanner";
 
 const CATEGORIES = ["plumbing","electrical","hvac","appliance","pest","structural","other"];
 const URGENCY_COLOR = { normal: "secondary", urgent: "outline", emergency: "destructive" };
@@ -40,6 +42,7 @@ export default function Maintenance() {
   const [triaging, setTriaging] = useState(false);
   const { user } = useAuth();
   const { accountId } = useAccount();
+  const { canWrite } = usePermissions('maintenance');
 
   const runAITriage = async (summary, description) => {
     const text = `${summary} ${description || ""}`.trim();
@@ -148,7 +151,11 @@ Normal: cosmetic, minor repairs.`,
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-outfit font-700">Maintenance</h1><p className="text-sm text-muted-foreground mt-1">{orders.length} work orders {selectedDate && viewMode === "list" && `— ${selectedDate.toLocaleDateString()}`}</p></div>
+        <div>
+          <h1 className="text-2xl font-outfit font-700">Maintenance</h1>
+          <p className="text-sm text-muted-foreground mt-1">{orders.length} work orders {selectedDate && viewMode === "list" && `— ${selectedDate.toLocaleDateString()}`}</p>
+          {!canWrite && <ViewOnlyBanner />}
+        </div>
         <div className="flex gap-2">
           <div className="flex gap-1 bg-secondary/50 rounded-lg p-1">
             <button onClick={() => { setViewMode("list"); setSelectedDate(null); }} className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === "list" ? "bg-white shadow" : "hover:bg-white/50"}` }><List className="w-4 h-4" />List</button>
@@ -156,7 +163,7 @@ Normal: cosmetic, minor repairs.`,
             <button onClick={() => setViewMode("calendar")} className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${viewMode === "calendar" ? "bg-white shadow" : "hover:bg-white/50"}` }><Calendar className="w-4 h-4" />Calendar</button>
           </div>
           <Button variant="outline" onClick={() => openSupplies()} className="gap-2"><ShoppingCart className="w-4 h-4" />Find Supplies</Button>
-          <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />New Work Order</Button>
+          {canWrite && <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />New Work Order</Button>}
         </div>
       </div>
 
@@ -200,7 +207,7 @@ Normal: cosmetic, minor repairs.`,
         <div className="bg-card border border-border rounded-xl p-16 text-center">
           <Wrench className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="font-semibold">No work orders</p>
-          <Button onClick={openAdd} className="mt-4 gap-2"><Plus className="w-4 h-4" />New Work Order</Button>
+          {canWrite && <Button onClick={openAdd} className="mt-4 gap-2"><Plus className="w-4 h-4" />New Work Order</Button>}
         </div>
       ) : (
         <div className="space-y-3">
@@ -236,8 +243,8 @@ Normal: cosmetic, minor repairs.`,
               </div>
               <div className="flex gap-1 shrink-0">
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" title="Find Supplies" onClick={() => openSupplies(o.summary)}><ShoppingCart className="w-3.5 h-3.5" /></Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(o)}><Pencil className="w-3.5 h-3.5" /></Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => remove(o.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+                {canWrite && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(o)}><Pencil className="w-3.5 h-3.5" /></Button>}
+                  {canWrite && <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => remove(o.id)}><Trash2 className="w-3.5 h-3.5" /></Button>}
               </div>
             </div>
           ))}

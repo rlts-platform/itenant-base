@@ -10,11 +10,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAccount } from "../hooks/useAccount";
+import { usePermissions } from "../hooks/usePermissions";
+import ViewOnlyBanner from "../components/ViewOnlyBanner";
 
 const CATEGORIES = ["plumbing","electrical","hvac","cleaning","landscaping","general","other"];
 
 export default function Vendors() {
   const { accountId } = useAccount();
+  const { canWrite } = usePermissions('vendors');
   const [vendors, setVendors] = useState([]);
   const [properties, setProperties] = useState([]);
   const [open, setOpen] = useState(false);
@@ -50,11 +53,15 @@ export default function Vendors() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="space-y-3">
-        <div><h1 className="text-2xl font-outfit font-700">Vendors</h1><p className="text-sm text-muted-foreground mt-1">{vendors.length} vendors</p></div>
+        <div>
+          <h1 className="text-2xl font-outfit font-700">Vendors</h1>
+          <p className="text-sm text-muted-foreground mt-1">{vendors.length} vendors</p>
+          {!canWrite && <ViewOnlyBanner />}
+        </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => setSuppliesOpen(true)} className="gap-2 h-11"><ShoppingCart className="w-4 h-4" /><span className="hidden sm:inline">Find Supplies</span></Button>
           <Button variant="outline" onClick={() => setLocalOpen(true)} className="gap-2 h-11"><MapPin className="w-4 h-4" /><span className="hidden sm:inline">Find Vendors</span></Button>
-          <Button onClick={openAdd} className="gap-2 h-11 ml-auto"><Plus className="w-4 h-4" /><span className="hidden sm:inline">Add Vendor</span></Button>
+          {canWrite && <Button onClick={openAdd} className="gap-2 h-11 ml-auto"><Plus className="w-4 h-4" /><span className="hidden sm:inline">Add Vendor</span></Button>}
         </div>
       </div>
 
@@ -62,7 +69,7 @@ export default function Vendors() {
         <div className="bg-card border border-border rounded-xl p-16 text-center">
           <Package className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="font-semibold">No vendors yet</p>
-          <Button onClick={openAdd} className="mt-4 gap-2"><Plus className="w-4 h-4" />Add Vendor</Button>
+          {canWrite && <Button onClick={openAdd} className="mt-4 gap-2"><Plus className="w-4 h-4" />Add Vendor</Button>}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -71,8 +78,8 @@ export default function Vendors() {
               <div className="flex items-start justify-between mb-3">
                 <span className="text-xs bg-secondary px-2 py-0.5 rounded-full capitalize">{v.category}</span>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(v)}><Pencil className="w-3 h-3" /></Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(v.id)}><Trash2 className="w-3 h-3" /></Button>
+                  {canWrite && <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(v)}><Pencil className="w-3 h-3" /></Button>}
+                  {canWrite && <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(v.id)}><Trash2 className="w-3 h-3" /></Button>}
                 </div>
               </div>
               <h3 className="font-semibold">{v.name}</h3>

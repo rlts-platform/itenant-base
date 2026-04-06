@@ -9,6 +9,8 @@ import AddPropertyWizard from "../components/property/AddPropertyWizard";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAccount } from "../hooks/useAccount";
+import { usePermissions } from "../hooks/usePermissions";
+import ViewOnlyBanner from "../components/ViewOnlyBanner";
 
 export default function Properties() {
   const { accountId } = useAccount();
@@ -20,6 +22,7 @@ export default function Properties() {
   const [selectedId, setSelectedId] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { canWrite } = usePermissions('properties');
 
   if (selectedId) return <PropertyProfile propertyId={selectedId} onBack={() => setSelectedId(null)} />;
 
@@ -80,10 +83,13 @@ export default function Properties() {
           <p className="text-muted-foreground text-sm mt-1">Manage your rental properties</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {!canWrite && <ViewOnlyBanner />}
           {properties.length > 0 && <ExportButton pageName="Properties" onExport={exportProperties} />}
-          <Button onClick={() => setWizardOpen(true)} className="gap-2 rounded-xl shadow-sm h-11 ml-auto">
-            <Plus className="w-4 h-4" /><span className="hidden sm:inline">Add Property</span>
-          </Button>
+          {canWrite && (
+            <Button onClick={() => setWizardOpen(true)} className="gap-2 rounded-xl shadow-sm h-11 ml-auto">
+              <Plus className="w-4 h-4" /><span className="hidden sm:inline">Add Property</span>
+            </Button>
+          )}
         </div>
       </motion.div>
 
@@ -92,7 +98,7 @@ export default function Properties() {
           <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="font-semibold">No properties yet</p>
           <p className="text-sm text-muted-foreground mt-1">Add your first property to get started</p>
-          <Button onClick={() => setWizardOpen(true)} className="mt-4 gap-2 rounded-xl"><Plus className="w-4 h-4" />Add Property</Button>
+          {canWrite && <Button onClick={() => setWizardOpen(true)} className="mt-4 gap-2 rounded-xl"><Plus className="w-4 h-4" />Add Property</Button>}
         </motion.div>
       ) : (
         <motion.div className="space-y-4" initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.07 } } }}>
@@ -125,9 +131,9 @@ export default function Properties() {
              >
                <Link2 className="w-3.5 h-3.5" /><span className="hidden sm:inline">Copy Link</span>
              </button>
-             <button onClick={() => remove(p.id)} className="flex items-center justify-center gap-1.5 px-3 h-11 rounded-lg border border-border text-sm font-medium text-destructive hover:bg-red-50 transition-colors flex-1 sm:flex-none">
+             {canWrite && <button onClick={() => remove(p.id)} className="flex items-center justify-center gap-1.5 px-3 h-11 rounded-lg border border-border text-sm font-medium text-destructive hover:bg-red-50 transition-colors flex-1 sm:flex-none">
                <Trash2 className="w-3.5 h-3.5" /><span className="hidden sm:inline">Delete</span>
-             </button>
+             </button>}
            </div>
                   </div>
                 </div>
@@ -137,7 +143,7 @@ export default function Properties() {
         </motion.div>
       )}
 
-      <AddPropertyWizard open={wizardOpen} onClose={() => setWizardOpen(false)} onSaved={handleSaved} accountId={accountId} />
+      <AddPropertyWizard open={wizardOpen && canWrite} onClose={() => setWizardOpen(false)} onSaved={handleSaved} accountId={accountId} />
     </div>
   );
 }

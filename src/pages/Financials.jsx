@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import PerPropertyTab from "../components/financials/PerPropertyTab";
 import TaxEstimatorTab from "../components/financials/TaxEstimatorTab";
 import { useAccount } from "../hooks/useAccount";
+import { usePermissions } from "../hooks/usePermissions";
+import ViewOnlyBanner from "../components/ViewOnlyBanner";
 
 const TABS = [
   { id: "overview",   label: "Overview",       icon: TrendingUp },
@@ -25,6 +27,7 @@ const REPORT_CARDS = [
 
 export default function Financials() {
   const { accountId } = useAccount();
+  const { canWrite } = usePermissions('financials');
   const [tab, setTab] = useState("overview");
   const [payments, setPayments] = useState([]);
   const [properties, setProperties] = useState([]);
@@ -56,6 +59,7 @@ export default function Financials() {
       <div>
         <h1 className="text-2xl font-outfit font-bold">Financials</h1>
         <p className="text-sm text-muted-foreground mt-1">Revenue overview & analysis</p>
+        {!canWrite && <ViewOnlyBanner />}
       </div>
 
       {/* Tab bar */}

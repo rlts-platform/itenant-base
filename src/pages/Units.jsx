@@ -10,9 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useAccount } from "../hooks/useAccount";
+import { usePermissions } from "../hooks/usePermissions";
+import ViewOnlyBanner from "../components/ViewOnlyBanner";
 
 export default function Units() {
   const { accountId } = useAccount();
+  const { canWrite } = usePermissions('units');
   const [units, setUnits] = useState([]);
   const [properties, setProperties] = useState([]);
   const [open, setOpen] = useState(false);
@@ -47,15 +50,19 @@ export default function Units() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-outfit font-700">Units</h1><p className="text-sm text-muted-foreground mt-1">{units.length} units total</p></div>
-        <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Add Unit</Button>
+        <div>
+          <h1 className="text-2xl font-outfit font-700">Units</h1>
+          <p className="text-sm text-muted-foreground mt-1">{units.length} units total</p>
+          {!canWrite && <ViewOnlyBanner />}
+        </div>
+        {canWrite && <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Add Unit</Button>}
       </div>
 
       {units.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-16 text-center">
           <Home className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="font-semibold">No units yet</p>
-          <Button onClick={openAdd} className="mt-4 gap-2"><Plus className="w-4 h-4" />Add Unit</Button>
+          {canWrite && <Button onClick={openAdd} className="mt-4 gap-2"><Plus className="w-4 h-4" />Add Unit</Button>}
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
@@ -79,8 +86,8 @@ export default function Units() {
                   <td className="px-4 py-3">{u.pet_friendly ? "✓" : "—"}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(u)}><Pencil className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(u.id)}><Trash2 className="w-3 h-3" /></Button>
+                      {canWrite && <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(u)}><Pencil className="w-3 h-3" /></Button>}
+                      {canWrite && <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(u.id)}><Trash2 className="w-3 h-3" /></Button>}
                     </div>
                   </td>
                 </tr>

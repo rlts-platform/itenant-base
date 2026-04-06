@@ -16,6 +16,8 @@ import ApplicationsTab from "../components/tenants/ApplicationsTab";
 import InvitesTab from "../components/tenants/InvitesTab";
 import MoveOutsTab from "../components/tenants/MoveOutsTab";
 import { useAccount } from "../hooks/useAccount";
+import { usePermissions } from "../hooks/usePermissions";
+import ViewOnlyBanner from "../components/ViewOnlyBanner";
 
 const TABS = [
 { id: "tenants", label: "All Tenants", icon: Users },
@@ -25,6 +27,7 @@ const TABS = [
 
 export default function Tenants() {
   const { accountId } = useAccount();
+  const { canWrite } = usePermissions('tenants');
 
   const [tenants, setTenants] = useState([]);
   const [units, setUnits] = useState([]);
@@ -156,10 +159,11 @@ export default function Tenants() {
        <div>
          <h1 className="text-2xl font-outfit font-bold">Tenant CRM</h1>
          <p className="text-sm text-muted-foreground mt-0.5">Manage all tenants, applications, and move-outs</p>
+         {!canWrite && <ViewOnlyBanner />}
        </div>
        <div className="flex gap-2">
          {tab === "tenants" && <ExportButton pageName="Tenants" hasFilters={search || filterProperty !== "all"} onExport={exportTenants} />}
-         <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Add Tenant</Button>
+         {canWrite && <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Add Tenant</Button>}
        </div>
       </div>
 

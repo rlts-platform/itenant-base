@@ -15,6 +15,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import BillReminders from "../components/payments/BillReminders";
 import { useAccount } from "../hooks/useAccount";
+import { usePermissions } from "../hooks/usePermissions";
+import ViewOnlyBanner from "../components/ViewOnlyBanner";
 
 const statusColor = { pending: "outline", confirmed: "default", failed: "destructive" };
 const METHODS = ["check", "money_order", "cash", "zelle"];
@@ -22,6 +24,7 @@ const METHODS = ["check", "money_order", "cash", "zelle"];
 export default function Payments() {
   const { user } = useAuth();
   const { accountId } = useAccount();
+  const { canWrite } = usePermissions('payments');
   const [payments, setPayments] = useState([]);
   const [properties, setProperties] = useState([]);
   const [units, setUnits] = useState([]);
@@ -149,10 +152,14 @@ export default function Payments() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-outfit font-700">Payments</h1><p className="text-sm text-muted-foreground mt-1">{payments.length} payments</p></div>
+        <div>
+          <h1 className="text-2xl font-outfit font-700">Payments</h1>
+          <p className="text-sm text-muted-foreground mt-1">{payments.length} payments</p>
+          {!canWrite && <ViewOnlyBanner />}
+        </div>
         <div className="flex gap-2">
           <ExportButton pageName="Payments" onExport={exportPayments} />
-          <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Log Payment</Button>
+          {canWrite && <Button onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />Log Payment</Button>}
         </div>
       </div>
 
@@ -204,8 +211,8 @@ export default function Payments() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(p)}><Pencil className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(p.id)}><Trash2 className="w-3 h-3" /></Button>
+                      {canWrite && <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(p)}><Pencil className="w-3 h-3" /></Button>}
+                      {canWrite && <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(p.id)}><Trash2 className="w-3 h-3" /></Button>}
                     </div>
                   </td>
                 </tr>

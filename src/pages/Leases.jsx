@@ -14,12 +14,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useAccount } from "../hooks/useAccount";
+import { usePermissions } from "../hooks/usePermissions";
+import ViewOnlyBanner from "../components/ViewOnlyBanner";
 
 const statusColor = { draft: "secondary", active: "default", expired: "outline", terminated: "destructive" };
 
 export default function Leases() {
   const { user } = useAuth();
   const { accountId } = useAccount();
+  const { canWrite } = usePermissions('leases');
   const [leases, setLeases] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [units, setUnits] = useState([]);
@@ -102,11 +105,15 @@ export default function Leases() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-outfit font-700">Leases</h1><p className="text-sm text-muted-foreground mt-1">{leases.length} leases</p></div>
+        <div>
+          <h1 className="text-2xl font-outfit font-700">Leases</h1>
+          <p className="text-sm text-muted-foreground mt-1">{leases.length} leases</p>
+          {!canWrite && <ViewOnlyBanner />}
+        </div>
         <div className="flex gap-2">
           <ExportButton pageName="Leases" onExport={exportLeases} />
-          <Button variant="outline" onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />New Lease</Button>
-          <Button onClick={() => { setRenewData(null); setGenOpen(true); }} className="gap-2"><Sparkles className="w-4 h-4" />Generate Lease</Button>
+          {canWrite && <Button variant="outline" onClick={openAdd} className="gap-2"><Plus className="w-4 h-4" />New Lease</Button>}
+          {canWrite && <Button onClick={() => { setRenewData(null); setGenOpen(true); }} className="gap-2"><Sparkles className="w-4 h-4" />Generate Lease</Button>}
         </div>
       </div>
 
@@ -114,7 +121,7 @@ export default function Leases() {
         <div className="bg-card border border-border rounded-xl p-16 text-center">
           <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="font-semibold">No leases yet</p>
-          <Button onClick={openAdd} className="mt-4 gap-2"><Plus className="w-4 h-4" />New Lease</Button>
+          {canWrite && <Button onClick={openAdd} className="mt-4 gap-2"><Plus className="w-4 h-4" />New Lease</Button>}
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
@@ -143,9 +150,9 @@ export default function Leases() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-primary" title="Renew Lease" onClick={() => { setRenewData(l); setGenOpen(true); }}><RefreshCw className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(l)}><Pencil className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(l.id)}><Trash2 className="w-3 h-3" /></Button>
+                      {canWrite && <Button variant="ghost" size="icon" className="h-7 w-7 text-primary" title="Renew Lease" onClick={() => { setRenewData(l); setGenOpen(true); }}><RefreshCw className="w-3 h-3" /></Button>}
+                      {canWrite && <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(l)}><Pencil className="w-3 h-3" /></Button>}
+                      {canWrite && <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => remove(l.id)}><Trash2 className="w-3 h-3" /></Button>}
                     </div>
                   </td>
                 </tr>
