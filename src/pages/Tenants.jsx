@@ -15,6 +15,7 @@ import AllTenantsTab from "../components/tenants/AllTenantsTab";
 import ApplicationsTab from "../components/tenants/ApplicationsTab";
 import InvitesTab from "../components/tenants/InvitesTab";
 import MoveOutsTab from "../components/tenants/MoveOutsTab";
+import { useAccount } from "../hooks/useAccount";
 
 const TABS = [
 { id: "tenants", label: "All Tenants", icon: Users },
@@ -23,7 +24,7 @@ const TABS = [
 { id: "moveouts", label: "Move Outs", icon: FileText }];
 
 export default function Tenants() {
-
+  const { accountId } = useAccount();
 
   const [tenants, setTenants] = useState([]);
   const [units, setUnits] = useState([]);
@@ -44,21 +45,22 @@ export default function Tenants() {
   const location = useLocation();
 
   const load = async () => {
+    if (!accountId) return;
     const [t, u, p, l, pay, inv, apps] = await Promise.all([
-    base44.entities.Tenant.list("-created_date"),
-    base44.entities.Unit.list(),
-    base44.entities.Property.list(),
-    base44.entities.Lease.list(),
-    base44.entities.Payment.list("-date", 200),
-    base44.entities.TenantInvite.list(),
-    base44.entities.RentalApplication.list("-created_date")]
-    );
+      base44.entities.Tenant.filter({ account_id: accountId }, "-created_date"),
+      base44.entities.Unit.filter({ account_id: accountId }),
+      base44.entities.Property.filter({ account_id: accountId }),
+      base44.entities.Lease.filter({ account_id: accountId }),
+      base44.entities.Payment.filter({ account_id: accountId }, "-date", 200),
+      base44.entities.TenantInvite.filter({ account_id: accountId }),
+      base44.entities.RentalApplication.filter({ account_id: accountId }, "-created_date"),
+    ]);
     setTenants(t);setUnits(u);setProperties(p);setLeases(l);
     setPayments(pay);setInvites(inv);setApplications(apps);
     setLoading(false);
   };
 
-  useEffect(() => {load();}, []);
+  useEffect(() => { if (accountId) load(); }, [accountId]);
   useEffect(() => {
     if (location.state?.openAdd) {openAdd();window.history.replaceState({}, "");}
   }, [location.state]);
@@ -77,7 +79,7 @@ export default function Tenants() {
       await base44.entities.Tenant.update(editing.id, form);
       tenantId = editing.id;
     } else {
-      const created = await base44.entities.Tenant.create({ ...form, status: "pending" });
+      const created = await base44.entities.Tenant.create({ ...form, status: "pending", account_id: accountId });
       tenantId = created.id;
       await base44.functions.invoke("sendTenantInvite", { tenant_id: tenantId });
     }

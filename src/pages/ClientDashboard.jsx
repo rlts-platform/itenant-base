@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAccount } from "../hooks/useAccount";
 
 const container = {
   hidden: {},
@@ -34,6 +35,7 @@ const STAT_CARDS = [
 export default function ClientDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { accountId } = useAccount();
   const [stats, setStats] = useState({ properties: 0, units: 0, tenants: 0, openOrders: 0, revenue: 0 });
   const [recentPayments, setRecentPayments] = useState([]);
   const [openOrders, setOpenOrders] = useState([]);
@@ -52,14 +54,15 @@ export default function ClientDashboard() {
   const [savingPay, setSavingPay] = useState(false);
 
   useEffect(() => {
+    if (!accountId) return;
     async function load() {
       const [props, units, tenants, payments, orders, leases] = await Promise.all([
-        base44.entities.Property.list(),
-        base44.entities.Unit.list(),
-        base44.entities.Tenant.filter({ status: "active" }),
-        base44.entities.Payment.list("-date", 20),
-        base44.entities.WorkOrder.filter({ status: "new" }),
-        base44.entities.Lease.filter({ status: "active" }),
+        base44.entities.Property.filter({ account_id: accountId }),
+        base44.entities.Unit.filter({ account_id: accountId }),
+        base44.entities.Tenant.filter({ status: "active", account_id: accountId }),
+        base44.entities.Payment.filter({ account_id: accountId }, "-date", 20),
+        base44.entities.WorkOrder.filter({ status: "new", account_id: accountId }),
+        base44.entities.Lease.filter({ status: "active", account_id: accountId }),
       ]);
       const revenue = payments.filter(p => p.status === "confirmed").reduce((s, p) => s + (p.amount || 0), 0);
       setStats({ properties: props.length, units: units.length, tenants: tenants.length, openOrders: orders.length, revenue });
@@ -67,7 +70,6 @@ export default function ClientDashboard() {
       setOpenOrders(orders.slice(0, 5));
       setAllTenants(tenants);
 
-      // Overdue: active leases whose tenant has no confirmed payment this calendar month
       const now = new Date();
       const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
       const paidThisMonth = new Set(
@@ -80,11 +82,11 @@ export default function ClientDashboard() {
       setLoading(false);
     }
     load();
-  }, []);
+  }, [accountId]);
 
   const submitWorkOrder = async () => {
     setSavingWo(true);
-    await base44.entities.WorkOrder.create({ ...woForm, status: "new" });
+    await base44.entities.WorkOrder.create({ ...woForm, status: "new", account_id: accountId });
     setSavingWo(false);
     setWoOpen(false);
     setWoForm({ summary: "", category: "plumbing", urgency: "normal" });
@@ -92,7 +94,7 @@ export default function ClientDashboard() {
 
   const submitPayment = async () => {
     setSavingPay(true);
-    await base44.entities.Payment.create({ ...payForm, amount: Number(payForm.amount), status: "confirmed" });
+    await base44.entities.Payment.create({ ...payForm, amount: Number(payForm.amount), status: "confirmed", account_id: accountId });
     setSavingPay(false);
     setPayOpen(false);
     setPayForm({ tenant_id: "", amount: "", method: "check", date: new Date().toISOString().split("T")[0] });

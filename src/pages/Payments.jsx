@@ -14,12 +14,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import BillReminders from "../components/payments/BillReminders";
+import { useAccount } from "../hooks/useAccount";
 
 const statusColor = { pending: "outline", confirmed: "default", failed: "destructive" };
 const METHODS = ["check", "money_order", "cash", "zelle"];
 
 export default function Payments() {
   const { user } = useAuth();
+  const { accountId } = useAccount();
   const [payments, setPayments] = useState([]);
   const [properties, setProperties] = useState([]);
   const [units, setUnits] = useState([]);
@@ -36,10 +38,16 @@ export default function Payments() {
   const [uploading2, setUploading2] = useState(false);
 
   const load = async () => {
-    const [p, t, pr, u] = await Promise.all([base44.entities.Payment.list("-date"), base44.entities.Tenant.list(), base44.entities.Property.list(), base44.entities.Unit.list()]);
+    if (!accountId) return;
+    const [p, t, pr, u] = await Promise.all([
+      base44.entities.Payment.filter({ account_id: accountId }, "-date"),
+      base44.entities.Tenant.filter({ account_id: accountId }),
+      base44.entities.Property.filter({ account_id: accountId }),
+      base44.entities.Unit.filter({ account_id: accountId }),
+    ]);
     setPayments(p); setTenants(t); setProperties(pr); setUnits(u); setLoading(false);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (accountId) load(); }, [accountId]);
 
   const openAdd = () => { setEditing(null); setForm(emptyForm); setOpen(true); };
   const openEdit = (p) => {
@@ -95,7 +103,7 @@ export default function Payments() {
       }
       await base44.entities.Payment.update(editing.id, data);
     } else {
-      const created = await base44.entities.Payment.create(data);
+      const created = await base44.entities.Payment.create({ ...data, account_id: accountId });
       await base44.entities.ActivityLog.create({
         record_type: "payment", record_id: created.id,
         new_status: data.status,

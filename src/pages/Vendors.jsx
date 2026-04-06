@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAccount } from "../hooks/useAccount";
 
 const CATEGORIES = ["plumbing","electrical","hvac","cleaning","landscaping","general","other"];
 
 export default function Vendors() {
+  const { accountId } = useAccount();
   const [vendors, setVendors] = useState([]);
   const [properties, setProperties] = useState([]);
   const [open, setOpen] = useState(false);
@@ -23,10 +25,14 @@ export default function Vendors() {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const [v, p] = await Promise.all([base44.entities.Vendor.list(), base44.entities.Property.list()]);
+    if (!accountId) return;
+    const [v, p] = await Promise.all([
+      base44.entities.Vendor.filter({ account_id: accountId }),
+      base44.entities.Property.filter({ account_id: accountId }),
+    ]);
     setVendors(v); setProperties(p); setLoading(false);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (accountId) load(); }, [accountId]);
 
   const openAdd = () => { setEditing(null); setForm({ name: "", category: "general", phone: "", email: "", rating: 5 }); setOpen(true); };
   const openEdit = (v) => { setEditing(v); setForm({ name: v.name, category: v.category, phone: v.phone || "", email: v.email || "", rating: v.rating || 5 }); setOpen(true); };
@@ -34,7 +40,7 @@ export default function Vendors() {
   const save = async () => {
     const data = { ...form, rating: Number(form.rating) };
     if (editing) await base44.entities.Vendor.update(editing.id, data);
-    else await base44.entities.Vendor.create(data);
+    else await base44.entities.Vendor.create({ ...data, account_id: accountId });
     setOpen(false); load();
   };
   const remove = async (id) => { await base44.entities.Vendor.delete(id); load(); };

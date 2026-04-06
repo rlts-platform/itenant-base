@@ -19,7 +19,7 @@ const EMPTY = {
   import_mode: "manual", imported_data: null,
 };
 
-export default function AddPropertyWizard({ open, onClose, onSaved }) {
+export default function AddPropertyWizard({ open, onClose, onSaved, accountId }) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState({ ...EMPTY });
   const [saving, setSaving] = useState(false);
@@ -73,6 +73,7 @@ export default function AddPropertyWizard({ open, onClose, onSaved }) {
       hoa_name: data.has_hoa === "yes" ? data.hoa_name : undefined,
       hoa_monthly_fee: data.has_hoa === "yes" ? Number(data.hoa_monthly_fee) || undefined : undefined,
       hoa_contact: data.has_hoa === "yes" ? data.hoa_contact : undefined,
+      account_id: accountId,
       notes: [
         data.neighborhood ? `Neighborhood: ${data.neighborhood}` : "",
         data.parking_type ? `Parking: ${data.parking_type}${data.parking_spaces ? ` (${data.parking_spaces} spaces)` : ""}` : "",
@@ -94,6 +95,7 @@ export default function AddPropertyWizard({ open, onClose, onSaved }) {
         rent_amount: Number(u.rent_amount) || undefined,
         deposit_amount: Number(u.deposit_amount) || undefined,
         status: u.status || "vacant",
+        account_id: accountId,
       })
     ));
 

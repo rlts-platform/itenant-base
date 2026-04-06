@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { useAccount } from "../hooks/useAccount";
 
 const CATEGORIES = ["plumbing","electrical","hvac","appliance","pest","structural","other"];
 const URGENCY_COLOR = { normal: "secondary", urgent: "outline", emergency: "destructive" };
@@ -38,6 +39,7 @@ export default function Maintenance() {
   const [suppliesPrefill, setSuppliesPrefill] = useState("");
   const [triaging, setTriaging] = useState(false);
   const { user } = useAuth();
+  const { accountId } = useAccount();
 
   const runAITriage = async (summary, description) => {
     const text = `${summary} ${description || ""}`.trim();
@@ -64,10 +66,17 @@ Normal: cosmetic, minor repairs.`,
   const openSupplies = (summary = "") => { setSuppliesPrefill(summary); setSuppliesOpen(true); };
 
   const load = async () => {
-    const [o, t, u, p, v] = await Promise.all([base44.entities.WorkOrder.list("-created_date"), base44.entities.Tenant.list(), base44.entities.Unit.list(), base44.entities.Property.list(), base44.entities.Vendor.list()]);
+    if (!accountId) return;
+    const [o, t, u, p, v] = await Promise.all([
+      base44.entities.WorkOrder.filter({ account_id: accountId }, "-created_date"),
+      base44.entities.Tenant.filter({ account_id: accountId }),
+      base44.entities.Unit.filter({ account_id: accountId }),
+      base44.entities.Property.filter({ account_id: accountId }),
+      base44.entities.Vendor.filter({ account_id: accountId }),
+    ]);
     setOrders(o); setTenants(t); setUnits(u); setProperties(p); setVendors(v); setLoading(false);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (accountId) load(); }, [accountId]);
 
   const openAdd = () => { setEditing(null); setForm({ summary: "", category: "plumbing", urgency: "normal", status: "new", tenant_id: "", unit_id: "", property_id: "", permission_to_enter: false, cost: "", scheduled_date: "", time_window: "morning", assigned_vendor_id: "", entry_instructions: "", notify_tenant: true }); setOpen(true); };
   const openEdit = (o) => { setEditing(o); setForm({ summary: o.summary, category: o.category, urgency: o.urgency, status: o.status, tenant_id: o.tenant_id || "", unit_id: o.unit_id || "", property_id: o.property_id || "", permission_to_enter: !!o.permission_to_enter, cost: o.cost || "", scheduled_date: o.scheduled_date || "", time_window: o.time_window || "morning", assigned_vendor_id: o.assigned_vendor_id || "", entry_instructions: o.entry_instructions || "", notify_tenant: o.notify_tenant ?? true }); setOpen(true); };
@@ -113,7 +122,7 @@ Normal: cosmetic, minor repairs.`,
         data.category = triage.category || data.category;
         data.ai_emergency = triage.is_emergency || false;
       }
-      const created = await base44.entities.WorkOrder.create(data);
+      const created = await base44.entities.WorkOrder.create({ ...data, account_id: accountId });
       await base44.entities.ActivityLog.create({
         record_type: "work_order", record_id: created.id,
         new_status: data.status || "new",

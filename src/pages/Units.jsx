@@ -9,8 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { useAccount } from "../hooks/useAccount";
 
 export default function Units() {
+  const { accountId } = useAccount();
   const [units, setUnits] = useState([]);
   const [properties, setProperties] = useState([]);
   const [open, setOpen] = useState(false);
@@ -19,10 +21,14 @@ export default function Units() {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const [u, p] = await Promise.all([base44.entities.Unit.list(), base44.entities.Property.list()]);
+    if (!accountId) return;
+    const [u, p] = await Promise.all([
+      base44.entities.Unit.filter({ account_id: accountId }),
+      base44.entities.Property.filter({ account_id: accountId }),
+    ]);
     setUnits(u); setProperties(p); setLoading(false);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (accountId) load(); }, [accountId]);
 
   const openAdd = () => { setEditing(null); setForm({ unit_number: "", bedrooms: 1, bathrooms: 1, sqft: "", rent_amount: "", deposit_amount: "", status: "vacant", pet_friendly: false, property_id: properties[0]?.id || "" }); setOpen(true); };
   const openEdit = (u) => { setEditing(u); setForm({ unit_number: u.unit_number, bedrooms: u.bedrooms, bathrooms: u.bathrooms, sqft: u.sqft || "", rent_amount: u.rent_amount || "", deposit_amount: u.deposit_amount || "", status: u.status || "vacant", pet_friendly: !!u.pet_friendly, property_id: u.property_id || "" }); setOpen(true); };
@@ -30,7 +36,7 @@ export default function Units() {
   const save = async () => {
     const data = { ...form, bedrooms: Number(form.bedrooms), bathrooms: Number(form.bathrooms), sqft: Number(form.sqft), rent_amount: Number(form.rent_amount), deposit_amount: Number(form.deposit_amount) };
     if (editing) await base44.entities.Unit.update(editing.id, data);
-    else await base44.entities.Unit.create(data);
+    else await base44.entities.Unit.create({ ...data, account_id: accountId });
     setOpen(false); load();
   };
   const remove = async (id) => { await base44.entities.Unit.delete(id); load(); };

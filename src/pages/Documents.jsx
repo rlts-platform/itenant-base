@@ -11,6 +11,7 @@ import FolderTree, { SUBCATEGORY_LABELS, FOLDER_TREE } from "../components/docum
 import DeleteGuardDialog from "../components/documents/DeleteGuardDialog";
 import DocGeneratorModal from "../components/documents/DocGeneratorModal";
 import SignatureRequestModal from "../components/documents/SignatureRequestModal";
+import { useAccount } from "../hooks/useAccount";
 
 // Flat list of all subcategory options for the dropdown
 const ALL_SUBCATEGORIES = FOLDER_TREE.flatMap(f =>
@@ -18,6 +19,7 @@ const ALL_SUBCATEGORIES = FOLDER_TREE.flatMap(f =>
 );
 
 export default function Documents() {
+  const { accountId } = useAccount();
   const [docs, setDocs] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [properties, setProperties] = useState([]);
@@ -33,14 +35,15 @@ export default function Documents() {
   const [signDoc, setSignDoc] = useState(null);
 
   const load = async () => {
+    if (!accountId) return;
     const [d, t, p] = await Promise.all([
-      base44.entities.Document.list("-created_date"),
-      base44.entities.Tenant.list(),
-      base44.entities.Property.list(),
+      base44.entities.Document.filter({ account_id: accountId }, "-created_date"),
+      base44.entities.Tenant.filter({ account_id: accountId }),
+      base44.entities.Property.filter({ account_id: accountId }),
     ]);
     setDocs(d); setTenants(t); setProperties(p); setLoading(false);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (accountId) load(); }, [accountId]);
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
@@ -64,7 +67,7 @@ export default function Documents() {
 
   const save = async () => {
     if (!fileUrl) return;
-    await base44.entities.Document.create({ ...form, file_url: fileUrl, category: "other" });
+    await base44.entities.Document.create({ ...form, file_url: fileUrl, category: "other", account_id: accountId });
     setOpen(false); setFileUrl(""); load();
   };
 

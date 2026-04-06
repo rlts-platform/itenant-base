@@ -8,8 +8,10 @@ import PropertyProfile from "./PropertyProfile";
 import AddPropertyWizard from "../components/property/AddPropertyWizard";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAccount } from "../hooks/useAccount";
 
 export default function Properties() {
+  const { accountId } = useAccount();
   const [properties, setProperties] = useState([]);
   const [units, setUnits] = useState([]);
   const [workOrders, setWorkOrders] = useState([]);
@@ -22,13 +24,18 @@ export default function Properties() {
   if (selectedId) return <PropertyProfile propertyId={selectedId} onBack={() => setSelectedId(null)} />;
 
   const load = async () => {
-    const [data, u, wo] = await Promise.all([base44.entities.Property.list("-created_date"), base44.entities.Unit.list(), base44.entities.WorkOrder.list()]);
+    if (!accountId) return;
+    const [data, u, wo] = await Promise.all([
+      base44.entities.Property.filter({ account_id: accountId }, "-created_date"),
+      base44.entities.Unit.filter({ account_id: accountId }),
+      base44.entities.WorkOrder.filter({ account_id: accountId }),
+    ]);
     setProperties(data);
     setUnits(u);
     setWorkOrders(wo);
     setLoading(false);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (accountId) load(); }, [accountId]);
   useEffect(() => { if (location.state?.openAdd) { setWizardOpen(true); window.history.replaceState({}, ""); } }, [location.state]);
 
   const remove = async (id) => { await base44.entities.Property.delete(id); load(); };
@@ -130,7 +137,7 @@ export default function Properties() {
         </motion.div>
       )}
 
-      <AddPropertyWizard open={wizardOpen} onClose={() => setWizardOpen(false)} onSaved={handleSaved} />
+      <AddPropertyWizard open={wizardOpen} onClose={() => setWizardOpen(false)} onSaved={handleSaved} accountId={accountId} />
     </div>
   );
 }

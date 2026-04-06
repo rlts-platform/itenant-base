@@ -13,11 +13,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { useAccount } from "../hooks/useAccount";
 
 const statusColor = { draft: "secondary", active: "default", expired: "outline", terminated: "destructive" };
 
 export default function Leases() {
   const { user } = useAuth();
+  const { accountId } = useAccount();
   const [leases, setLeases] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [units, setUnits] = useState([]);
@@ -30,10 +32,16 @@ export default function Leases() {
   const [renewData, setRenewData] = useState(null);
 
   const load = async () => {
-    const [l, t, u, p] = await Promise.all([base44.entities.Lease.list("-created_date"), base44.entities.Tenant.list(), base44.entities.Unit.list(), base44.entities.Property.list()]);
+    if (!accountId) return;
+    const [l, t, u, p] = await Promise.all([
+      base44.entities.Lease.filter({ account_id: accountId }, "-created_date"),
+      base44.entities.Tenant.filter({ account_id: accountId }),
+      base44.entities.Unit.filter({ account_id: accountId }),
+      base44.entities.Property.filter({ account_id: accountId }),
+    ]);
     setLeases(l); setTenants(t); setUnits(u); setProperties(p); setLoading(false);
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (accountId) load(); }, [accountId]);
 
   const openAdd = () => { setEditing(null); setForm({ tenant_id: "", unit_id: "", start_date: "", end_date: "", rent_amount: "", deposit_amount: "", status: "draft", signed_by_tenant: false, signed_by_client: false }); setOpen(true); };
   const openEdit = (l) => { setEditing(l); setForm({ tenant_id: l.tenant_id, unit_id: l.unit_id, start_date: l.start_date, end_date: l.end_date, rent_amount: l.rent_amount || "", deposit_amount: l.deposit_amount || "", status: l.status, signed_by_tenant: !!l.signed_by_tenant, signed_by_client: !!l.signed_by_client }); setOpen(true); };
@@ -51,7 +59,7 @@ export default function Leases() {
       }
       await base44.entities.Lease.update(editing.id, data);
     } else {
-      const created = await base44.entities.Lease.create(data);
+      const created = await base44.entities.Lease.create({ ...data, account_id: accountId });
       await base44.entities.ActivityLog.create({
         record_type: "lease", record_id: created.id,
         new_status: data.status,

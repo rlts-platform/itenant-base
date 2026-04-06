@@ -38,6 +38,9 @@
     },
     "property_id": {
       "type": "string"
+    },
+    "account_id": {
+      "type": "string"
     }
   },
   "required": [

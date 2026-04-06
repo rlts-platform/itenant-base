@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { Link } from "react-router-dom";
 import PerPropertyTab from "../components/financials/PerPropertyTab";
 import TaxEstimatorTab from "../components/financials/TaxEstimatorTab";
+import { useAccount } from "../hooks/useAccount";
 
 const TABS = [
   { id: "overview",   label: "Overview",       icon: TrendingUp },
@@ -23,17 +24,19 @@ const REPORT_CARDS = [
 ];
 
 export default function Financials() {
+  const { accountId } = useAccount();
   const [tab, setTab] = useState("overview");
   const [payments, setPayments] = useState([]);
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!accountId) return;
     Promise.all([
-      base44.entities.Payment.filter({ status: "confirmed" }),
-      base44.entities.Property.list(),
+      base44.entities.Payment.filter({ status: "confirmed", account_id: accountId }),
+      base44.entities.Property.filter({ account_id: accountId }),
     ]).then(([p, props]) => { setPayments(p); setProperties(props); setLoading(false); });
-  }, []);
+  }, [accountId]);
 
   const totalRevenue = payments.reduce((s, p) => s + (p.amount || 0), 0);
   const thisMonth = new Date().toISOString().slice(0, 7);
