@@ -24,7 +24,7 @@ export default function LeaseTemplatesSection({ stateFilter, onGenerate }) {
             className="bg-white border border-border rounded-xl p-4 flex items-center justify-between hover:shadow-sm transition-shadow"
           >
             <div className="flex items-center gap-3">
-              <Badge className="text-xs font-bold px-2 py-0.5 bg-primary text-primary-foreground shrink-0">
+              <Badge className="text-xs font-bold px-2 py-0.5 bg-primary shrink-0" style={{ color: '#FFFFFF' }}>
                 {state.abbr}
               </Badge>
               <div>
