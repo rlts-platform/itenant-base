@@ -81,7 +81,7 @@ const AuthenticatedApp = () => {
               } else if (role === "tenant" && (path === "/" || path === "/landing" || !path.startsWith("/tenant"))) {
                 navigate("/tenant", { replace: true });
               } else if (role === "client" && (path === "/" || path === "/landing")) {
-                navigate("/", { replace: true });
+                // already home — do not navigate, Dashboard renders at "/"
               } else if (role !== "client" && path === "/") {
                 // Authenticated user on / but not client — redirect by role
                 navigate(role === "tenant" ? "/tenant" : role === "platform_owner" ? "/owner" : "/", { replace: true });
@@ -103,9 +103,6 @@ const AuthenticatedApp = () => {
   if (checkingUser && user && !authError && !isLoadingAuth && !isLoadingPublicSettings) {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center" style={{ backgroundColor: '#F4F3FF' }}>
-        <div className="mb-6">
-          <Logo variant="icon" size="lg" />
-        </div>
         <style>{`
           @keyframes pulse-scale {
             0%, 100% { transform: scale(1); opacity: 1; }
