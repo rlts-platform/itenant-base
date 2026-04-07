@@ -180,3 +180,23 @@ html, body {
   color: inherit !important;
   -webkit-text-fill-color: inherit !important;
 }
+/* Force hero text white — all selectors, maximum specificity */
+.hero-section *,
+.hero-section *::before,
+.hero-section *::after {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+.hero-section button {
+  color: inherit;
+  -webkit-text-fill-color: inherit;
+}
+.hero-section button[style*="#7C6FCD"] {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+.hero-section button[style*="#fff"],
+.hero-section button[style*="white"] {
+  color: #7C6FCD !important;
+  -webkit-text-fill-color: #7C6FCD !important;
+}
