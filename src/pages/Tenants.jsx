@@ -26,7 +26,7 @@ const TABS = [
 { id: "moveouts", label: "Move Outs", icon: FileText }];
 
 export default function Tenants() {
-  const { accountId } = useAccount();
+  const { accountId, accountLoading } = useAccount();
   const { canWrite } = usePermissions('tenants');
 
   const [tenants, setTenants] = useState([]);
@@ -63,7 +63,7 @@ export default function Tenants() {
     setLoading(false);
   };
 
-  useEffect(() => { if (accountId) load(); }, [accountId]);
+  useEffect(() => { if (accountLoading) return; if (accountId) load(); else setLoading(false); }, [accountId, accountLoading]);
   useEffect(() => {
     if (location.state?.openAdd) {openAdd();window.history.replaceState({}, "");}
   }, [location.state]);

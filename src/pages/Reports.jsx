@@ -29,7 +29,7 @@ const fmt = (n) => n != null ? `$${Number(n).toLocaleString()}` : "—";
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString() : "—";
 
 export default function Reports() {
-  const { accountId } = useAccount();
+  const { accountId, accountLoading } = useAccount();
   const [loading, setLoading] = useState(null);
   const [report, setReport] = useState(null);
   const [activeTab, setActiveTab] = useState("reports");

@@ -13,7 +13,7 @@ import { usePermissions } from "../hooks/usePermissions";
 import ViewOnlyBanner from "../components/ViewOnlyBanner";
 
 export default function Properties() {
-  const { accountId } = useAccount();
+  const { accountId, accountLoading } = useAccount();
   const [properties, setProperties] = useState([]);
   const [units, setUnits] = useState([]);
   const [workOrders, setWorkOrders] = useState([]);
@@ -38,7 +38,7 @@ export default function Properties() {
     setWorkOrders(wo);
     setLoading(false);
   };
-  useEffect(() => { if (accountId) load(); }, [accountId]);
+  useEffect(() => { if (accountLoading) return; if (accountId) load(); else setLoading(false); }, [accountId, accountLoading]);
   useEffect(() => { if (location.state?.openAdd) { setWizardOpen(true); window.history.replaceState({}, ""); } }, [location.state]);
 
   const remove = async (id) => { await base44.entities.Property.delete(id); load(); };

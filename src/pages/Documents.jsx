@@ -24,7 +24,7 @@ const ALL_SUBCATEGORIES = FOLDER_TREE.flatMap(f =>
 );
 
 export default function Documents() {
-  const { accountId } = useAccount();
+  const { accountId, accountLoading } = useAccount();
   const { canWrite } = usePermissions('documents');
   const [docs, setDocs] = useState([]);
   const [tenants, setTenants] = useState([]);
@@ -51,7 +51,7 @@ export default function Documents() {
     ]);
     setDocs(d); setTenants(t); setProperties(p); setLoading(false);
   };
-  useEffect(() => { if (accountId) load(); }, [accountId]);
+  useEffect(() => { if (accountLoading) return; if (accountId) load(); else setLoading(false); }, [accountId, accountLoading]);
 
   const handleFile = async (e) => {
     const file = e.target.files[0];

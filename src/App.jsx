@@ -59,6 +59,13 @@ const AuthenticatedApp = () => {
   // After auth, check app_users table for new vs returning + onboarding status
   useEffect(() => {
     if (!isLoadingAuth && !isLoadingPublicSettings && user && !authError) {
+      // Safety timeout — if AppUser check hangs, unblock after 6 seconds
+      const timeout = setTimeout(() => {
+        console.warn("AppUser check timed out — falling through to onboarding");
+        setCheckingUser(false);
+        navigate('/onboarding', { replace: true });
+      }, 6000);
+
       (async () => {
         try {
           const existing = await base44.entities.AppUser.filter({ user_email: user.email });
@@ -91,6 +98,7 @@ const AuthenticatedApp = () => {
         } catch (err) {
           console.error("Error checking app user:", err);
         } finally {
+          clearTimeout(timeout);
           setCheckingUser(false);
         }
       })();

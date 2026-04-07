@@ -41,7 +41,7 @@ export default function Maintenance() {
   const [suppliesPrefill, setSuppliesPrefill] = useState("");
   const [triaging, setTriaging] = useState(false);
   const { user } = useAuth();
-  const { accountId } = useAccount();
+  const { accountId, accountLoading } = useAccount();
   const { canWrite } = usePermissions('maintenance');
 
   const runAITriage = async (summary, description) => {
@@ -128,7 +128,7 @@ Respond with the most conservative (safest) urgency level when in doubt. A near-
     ]);
     setOrders(o); setTenants(t); setUnits(u); setProperties(p); setVendors(v); setLoading(false);
   };
-  useEffect(() => { if (accountId) load(); }, [accountId]);
+  useEffect(() => { if (accountLoading) return; if (accountId) load(); else setLoading(false); }, [accountId, accountLoading]);
 
   const openAdd = () => { setEditing(null); setForm({ summary: "", category: "plumbing", urgency: "normal", status: "new", tenant_id: "", unit_id: "", property_id: "", permission_to_enter: false, cost: "", scheduled_date: "", time_window: "morning", assigned_vendor_id: "", entry_instructions: "", notify_tenant: true }); setOpen(true); };
   const openEdit = (o) => { setEditing(o); setForm({ summary: o.summary, category: o.category, urgency: o.urgency, status: o.status, tenant_id: o.tenant_id || "", unit_id: o.unit_id || "", property_id: o.property_id || "", permission_to_enter: !!o.permission_to_enter, cost: o.cost || "", scheduled_date: o.scheduled_date || "", time_window: o.time_window || "morning", assigned_vendor_id: o.assigned_vendor_id || "", entry_instructions: o.entry_instructions || "", notify_tenant: o.notify_tenant ?? true }); setOpen(true); };

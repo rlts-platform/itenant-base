@@ -21,7 +21,7 @@ const statusColor = { draft: "secondary", active: "default", expired: "outline",
 
 export default function Leases() {
   const { user } = useAuth();
-  const { accountId } = useAccount();
+  const { accountId, accountLoading } = useAccount();
   const { canWrite } = usePermissions('leases');
   const [leases, setLeases] = useState([]);
   const [tenants, setTenants] = useState([]);
@@ -44,7 +44,7 @@ export default function Leases() {
     ]);
     setLeases(l); setTenants(t); setUnits(u); setProperties(p); setLoading(false);
   };
-  useEffect(() => { if (accountId) load(); }, [accountId]);
+  useEffect(() => { if (accountLoading) return; if (accountId) load(); else setLoading(false); }, [accountId, accountLoading]);
 
   const openAdd = () => { setEditing(null); setForm({ tenant_id: "", unit_id: "", start_date: "", end_date: "", rent_amount: "", deposit_amount: "", status: "draft", signed_by_tenant: false, signed_by_client: false }); setOpen(true); };
   const openEdit = (l) => { setEditing(l); setForm({ tenant_id: l.tenant_id, unit_id: l.unit_id, start_date: l.start_date, end_date: l.end_date, rent_amount: l.rent_amount || "", deposit_amount: l.deposit_amount || "", status: l.status, signed_by_tenant: !!l.signed_by_tenant, signed_by_client: !!l.signed_by_client }); setOpen(true); };

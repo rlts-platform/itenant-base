@@ -73,7 +73,7 @@ const EXPENSE_CATEGORIES = [
 ];
 
 export default function Financials() {
-  const { accountId } = useAccount();
+  const { accountId, accountLoading } = useAccount();
   const { canWrite } = usePermissions('financials');
   const [tab, setTab] = useState("trends");
   const [payments, setPayments] = useState([]);
@@ -96,7 +96,8 @@ export default function Financials() {
   const [reportType, setReportType] = useState("pl");
 
   useEffect(() => {
-    if (!accountId) return;
+    if (accountLoading) return;
+    if (!accountId) { setLoading(false); return; }
     Promise.all([
       base44.entities.Payment.filter({ status: "confirmed", account_id: accountId }),
       base44.entities.WorkOrder.filter({ account_id: accountId }),
@@ -113,7 +114,7 @@ export default function Financials() {
       setVendors(v);
       setLoading(false);
     });
-  }, [accountId]);
+  }, [accountId, accountLoading]);
 
   const totalRevenue = payments.reduce((s, p) => s + (p.amount || 0), 0);
   const totalExpenses = workOrders.reduce((s, wo) => s + (wo.cost || 0), 0);

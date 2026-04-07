@@ -14,7 +14,7 @@ import { usePermissions } from "../hooks/usePermissions";
 import ViewOnlyBanner from "../components/ViewOnlyBanner";
 
 export default function Units() {
-  const { accountId } = useAccount();
+  const { accountId, accountLoading } = useAccount();
   const { canWrite } = usePermissions('units');
   const [units, setUnits] = useState([]);
   const [properties, setProperties] = useState([]);
@@ -31,7 +31,7 @@ export default function Units() {
     ]);
     setUnits(u); setProperties(p); setLoading(false);
   };
-  useEffect(() => { if (accountId) load(); }, [accountId]);
+  useEffect(() => { if (accountLoading) return; if (accountId) load(); else setLoading(false); }, [accountId, accountLoading]);
 
   const openAdd = () => { setEditing(null); setForm({ unit_number: "", bedrooms: 1, bathrooms: 1, sqft: "", rent_amount: "", deposit_amount: "", status: "vacant", pet_friendly: false, property_id: properties[0]?.id || "" }); setOpen(true); };
   const openEdit = (u) => { setEditing(u); setForm({ unit_number: u.unit_number, bedrooms: u.bedrooms, bathrooms: u.bathrooms, sqft: u.sqft || "", rent_amount: u.rent_amount || "", deposit_amount: u.deposit_amount || "", status: u.status || "vacant", pet_friendly: !!u.pet_friendly, property_id: u.property_id || "" }); setOpen(true); };

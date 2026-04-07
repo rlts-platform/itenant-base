@@ -16,7 +16,7 @@ import ViewOnlyBanner from "../components/ViewOnlyBanner";
 const CATEGORIES = ["plumbing","electrical","hvac","cleaning","landscaping","general","other"];
 
 export default function Vendors() {
-  const { accountId } = useAccount();
+  const { accountId, accountLoading } = useAccount();
   const { canWrite } = usePermissions('vendors');
   const [vendors, setVendors] = useState([]);
   const [properties, setProperties] = useState([]);
@@ -35,7 +35,7 @@ export default function Vendors() {
     ]);
     setVendors(v); setProperties(p); setLoading(false);
   };
-  useEffect(() => { if (accountId) load(); }, [accountId]);
+  useEffect(() => { if (accountLoading) return; if (accountId) load(); else setLoading(false); }, [accountId, accountLoading]);
 
   const openAdd = () => { setEditing(null); setForm({ name: "", category: "general", phone: "", email: "", rating: 5 }); setOpen(true); };
   const openEdit = (v) => { setEditing(v); setForm({ name: v.name, category: v.category, phone: v.phone || "", email: v.email || "", rating: v.rating || 5 }); setOpen(true); };

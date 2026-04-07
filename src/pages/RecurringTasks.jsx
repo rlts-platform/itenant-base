@@ -38,7 +38,7 @@ function calcNextDue(freqValue, freqUnit, fromDate = new Date()) {
 const EMPTY_FORM = { name: "", description: "", category: "hvac", urgency: "normal", frequency_value: 3, frequency_unit: "months", property_id: "", assigned_vendor_id: "" };
 
 export default function RecurringTasks() {
-  const { accountId } = useAccount();
+  const { accountId, accountLoading } = useAccount();
   const { canWrite } = usePermissions("maintenance");
 
   const [tasks, setTasks] = useState([]);
@@ -62,7 +62,7 @@ export default function RecurringTasks() {
     setLoading(false);
   };
 
-  useEffect(() => { if (accountId) load(); }, [accountId]);
+  useEffect(() => { if (accountLoading) return; if (accountId) load(); else setLoading(false); }, [accountId, accountLoading]);
 
   const openAdd = () => { setEditing(null); setForm(EMPTY_FORM); setOpen(true); };
   const openEdit = (t) => {
