@@ -35,7 +35,7 @@ const STAT_CARDS = [
 export default function ClientDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { accountId } = useAccount();
+  const { accountId, accountLoading } = useAccount();
   const [stats, setStats] = useState({ properties: 0, units: 0, tenants: 0, openOrders: 0, revenue: 0 });
   const [recentPayments, setRecentPayments] = useState([]);
   const [openOrders, setOpenOrders] = useState([]);
@@ -54,7 +54,8 @@ export default function ClientDashboard() {
   const [savingPay, setSavingPay] = useState(false);
 
   useEffect(() => {
-    if (!accountId) return;
+    if (accountLoading) return;
+    if (!accountId) { setLoading(false); return; }
     async function load() {
       const [props, units, tenants, payments, orders, leases] = await Promise.all([
         base44.entities.Property.filter({ account_id: accountId }),
@@ -82,7 +83,7 @@ export default function ClientDashboard() {
       setLoading(false);
     }
     load();
-  }, [accountId]);
+  }, [accountId, accountLoading]);
 
   const submitWorkOrder = async () => {
     setSavingWo(true);
