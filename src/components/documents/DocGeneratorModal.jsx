@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Sparkles, Save, Loader2, Download } from "lucide-react";
 import { US_STATES } from "@/lib/usStates";
 
 const DOC_TYPES = [
+  { id: "residential_lease",   label: "Residential Lease Agreement",        subcategory: "lease_agreement",  fields: ["tenant","property","date","amount"] },
   { id: "move_in_checklist",   label: "Move-In Inspection Checklist",       subcategory: "inspection",       fields: ["tenant","property","date"] },
   { id: "move_out_checklist",  label: "Move-Out Inspection Checklist",      subcategory: "inspection",       fields: ["tenant","property","date"] },
   { id: "lease_violation",     label: "Lease Violation Notice",             subcategory: "lease_violation",  fields: ["tenant","property","date","specifics"] },
@@ -29,6 +30,14 @@ export default function DocGeneratorModal({ open, onClose, tenants, properties, 
   const [generating, setGenerating] = useState(false);
   const [preview, setPreview] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Sync state selection whenever initialState changes (e.g. clicking Generate on a specific state template)
+  useEffect(() => {
+    if (initialState?.abbr) {
+      setSelectedState(initialState.abbr);
+      setDocType("residential_lease");
+    }
+  }, [initialState]);
 
   const selectedType = DOC_TYPES.find(d => d.id === docType);
 
