@@ -169,6 +169,7 @@ html, body {
 /* Hero section text colors — scoped to prevent affecting other pages */
 .hero-section {
   color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
 }
 
 .hero-section h1,
@@ -177,4 +178,5 @@ html, body {
 .hero-section span,
 .hero-section div {
   color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
 }
