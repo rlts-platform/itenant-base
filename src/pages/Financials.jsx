@@ -411,21 +411,21 @@ export default function Financials() {
             <Select value={paymentFilter.property} onValueChange={(v) => setPaymentFilter(f => ({ ...f, property: v }))}>
               <SelectTrigger className="w-40"><SelectValue placeholder="Filter by Property" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value={null}>All Properties</SelectItem>
+                <SelectItem value="_all">All Properties</SelectItem>
                 {properties.map(p => <SelectItem key={p.id} value={p.id}>{p.nickname || p.address}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={paymentFilter.tenant} onValueChange={(v) => setPaymentFilter(f => ({ ...f, tenant: v }))}>
               <SelectTrigger className="w-40"><SelectValue placeholder="Filter by Tenant" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value={null}>All Tenants</SelectItem>
+                <SelectItem value="_all">All Tenants</SelectItem>
                 {tenants.map(t => <SelectItem key={t.id} value={t.id}>{t.first_name} {t.last_name}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={paymentFilter.status} onValueChange={(v) => setPaymentFilter(f => ({ ...f, status: v }))}>
               <SelectTrigger className="w-40"><SelectValue placeholder="Filter by Status" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value={null}>All Statuses</SelectItem>
+                <SelectItem value="_all">All Statuses</SelectItem>
                 <SelectItem value="confirmed">Paid</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="failed">Failed</SelectItem>

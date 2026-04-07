@@ -157,7 +157,7 @@ export default function AIForecastTab({ accountId }) {
                 <SelectValue placeholder="All Properties" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={null}>All Properties</SelectItem>
+                <SelectItem value="_all">All Properties</SelectItem>
                 {properties.map(p => <SelectItem key={p.id} value={p.id}>{p.nickname || p.address.split(',')[0]}</SelectItem>)}
               </SelectContent>
             </Select>

@@ -242,21 +242,21 @@ export default function AllRecordsTab({ payments, workOrders, properties, units,
           <Select value={filterProperty} onValueChange={setFilterProperty}>
             <SelectTrigger className="w-40"><SelectValue placeholder="All Properties" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value={null}>All Properties</SelectItem>
+              <SelectItem value="_all">All Properties</SelectItem>
               {properties.map(p => <SelectItem key={p.id} value={p.id}>{p.nickname || p.address?.split(",")[0]}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={filterCategory} onValueChange={setFilterCategory}>
             <SelectTrigger className="w-44"><SelectValue placeholder="All Categories" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value={null}>All Categories</SelectItem>
+              <SelectItem value="_all">All Categories</SelectItem>
               {ALL_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={filterType} onValueChange={setFilterType}>
             <SelectTrigger className="w-36"><SelectValue placeholder="All Types" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value={null}>All Types</SelectItem>
+              <SelectItem value="_all">All Types</SelectItem>
               <SelectItem value="income">Income</SelectItem>
               <SelectItem value="expense">Expense</SelectItem>
             </SelectContent>
@@ -372,7 +372,7 @@ export default function AllRecordsTab({ payments, workOrders, properties, units,
                 <Select value={form.property_id} onValueChange={v => setForm(f => ({ ...f, property_id: v, unit_id: "" }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select property" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={null}>None</SelectItem>
+                    <SelectItem value="_all">None</SelectItem>
                     {properties.map(p => <SelectItem key={p.id} value={p.id}>{p.nickname || p.address?.split(",")[0]}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -382,7 +382,7 @@ export default function AllRecordsTab({ payments, workOrders, properties, units,
                 <Select value={form.unit_id} onValueChange={v => setForm(f => ({ ...f, unit_id: v }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select unit" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={null}>None</SelectItem>
+                    <SelectItem value="_all">None</SelectItem>
                     {filteredUnits.map(u => <SelectItem key={u.id} value={u.id}>{u.unit_number}</SelectItem>)}
                   </SelectContent>
                 </Select>

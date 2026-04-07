@@ -123,7 +123,7 @@ Write the complete document with proper formatting, salutation, body, and signat
               <Select value={selectedState} onValueChange={v => setSelectedState(v)}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="All states" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={null}>All states</SelectItem>
+                  <SelectItem value="_all">All states</SelectItem>
                   {US_STATES.map(s => <SelectItem key={s.abbr} value={s.abbr}>{s.name}</SelectItem>)}
                 </SelectContent>
               </Select>

@@ -264,7 +264,7 @@ export default function RecurringTasks() {
             <Select value={form.property_id} onValueChange={v => setForm(f => ({ ...f, property_id: v }))}>
               <SelectTrigger className="mt-1"><SelectValue placeholder="All properties" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value={null}>All properties</SelectItem>
+                <SelectItem value="_all">All properties</SelectItem>
                 {properties.map(p => <SelectItem key={p.id} value={p.id}>{p.nickname || p.address}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -273,7 +273,7 @@ export default function RecurringTasks() {
             <Select value={form.assigned_vendor_id} onValueChange={v => setForm(f => ({ ...f, assigned_vendor_id: v }))}>
               <SelectTrigger className="mt-1"><SelectValue placeholder="No vendor assigned" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value={null}>No vendor</SelectItem>
+                <SelectItem value="_all">No vendor</SelectItem>
                 {vendors.map(v => <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>)}
               </SelectContent>
             </Select>

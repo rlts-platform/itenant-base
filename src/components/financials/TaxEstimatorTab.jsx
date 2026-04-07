@@ -156,7 +156,7 @@ export default function TaxEstimatorTab({ accountId, properties, payments, workO
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={null}>All Categories</SelectItem>
+                  <SelectItem value="_all">All Categories</SelectItem>
                   {EXPENSE_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -168,7 +168,7 @@ export default function TaxEstimatorTab({ accountId, properties, payments, workO
                   <SelectValue placeholder="All Properties" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={null}>All Properties</SelectItem>
+                  <SelectItem value="_all">All Properties</SelectItem>
                   {properties.map(p => <SelectItem key={p.id} value={p.id}>{p.nickname || p.address.split(',')[0]}</SelectItem>)}
                 </SelectContent>
               </Select>
