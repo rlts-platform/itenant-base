@@ -120,8 +120,8 @@ export default function Documents() {
           <Filter className="w-4 h-4 text-muted-foreground" />
           <Select value={stateFilter} onValueChange={setStateFilter}>
             <SelectTrigger className="w-48 h-9 text-sm"><SelectValue placeholder="Filter by State" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value={null}>All States</SelectItem>
+            <SelectContent position="popper" sideOffset={4} className="z-[9999] max-h-72 overflow-y-auto">
+              <SelectItem value="">All States</SelectItem>
               {US_STATES.map(s => <SelectItem key={s.abbr} value={s.abbr}>{s.name}</SelectItem>)}
             </SelectContent>
           </Select>
