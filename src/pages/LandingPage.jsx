@@ -74,10 +74,10 @@ export default function LandingPage() {
 
         <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "80px 24px 60px", maxWidth: 720 }}>
           {/* Badge */}
-          <div style={{ display: "inline-block", marginBottom: 20, padding: "5px 16px", borderRadius: 999, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", fontWeight: 600, fontSize: 13 }} className="text-white">
+          <div style={{ display: "inline-block", marginBottom: 20, padding: "5px 16px", borderRadius: 999, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", fontWeight: 600, fontSize: 13 }} className="text-black">
             • Smarter Property Management
           </div>
-          <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", fontWeight: 800, letterSpacing: "-1.5px", color: "#FFFFFF", lineHeight: 1.12, margin: "0 0 18px", textShadow: "0 2px 8px rgba(0,0,0,0.45)" }}>
+          <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", fontWeight: 800, letterSpacing: "-1.5px", color: "#FFFFFF", lineHeight: 1.12, margin: "0 0 18px", textShadow: "0 2px 8px rgba(0,0,0,0.45)" }} className="text-slate-200">
             Property Management.<br />Simplified.
           </h1>
           <p style={{ fontSize: 18, color: "rgba(255,255,255,0.92)", marginBottom: 36, lineHeight: 1.7, textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>
