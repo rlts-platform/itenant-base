@@ -15,6 +15,7 @@ import CashFlowReport from "../components/financials/CashFlowReport";
 import IncomeByPropertyReport from "../components/financials/IncomeByPropertyReport";
 import AIForecastTab from "../components/financials/AIForecastTab";
 import CategoriesTab from "../components/financials/CategoriesTab";
+import AllRecordsTab from "../components/financials/AllRecordsTab";
 import BudgetsTab from "../components/financials/BudgetsTab";
 import BankingTab from "../components/financials/BankingTab";
 import OwnerStatementsReport from "../components/financials/OwnerStatementsReport";
@@ -490,9 +491,17 @@ export default function Financials() {
       {tab === "taxes" && <TaxEstimatorTab accountId={accountId} properties={properties} payments={payments} workOrders={workOrders} vendors={vendors} />}
 
       {tab === "all" && (
-        <div className="text-center py-12 text-muted-foreground">
-          All Records tab content coming soon
-        </div>
+        <AllRecordsTab
+          payments={payments}
+          workOrders={workOrders}
+          properties={properties}
+          units={units}
+          accountId={accountId}
+          onTransactionAdded={() => {
+            base44.entities.Payment.filter({ status: "confirmed", account_id: accountId }).then(setPayments);
+            base44.entities.WorkOrder.filter({ account_id: accountId }).then(setWorkOrders);
+          }}
+        />
       )}
     </div>
 
