@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Upload, Trash2, ExternalLink, Sparkles, Loader2, PenLine, CheckCircle2 } from "lucide-react";
+import { Plus, Upload, Trash2, ExternalLink, Sparkles, Loader2, PenLine, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -11,9 +11,12 @@ import FolderTree, { SUBCATEGORY_LABELS, FOLDER_TREE } from "../components/docum
 import DeleteGuardDialog from "../components/documents/DeleteGuardDialog";
 import DocGeneratorModal from "../components/documents/DocGeneratorModal";
 import SignatureRequestModal from "../components/documents/SignatureRequestModal";
+import LeaseTemplatesSection from "../components/documents/LeaseTemplatesSection";
+import GeneratedDocumentsSection from "../components/documents/GeneratedDocumentsSection";
 import { useAccount } from "../hooks/useAccount";
 import { usePermissions } from "../hooks/usePermissions";
 import ViewOnlyBanner from "../components/ViewOnlyBanner";
+import { US_STATES } from "../lib/usStates";
 
 // Flat list of all subcategory options for the dropdown
 const ALL_SUBCATEGORIES = FOLDER_TREE.flatMap(f =>
@@ -36,6 +39,8 @@ export default function Documents() {
   const [fileUrl, setFileUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [signDoc, setSignDoc] = useState(null);
+  const [stateFilter, setStateFilter] = useState("");
+  const [genInitialState, setGenInitialState] = useState(null);
 
   const load = async () => {
     if (!accountId) return;
@@ -86,9 +91,8 @@ export default function Documents() {
   const tenantName = (id) => { const t = tenants.find(t => t.id === id); return t ? `${t.first_name} ${t.last_name}` : null; };
   const propName = (id) => properties.find(p => p.id === id)?.nickname || properties.find(p => p.id === id)?.address || null;
 
-  const filteredDocs = selectedFolder
+  const filteredDocs = (selectedFolder
     ? docs.filter(d => {
-        // if a parent folder is selected, match all children
         const parent = FOLDER_TREE.find(f => f.id === selectedFolder);
         if (parent && parent.children?.length > 0) {
           const childIds = new Set(parent.children.map(c => c.id));
@@ -96,7 +100,8 @@ export default function Documents() {
         }
         return d.subcategory === selectedFolder || (!d.subcategory && selectedFolder === "other");
       })
-    : docs;
+    : docs
+  ).filter(d => !stateFilter || !d.state_tag || d.state_tag === stateFilter);
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
@@ -110,6 +115,19 @@ export default function Documents() {
 
       {/* Right: Main content */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        {/* State Filter */}
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          <Select value={stateFilter} onValueChange={setStateFilter}>
+            <SelectTrigger className="w-48 h-9 text-sm"><SelectValue placeholder="Filter by State" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value={null}>All States</SelectItem>
+              {US_STATES.map(s => <SelectItem key={s.abbr} value={s.abbr}>{s.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          {stateFilter && <button className="text-xs text-primary underline" onClick={() => setStateFilter("")}>Clear</button>}
+        </div>
+
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-outfit font-bold" style={{ color: '#1A1A2E' }}>Documents</h1>
@@ -128,11 +146,19 @@ export default function Documents() {
           </div>
         </div>
 
-        {filteredDocs.length === 0 ? (
+        {/* Lease Templates Section — shown when no folder selected or 'templates' selected */}
+        {(!selectedFolder || selectedFolder === "templates") && (
+          <LeaseTemplatesSection
+            stateFilter={stateFilter}
+            onGenerate={(state) => { setGenInitialState(state); setGenOpen(true); }}
+          />
+        )}
+
+        {filteredDocs.length === 0 && selectedFolder !== "templates" ? (
           <div className="bg-card border border-border rounded-xl p-16 text-center">
             <p className="font-semibold" style={{ color: '#6B7280' }}>No documents in this folder</p>
           </div>
-        ) : (
+        ) : selectedFolder !== "templates" && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredDocs.map(d => {
               const folderLabel = SUBCATEGORY_LABELS[d.subcategory] || d.subcategory || "Other";
@@ -141,6 +167,7 @@ export default function Documents() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="secondary" className="text-xs">{folderLabel}</Badge>
+                      {d.state_tag && <Badge className="text-xs bg-primary text-primary-foreground">{d.state_tag}</Badge>}
                       {d.signature_status && d.signature_status !== "none" && (
                         <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: d.signature_status === "signed" ? "#F0FDF4" : d.signature_status === "declined" ? "#FEF2F2" : "#FEF9C3", color: d.signature_status === "signed" ? "#22C55E" : d.signature_status === "declined" ? "#EF4444" : "#F59E0B" }}>
                           {d.signature_status === "signed" ? "✓ Signed" : d.signature_status === "declined" ? "✗ Declined" : "⏳ Pending"}
@@ -180,6 +207,9 @@ export default function Documents() {
             })}
           </div>
         )}
+
+        {/* Generated Documents Section */}
+        <GeneratedDocumentsSection docs={docs} stateFilter={stateFilter} onDeleted={load} />
       </div>
 
       {/* Upload Dialog */}
@@ -247,7 +277,8 @@ export default function Documents() {
 
       <DocGeneratorModal
         open={genOpen}
-        onClose={() => setGenOpen(false)}
+        onClose={() => { setGenOpen(false); setGenInitialState(null); }}
+        initialState={genInitialState}
         tenants={tenants}
         properties={properties}
         onSaved={load}

@@ -33,6 +33,9 @@
     "account_id": {
       "type": "string"
     },
+    "state_tag": {
+      "type": "string"
+    },
     "signature_status": {
       "type": "string",
       "enum": [

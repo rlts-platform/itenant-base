@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, Save, Loader2 } from "lucide-react";
+import { Sparkles, Save, Loader2, Download } from "lucide-react";
+import { US_STATES } from "@/lib/usStates";
 
 const DOC_TYPES = [
   { id: "move_in_checklist",   label: "Move-In Inspection Checklist",       subcategory: "inspection",       fields: ["tenant","property","date"] },
@@ -21,8 +22,9 @@ const DOC_TYPES = [
 
 const DISCLAIMER = "\n\n---\nDISCLAIMER: This document was generated with the assistance of AI and is provided for informational purposes only. It does not constitute legal advice. Landlord-tenant laws vary by state and locality. Always consult a licensed attorney before serving legal notices or making decisions based on this document.";
 
-export default function DocGeneratorModal({ open, onClose, tenants, properties, onSaved }) {
+export default function DocGeneratorModal({ open, onClose, tenants, properties, onSaved, initialState }) {
   const [docType, setDocType] = useState("");
+  const [selectedState, setSelectedState] = useState(initialState?.abbr || "");
   const [fields, setFields] = useState({ tenant: "", property: "", date: new Date().toISOString().split("T")[0], amount: "", specifics: "" });
   const [generating, setGenerating] = useState(false);
   const [preview, setPreview] = useState("");
@@ -37,7 +39,10 @@ export default function DocGeneratorModal({ open, onClose, tenants, properties, 
     const tenantObj = tenants.find(t => t.id === fields.tenant);
     const propObj = properties.find(p => p.id === fields.property);
 
-    const prompt = `Generate a professional, legally appropriate "${selectedType.label}" document for a residential property management context.
+    const stateObj = US_STATES.find(s => s.abbr === selectedState);
+    const prompt = `Generate a professional, legally appropriate "${selectedType.label}" document for a residential property management context.${
+      stateObj ? `\n\nSTATE: ${stateObj.name} — Apply all legally required ${stateObj.name}-specific clauses, disclosures, and landlord-tenant law requirements for this state.` : ""
+    }
 
 Details:
 - Tenant: ${tenantObj ? `${tenantObj.first_name} ${tenantObj.last_name}` : "N/A"}
@@ -58,7 +63,8 @@ Write the complete document with proper formatting, salutation, body, and signat
     setSaving(true);
     const tenantObj = tenants.find(t => t.id === fields.tenant);
     const propObj = properties.find(p => p.id === fields.property);
-    const docName = `${selectedType.label}${tenantObj ? ` - ${tenantObj.first_name} ${tenantObj.last_name}` : ""} ${fields.date}`;
+    const stateObj = US_STATES.find(s => s.abbr === selectedState);
+    const docName = `${selectedType.label}${stateObj ? ` (${stateObj.abbr})` : ""}${tenantObj ? ` - ${tenantObj.first_name} ${tenantObj.last_name}` : ""} ${fields.date}`;
     await base44.entities.Document.create({
       file_name: docName,
       category: "other",
@@ -66,13 +72,24 @@ Write the complete document with proper formatting, salutation, body, and signat
       body_text: preview,
       tenant_id: fields.tenant || undefined,
       property_id: fields.property || undefined,
+      state_tag: selectedState || undefined,
+      ai_generated: true,
     });
     setSaving(false);
     onSaved();
     onClose();
   };
 
-  const reset = () => { setDocType(""); setPreview(""); setFields({ tenant: "", property: "", date: new Date().toISOString().split("T")[0], amount: "", specifics: "" }); };
+  const reset = () => { setDocType(""); setPreview(""); setSelectedState(""); setFields({ tenant: "", property: "", date: new Date().toISOString().split("T")[0], amount: "", specifics: "" }); };
+
+  const downloadTxt = () => {
+    if (!preview) return;
+    const blob = new Blob([preview], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = (selectedType?.label || "document") + ".txt";
+    a.click();
+  };
 
   return (
     <Dialog open={open} onOpenChange={() => { onClose(); reset(); }}>
@@ -84,12 +101,24 @@ Write the complete document with proper formatting, salutation, body, and signat
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-          <div>
-            <Label>Document Type</Label>
-            <Select value={docType} onValueChange={v => { setDocType(v); setPreview(""); }}>
-              <SelectTrigger className="mt-1"><SelectValue placeholder="Select document type…" /></SelectTrigger>
-              <SelectContent>{DOC_TYPES.map(d => <SelectItem key={d.id} value={d.id}>{d.label}</SelectItem>)}</SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Document Type</Label>
+              <Select value={docType} onValueChange={v => { setDocType(v); setPreview(""); }}>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Select document type…" /></SelectTrigger>
+                <SelectContent>{DOC_TYPES.map(d => <SelectItem key={d.id} value={d.id}>{d.label}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>State (optional)</Label>
+              <Select value={selectedState} onValueChange={v => setSelectedState(v)}>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="All states" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>All states</SelectItem>
+                  {US_STATES.map(s => <SelectItem key={s.abbr} value={s.abbr}>{s.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {selectedType && (
@@ -159,6 +188,9 @@ Write the complete document with proper formatting, salutation, body, and signat
           {preview && (
             <>
               <Button variant="outline" onClick={() => setPreview("")}>Regenerate</Button>
+              <Button variant="outline" onClick={downloadTxt} className="gap-2">
+                <Download className="w-4 h-4" /> Download
+              </Button>
               <Button onClick={save} disabled={saving} className="gap-2">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save to Library
