@@ -70,7 +70,7 @@ export default function LandingPage() {
       <section className="hero-section" style={{ position: "relative", minHeight: 620, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
         {/* Hero bg image */}
         <div style={{ position: "absolute", inset: 0, backgroundImage: `url(${HERO_IMAGE})`, backgroundSize: "cover", backgroundPosition: "center", zIndex: 0 }} />
-        <div style={{ position: "absolute", inset: 0, background: "rgba(13,15,20,0.45)", zIndex: 1 }} />
+        <div style={{ position: "absolute", inset: 0, background: "rgba(13,15,20,0.30)", zIndex: 1 }} />
 
         <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "80px 24px 60px", maxWidth: 720 }}>
           {/* Badge */}
@@ -114,7 +114,10 @@ export default function LandingPage() {
             flex: "0 0 170px", width: 170
           }}>
               <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(124,111,205,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
-                <tile.icon size={22} color="#7C6FCD" />
+                {i === 0 && <Bot size={22} color="#7C6FCD" />}
+                {i === 1 && <Wrench size={22} color="#7C6FCD" />}
+                {i === 2 && <BarChart3 size={22} color="#7C6FCD" />}
+                {i === 3 && <Zap size={22} color="#7C6FCD" />}
               </div>
               <p style={{ fontWeight: 700, fontSize: 13, color: "#1A1A2E" }}>{tile.label}</p>
             </div>
@@ -131,7 +134,12 @@ export default function LandingPage() {
             {FEATURES.map((f, i) =>
             <div key={i} style={{ background: "#fff", border: "1px solid rgba(124,111,205,0.12)", borderRadius: 16, padding: "24px", boxShadow: "0 2px 16px rgba(124,111,205,0.06)" }}>
                 <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(124,111,205,0.08)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
-                  <f.icon size={20} color="#7C6FCD" />
+                  {i === 0 && <Building2 size={20} color="#7C6FCD" />}
+                  {i === 1 && <Wrench size={20} color="#7C6FCD" />}
+                  {i === 2 && <CreditCard size={20} color="#7C6FCD" />}
+                  {i === 3 && <Bot size={20} color="#7C6FCD" />}
+                  {i === 4 && <Zap size={20} color="#7C6FCD" />}
+                  {i === 5 && <FolderOpen size={20} color="#7C6FCD" />}
                 </div>
                 <h3 style={{ fontWeight: 700, fontSize: 15, color: "#1A1A2E", marginBottom: 6 }}>{f.title}</h3>
                 <p style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.6 }}>{f.desc}</p>
