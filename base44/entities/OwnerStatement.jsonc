@@ -1,0 +1,66 @@
+{
+  "name": "OwnerStatement",
+  "type": "object",
+  "properties": {
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_email": {
+      "type": "string"
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "statement_month": {
+      "type": "string"
+    },
+    "rent_collected": {
+      "type": "number"
+    },
+    "late_fees": {
+      "type": "number"
+    },
+    "other_income": {
+      "type": "number"
+    },
+    "repairs": {
+      "type": "number"
+    },
+    "insurance": {
+      "type": "number"
+    },
+    "taxes": {
+      "type": "number"
+    },
+    "management_fee": {
+      "type": "number"
+    },
+    "management_fee_pct": {
+      "type": "number"
+    },
+    "other_expenses": {
+      "type": "number"
+    },
+    "net_operating_income": {
+      "type": "number"
+    },
+    "owner_distribution": {
+      "type": "number"
+    },
+    "prior_balance": {
+      "type": "number"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "owner_name",
+    "property_id",
+    "statement_month",
+    "account_id"
+  ]
+}

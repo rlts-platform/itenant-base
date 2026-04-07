@@ -16,6 +16,8 @@ import IncomeByPropertyReport from "../components/financials/IncomeByPropertyRep
 import AIForecastTab from "../components/financials/AIForecastTab";
 import BudgetsTab from "../components/financials/BudgetsTab";
 import BankingTab from "../components/financials/BankingTab";
+import OwnerStatementsReport from "../components/financials/OwnerStatementsReport";
+import CapExTracker from "../components/financials/CapExTracker";
 import { useAccount } from "../hooks/useAccount";
 import { usePermissions } from "../hooks/usePermissions";
 import ViewOnlyBanner from "../components/ViewOnlyBanner";
@@ -282,10 +284,28 @@ export default function Financials() {
             >
               Income by Property
             </button>
+            <button
+              onClick={() => setReportType("owner")}
+              className={`px-4 py-3 font-medium text-sm border-b-2 ${
+                reportType === "owner" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Owner Statements
+            </button>
+            <button
+              onClick={() => setReportType("capex")}
+              className={`px-4 py-3 font-medium text-sm border-b-2 ${
+                reportType === "capex" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              CapEx Tracker
+            </button>
           </div>
           {reportType === "pl" && <ProfitLossReport payments={payments} workOrders={workOrders} properties={properties} />}
           {reportType === "cf" && <CashFlowReport payments={payments} workOrders={workOrders} properties={properties} />}
           {reportType === "ip" && <IncomeByPropertyReport payments={payments} workOrders={workOrders} properties={properties} />}
+          {reportType === "owner" && <OwnerStatementsReport accountId={accountId} properties={properties} payments={payments} workOrders={workOrders} />}
+          {reportType === "capex" && <CapExTracker accountId={accountId} properties={properties} />}
         </div>
       )}
 

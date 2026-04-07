@@ -1,0 +1,59 @@
+{
+  "name": "CapExItem",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "date_started": {
+      "type": "string",
+      "format": "date"
+    },
+    "estimated_cost": {
+      "type": "number"
+    },
+    "actual_cost": {
+      "type": "number"
+    },
+    "contractor": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Roof",
+        "HVAC",
+        "Plumbing",
+        "Electrical",
+        "Flooring",
+        "Exterior",
+        "Addition",
+        "Other"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Planned",
+        "In Progress",
+        "Complete"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "property_id",
+    "category",
+    "status",
+    "account_id"
+  ]
+}
