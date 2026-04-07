@@ -14,6 +14,7 @@ import ProfitLossReport from "../components/financials/ProfitLossReport";
 import CashFlowReport from "../components/financials/CashFlowReport";
 import IncomeByPropertyReport from "../components/financials/IncomeByPropertyReport";
 import AIForecastTab from "../components/financials/AIForecastTab";
+import CategoriesTab from "../components/financials/CategoriesTab";
 import BudgetsTab from "../components/financials/BudgetsTab";
 import BankingTab from "../components/financials/BankingTab";
 import OwnerStatementsReport from "../components/financials/OwnerStatementsReport";
@@ -251,6 +252,8 @@ export default function Financials() {
       )}
 
       {tab === "forecast" && <AIForecastTab accountId={accountId} />}
+
+      {tab === "categories" && <CategoriesTab payments={payments} workOrders={workOrders} />}
 
       {tab === "reports" && (
         <div className="space-y-6">
