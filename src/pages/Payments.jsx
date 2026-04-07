@@ -32,6 +32,7 @@ export default function Payments() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [selectedTenantId, setSelectedTenantId] = useState(null);
 
   // Form state
@@ -42,13 +43,21 @@ export default function Payments() {
 
   const load = async () => {
     if (!accountId) return;
-    const [p, t, pr, u] = await Promise.all([
-      base44.entities.Payment.filter({ account_id: accountId }, "-date"),
-      base44.entities.Tenant.filter({ account_id: accountId }),
-      base44.entities.Property.filter({ account_id: accountId }),
-      base44.entities.Unit.filter({ account_id: accountId }),
-    ]);
-    setPayments(p); setTenants(t); setProperties(pr); setUnits(u); setLoading(false);
+    try {
+      const [p, t, pr, u] = await Promise.all([
+        base44.entities.Payment.filter({ account_id: accountId }, "-date"),
+        base44.entities.Tenant.filter({ account_id: accountId }),
+        base44.entities.Property.filter({ account_id: accountId }),
+        base44.entities.Unit.filter({ account_id: accountId }),
+      ]);
+      setPayments(p || []); setTenants(t || []); setProperties(pr || []); setUnits(u || []);
+      setLoadError(false);
+    } catch (err) {
+      console.error("Payments load error:", err);
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(() => {
     if (accountId) load();
@@ -149,6 +158,15 @@ export default function Payments() {
   };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (loadError) return (
+    <div className="p-6 max-w-5xl mx-auto">
+      <div className="bg-red-50 border border-red-200 rounded-xl p-10 text-center">
+        <p className="font-semibold text-red-700">Payments could not be loaded.</p>
+        <p className="text-sm text-red-600 mt-2">Please refresh the page. If the problem continues, contact support.</p>
+        <button onClick={() => { setLoadError(false); setLoading(true); load(); }} className="mt-4 px-4 py-2 rounded-lg text-sm font-semibold text-white" style={{ backgroundColor: '#7C6FCD' }}>Try Again</button>
+      </div>
+    </div>
+  );
 
   const selectedTenant = tenants.find(t => t.id === selectedTenantId);
 
