@@ -66,29 +66,28 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero */}
+{/* Hero */}
       <section className="hero-section" style={{ position: "relative", minHeight: 620, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
         {/* Hero bg image */}
         <div style={{ position: "absolute", inset: 0, backgroundImage: `url(${HERO_IMAGE})`, backgroundSize: "cover", backgroundPosition: "center", zIndex: 0 }} />
         <div style={{ position: "absolute", inset: 0, background: "rgba(13,15,20,0.45)", zIndex: 1 }} />
-
-        <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "80px 24px 60px", maxWidth: 720 }} className="text-white opacity-100">
+        <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "80px 24px 60px", maxWidth: 720 }}>
           {/* Badge */}
-          <div style={{ display: "inline-block", marginBottom: 20, padding: "5px 16px", borderRadius: 999, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", fontWeight: 600, fontSize: 13 }} className="text-black">
-            • Smarter Property Management
+          <div style={{ display: "inline-block", marginBottom: 20, padding: "5px 16px", borderRadius: 999, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", fontWeight: 600, fontSize: 13 }}>
+- Smarter Property Management
           </div>
-          <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", fontWeight: 800, letterSpacing: "-1.5px", color: "#FFFFFF", lineHeight: 1.12, margin: "0 0 18px", textShadow: "0 2px 8px rgba(0,0,0,0.45)" }} className="text-slate-200">
-            Property Management.<br />Simplified.
+          <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", fontWeight: 800, letterSpacing: "-1.5px", color: "#FFFFFF", lineHeight: 1.12, margin: "0 0 18px", textShadow: "0 2px 8px rgba(0,0,0,0.45)" }}>
+Property Management.<br />Simplified.
           </h1>
           <p style={{ fontSize: 18, color: "rgba(255,255,255,0.92)", marginBottom: 36, lineHeight: 1.7, textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>
-            The all-in-one platform for landlords, property managers, and tenants.<br />Automate the boring. Focus on what matters.
+The all-in-one platform for landlords, property managers, and tenants.<br />Automate the boring. Focus on what matters.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <button onClick={handleSignup} style={{ padding: "14px 32px", borderRadius: 999, background: "#7C6FCD", color: "#fff", fontWeight: 700, fontSize: 16, cursor: "pointer", border: "none", boxShadow: "0 4px 20px rgba(124,111,205,0.35)" }}>
-              Get Started Free
+Get Started Free
             </button>
             <button onClick={handleLogin} style={{ padding: "14px 32px", borderRadius: 999, background: "#fff", border: "1px solid rgba(124,111,205,0.4)", color: "#7C6FCD", fontWeight: 700, fontSize: 16, cursor: "pointer" }}>
-              Log In
+Log In
             </button>
           </div>
           <div style={{ display: "flex", gap: 24, justifyContent: "center", marginTop: 24, flexWrap: "wrap" }}>
