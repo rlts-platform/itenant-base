@@ -72,7 +72,7 @@ export default function LandingPage() {
         <div style={{ position: "absolute", inset: 0, backgroundImage: `url(${HERO_IMAGE})`, backgroundSize: "cover", backgroundPosition: "center", zIndex: 0 }} />
         <div style={{ position: "absolute", inset: 0, background: "rgba(13,15,20,0.45)", zIndex: 1 }} />
 
-        <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "80px 24px 60px", maxWidth: 720 }} className="text-w opacity-100">
+        <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "80px 24px 60px", maxWidth: 720 }} className="text-white opacity-100">
           {/* Badge */}
           <div style={{ display: "inline-block", marginBottom: 20, padding: "5px 16px", borderRadius: 999, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", fontWeight: 600, fontSize: 13 }} className="text-black">
             • Smarter Property Management
