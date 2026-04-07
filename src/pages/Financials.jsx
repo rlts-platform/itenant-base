@@ -215,26 +215,6 @@ export default function Financials() {
         </div>
       </div>
 
-      {/* Revenue vs Expenses Chart */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <h2 className="font-semibold mb-4">Revenue vs Expenses (Last 6 Months)</h2>
-        {chartData.length === 0 ? (
-          <p className="text-center text-muted-foreground py-12">No data yet</p>
-        ) : (
-          <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip formatter={(v) => `$${v.toLocaleString()}`} />
-              <Legend />
-              <Line type="monotone" dataKey="revenue" stroke="#059669" dot={{ fill: '#059669', r: 5 }} name="Revenue" />
-              <Line type="monotone" dataKey="expenses" stroke="#DC2626" dot={{ fill: '#DC2626', r: 5 }} name="Expenses" />
-            </LineChart>
-          </ResponsiveContainer>
-        )}
-      </div>
-
       {/* Tab bar */}
       <div className="flex gap-1 bg-secondary/50 rounded-xl p-1 w-fit overflow-x-auto">
         {TABS.map(t => (
@@ -250,8 +230,23 @@ export default function Financials() {
 
       {/* Tab content */}
       {tab === "trends" && (
-        <div className="text-center py-12 text-muted-foreground">
-          Trends tab content coming soon
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h2 className="font-semibold mb-4">Revenue vs Expenses (Last 6 Months)</h2>
+          {chartData.length === 0 ? (
+            <p className="text-center text-muted-foreground py-12">No data yet</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip formatter={(v) => `$${v.toLocaleString()}`} />
+                <Legend />
+                <Line type="monotone" dataKey="revenue" stroke="#059669" dot={{ fill: '#059669', r: 5 }} name="Revenue" />
+                <Line type="monotone" dataKey="expenses" stroke="#DC2626" dot={{ fill: '#DC2626', r: 5 }} name="Expenses" />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
       )}
 
