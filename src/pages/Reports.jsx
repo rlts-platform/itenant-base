@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useAccount } from "../hooks/useAccount";
 import { FileBarChart2, DollarSign, Home, Wrench, AlertCircle, Calculator, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ReportModal from "../components/reports/ReportModal";
 import MonthlyReportScheduler from "../components/reports/MonthlyReportScheduler";
+import SavedReportsTab from "../components/reports/SavedReportsTab";
 
 const REPORT_TYPES = [
   { id: "rent_roll", title: "Rent Roll", icon: FileBarChart2, color: "bg-blue-100 text-blue-600", description: "All units with tenant names, rent amounts, payment status, and lease dates." },
@@ -14,18 +16,45 @@ const REPORT_TYPES = [
   { id: "year_end", title: "Year-End Financial Summary", icon: Calculator, color: "bg-cyan-100 text-cyan-600", description: "Full-year income, expenses, and net income per property." },
 ];
 
+const REPORT_TYPE_TO_FOLDER = {
+  rent_roll: "Tenant Reports",
+  income_statement: "Financial Reports",
+  vacancy: "Occupancy Reports",
+  maintenance: "Maintenance Reports",
+  late_payments: "Financial Reports",
+  year_end: "Financial Reports",
+};
+
 const fmt = (n) => n != null ? `$${Number(n).toLocaleString()}` : "—";
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString() : "—";
 
 export default function Reports() {
+  const { accountId } = useAccount();
   const [loading, setLoading] = useState(null);
   const [report, setReport] = useState(null);
+  const [activeTab, setActiveTab] = useState("reports");
+
+  const autoSaveReport = async (type, result) => {
+    if (!accountId) return;
+    const folder = REPORT_TYPE_TO_FOLDER[type] || "Custom Reports";
+    const me = await base44.auth.me().catch(() => null);
+    await base44.entities.SavedReport.create({
+      name: result.title,
+      report_type: result.title,
+      folder,
+      generated_by: me?.full_name || me?.email || "Unknown",
+      generated_at: new Date().toISOString(),
+      account_id: accountId,
+      report_data: JSON.stringify({ columns: result.columns, rows: result.rows }),
+    }).catch(() => {});
+  };
 
   const generate = async (type) => {
     setLoading(type);
     const result = await buildReport(type);
     setReport(result);
     setLoading(null);
+    autoSaveReport(type, result);
   };
 
   return (
@@ -35,9 +64,28 @@ export default function Reports() {
         <p className="text-sm mt-1" style={{ color: '#6B7280' }}>Generate, download, and analyze reports for your portfolio</p>
       </div>
 
-      <MonthlyReportScheduler />
+      {/* Tab bar */}
+      <div className="flex gap-1 bg-secondary/50 rounded-xl p-1 w-fit">
+        {[{ id: "reports", label: "On-Demand Reports" }, { id: "saved", label: "Saved Reports" }].map(t => (
+          <button
+            key={t.id}
+            onClick={() => setActiveTab(t.id)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+              activeTab === t.id ? "bg-white shadow text-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >{t.label}</button>
+        ))}
+      </div>
 
-      <div>
+      {activeTab === "saved" && (
+        <SavedReportsTab onViewReport={(r) => {
+          try { setReport(JSON.parse(r.report_data)); } catch {}
+        }} />
+      )}
+
+      {activeTab === "reports" && <MonthlyReportScheduler />}
+
+      {activeTab === "reports" && <div>
         <h2 className="text-base font-bold mb-3" style={{ color: '#1A1A2E' }}>On-Demand Reports</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {REPORT_TYPES.map(rt => (
@@ -62,7 +110,7 @@ export default function Reports() {
             </div>
           ))}
         </div>
-      </div>
+      </div>}
 
       <ReportModal report={report} onClose={() => setReport(null)} />
     </div>

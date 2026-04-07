@@ -1,0 +1,42 @@
+{
+  "name": "SavedReport",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "report_type": {
+      "type": "string"
+    },
+    "folder": {
+      "type": "string",
+      "enum": [
+        "Financial Reports",
+        "Tenant Reports",
+        "Maintenance Reports",
+        "Lease Reports",
+        "Occupancy Reports",
+        "Custom Reports"
+      ]
+    },
+    "generated_by": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "account_id": {
+      "type": "string"
+    },
+    "report_data": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "report_type",
+    "folder",
+    "account_id"
+  ]
+}
